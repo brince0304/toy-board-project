@@ -48,8 +48,6 @@ class JpaRepositoryTest {
     void givenTestData_whenSelecting_thenWorksFine(){
         //given
 
-
-
         //when
         List<Article> articles = articleRepository.findAll();
 
