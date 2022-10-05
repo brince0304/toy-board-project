@@ -15,17 +15,18 @@ import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
-@Getter //setter는 따로 생성
+@Getter //setter는 따로 생성 ( 자동으로 설정되는 값이 있기 때문 )
 @ToString
 @Table(indexes = {
         @Index(columnList= "title"),
         @Index(columnList= "hashtag"),
         @Index(columnList= "createdAt"),
         @Index(columnList= "createdBy")
-})  //테이블 컬럼 설정
-@EntityListeners(AuditingEntityListener.class) //시간에 대해서 자동으로 값을 넣어준다
+})  //테이블 컬럼 인덱스 설정
+ // 인덱스 이름이 없으니 키 부여
+
 @Entity
-public class Article {
+public class Article extends AuditingFields{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 프라이머리 키
     private Long id;
@@ -39,10 +40,6 @@ public class Article {
     @ToString.Exclude //과부하 발생 예방
     private final Set<ArticleComment> articleComments = new LinkedHashSet<>();
 
-    @CreatedDate @Column(nullable = false) LocalDateTime createdAt; //생성 시간 자동저장
-    @CreatedBy @Column(nullable = false, length= 100) private String createdBy; //생성자 자동저장
-    @LastModifiedDate @Column(nullable = false) LocalDateTime modifiedAt; //수정 시간 자동저장
-    @LastModifiedBy @Column(nullable = false) String modifiedBy;  //수정자 자동 저장
 
 
     protected Article() { //기본 빈 생성자
