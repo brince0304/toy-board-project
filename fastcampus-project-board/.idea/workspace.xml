@@ -4,11 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8cc4254c-a000-414e-b69b-335728ccf3c6" name="변경" comment="">
-      <change afterPath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/domain/Article.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/domain/ArticleComment.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="8cc4254c-a000-414e-b69b-335728ccf3c6" name="변경" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -94,6 +90,7 @@
       <workItem from="1664885256500" duration="14000" />
       <workItem from="1664885307059" duration="26000" />
       <workItem from="1664885655841" duration="550000" />
+      <workItem from="1665063018983" duration="15000" />
     </task>
     <servers />
   </component>
