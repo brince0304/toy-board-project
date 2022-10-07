@@ -25,7 +25,6 @@ class ArticleControllerTest {
     }
 
 
-    @Disabled
     @DisplayName("[view][GET] 게시글 페이지 ")
     @Test
     public void givenNothing_whenRequestingArticlesView_thenReturnsArticlesView() throws Exception {
@@ -33,8 +32,8 @@ class ArticleControllerTest {
 
         //when & then
         mvc.perform(get("/articles")).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.TEXT_HTML))
-                .andExpect(view().name("article/index"))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
+                .andExpect(view().name("articles/index"))
                 .andExpect(model().attributeExists("articles"));
 
     }
