@@ -1,5 +1,6 @@
 package com.fastcampus.projectboard.Controller;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 // @WebMvcTest // Slice 테스트 (컨트롤로와 관련이 되지 않은건 로드하지 않음) 컨트롤러와 연관된 내용만 최소한으로 읽어온다.
+
+@Disabled("Spring Data REST 테스트는 불필요하므로 제외시킴")
 @DisplayName("Data Rest Test (API 테스트)")
 @Transactional //롤백 (롤맥 상태로 트랜젝션이 묶인다)
 @AutoConfigureMockMvc
