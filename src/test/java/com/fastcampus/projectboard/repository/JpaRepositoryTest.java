@@ -80,6 +80,16 @@ class JpaRepositoryTest {
 
         //then
         assertThat(savedArticle).hasFieldOrPropertyWithValue("hashtag",updatedHashtag);
-        //hashtag 필드가 없데이트 되었는가
+        //hashtag 필드가 업데이트 되었는가
+    }
+    @DisplayName("해시태그 업데이트 직접 작성")
+    @Test
+    void hashtagUpdatingTest() {
+        Article previousArticle = articleRepository.getReferenceById(1L);
+        String updatedHashtag = "changed";
+        previousArticle.setHashtag(updatedHashtag);
+        Article newArticle = articleRepository.save(previousArticle);
+        assertThat(articleRepository.getReferenceById(1L).getHashtag()).isEqualTo(updatedHashtag);
+
     }
 }
