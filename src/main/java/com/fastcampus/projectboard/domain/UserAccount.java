@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Getter
 @ToString
@@ -34,6 +35,30 @@ public class UserAccount extends AuditingFields{
     @Column(nullable = false,length = 100)
     private String nickName;
     @Setter
-    @Column(nullable = false)
     private String memo;
+
+    protected UserAccount(){}
+    private UserAccount(String userId, String userPassword, String email, String nickName, String memo) {
+        this.userId = userId;
+        this.userPassword = userPassword;
+        this.email = email;
+        this.nickName = nickName;
+        this.memo = memo;
+    }
+
+    public static UserAccount of(String userId, String userPassword, String email, String nickname, String memo){
+        return new UserAccount(userId,userPassword,email,nickname,memo);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UserAccount that)) return false;
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }
