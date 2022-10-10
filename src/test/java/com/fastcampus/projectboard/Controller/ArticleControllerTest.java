@@ -1,12 +1,14 @@
 package com.fastcampus.projectboard.Controller;
 
 
+import com.fastcampus.projectboard.config.SecurityConfig;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -16,6 +18,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 @AutoConfigureMockMvc
 @DisplayName("view 컨트롤러 - 게시글")
 @WebMvcTest(ArticleController.class)
+@Import(SecurityConfig.class)
 class ArticleControllerTest {
 
     private final MockMvc mvc;
@@ -75,6 +78,8 @@ class ArticleControllerTest {
                 .andExpect(model().attributeExists("articles/search-hashtag"));
 
     }
+
+
 
 
 
