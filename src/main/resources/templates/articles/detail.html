@@ -3,32 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <title>게시글 페이지</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 
 <header id="header"></header>
 
 
-<main>
-    <header>
-        <h1>첫번째 글</h1>
-    </header>
-
-    <aside>
-        <p>brince</p>
-        <p><a href="mailto:brince0304@gmail.com"></a></p>
-        <p><time datetime="2022-10-01T00:00:00">2022-10-01</time></p>
-        <p>#java</p>
-    </aside>
-<section>
-    <p>본문<br><br></p>
-
+<main class="container">
+    <table class="table">
+        <thead>
+        <tr>
+            <th class="col-1">번호</th>
+            <th class="col-6">제목</th>
+            <th class="col-2">해시태그</th>
+            <th class="col-1">작성자</th>
+            <th class="col">작성일</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>1</td>
+            <td>첫글</td>
+            <td>#java</td>
+            <td>test</td>
+            <td>2022-10-06</td>
+        </tr>
+        </tbody>
+    </table>
+    <section>
+<article class="col-md-7 col-lg-8">
+    <p>안녕 내이름은 브린스 안녕안녕
+        <br>
+        안녕안녕 하세요 안녕하세요
+        <br>
+        브린브린 브린스 안녕하세요<br><br></p>
+</article>
+    </section>
+    <section>
     <div>
         <form>
-            <label for="articleComment" hidden></label>
-            <textarea id="articleComment" placeholder="댓글 쓰기.." rows="3"></textarea>
-            <button type="submit">쓰기</button>
+            <div class="input-group" style="width:1000px">
+                <label for="exampleTextarea" class="form-label mt-4" hidden>댓글 작성</label>
+                <textarea class="form-control" id="exampleTextarea" placeholder="댓글을 입력해주세요.." rows="3"></textarea>
+                <br>
+                <button type="submit" class="btn btn-primary">작성</button>
+                <br>
+            </div>
         </form>
+        <br>
 <ul>
     <li>
         <div>
@@ -51,10 +74,31 @@
     </li>
 </ul>
     </div>
-    <nav>
-        <a href="#">이전글</a>
-        <a href="#">다음글</a>
-    </nav>
+        <div>
+            <ul class="pagination pagination-sm">
+                <li class="page-item disabled">
+                    <a class="page-link" href="#">&laquo;</a>
+                </li>
+                <li class="page-item active">
+                    <a class="page-link" href="#">1</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="#">2</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="#">3</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="#">4</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="#">5</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="#">&raquo;</a>
+                </li>
+            </ul>
+        </div>
 
 </section>
 
