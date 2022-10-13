@@ -1,82 +1,115 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>게시판 페이지</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+
+
+    </style>
 </head>
 <body>
 
 <header id="header"></header>
-메인 페이지 - 테이블
 
-<main>
-    <table>
+
+<main class="container">
+    <table class="table">
         <thead>
         <tr>
-            <th>제목</th>
-            <th>해시태그</th>
-            <th>작성자</th>
-            <th>작성일</th>
+            <th class="col-1">번호</th>
+            <th class="col-6">제목</th>
+            <th class="col-2">해시태그</th>
+            <th class="col-1">작성자</th>
+            <th class="col">작성일</th>
         </tr>
         </thead>
         <tbody>
             <tr>
-                <td>첫글</td>
+                <td>3</td>
+                <td>세번째글</td>
                 <td>#java</td>
-                <td>brince</td>
+                <td>test</td>
                 <td>2022-10-06</td>
             </tr>
             <tr>
+                <td>2</td>
                 <td>두번째글</td>
                 <td>#spring</td>
-                <td>brince</td>
+                <td>test</td>
                 <td>2022-10-06</td>
             </tr>
             <tr>
-                <td>세번째</td>
+                <td>1</td>
+                <td>첫번째</td>
                 <td>#programming</td>
-                <td>brince</td>
+                <td>test</td>
                 <td>2022-10-06</td>
             </tr>
         </tbody>
     </table>
-    <form>
-        <label for="search-type" hidden> 유형 </label>
-        <select id= "search-type" name="search-type">
-            <option>제목</option>
-            <option>본문</option>
-            <option>ID</option>
-            <option>닉네임</option>
-            <option>해시태그</option>
-        </select>
-        <label for="search-value" hidden>검색어</label>
-        <input id="search-value" type="search" placeholder="검색어..." name="search-value">
-        <button type="submit">검색</button>
-    </form>
-
-
-
-    <nav>
-        <table>
-            <tr>
-                <td>previous</td>
-                <td>1</td>
-                <td>2</td>
-                <td>3</td>
-                <td>4</td>
-                <td>5</td>
-                <td>6</td>
-                <td>7</td>
-                <td>8</td>
-                <td>9</td>
-                <td>10</td>
-                <td>next</td>
-            </tr>
-        </table>
-    </nav>
+    <br>
+    <div class="row" style="justify-content: center;">
+        <div class="col-lg-12" style="width:550px">
+            <div class="search-form">
+                    <form id="search-form">
+                        <div class="row">
+                            <div class="col-md-11">
+                                <div class="row no-gutters">
+                                    <div class="col-lg-4 col-md-3 col-sm-12 p-0">
+                                        <label for="exampleSelect1" class="form-label mt-4" hidden>Example select</label>
+                                        <select class="form-select" id="exampleSelect1">
+                                            <option>제목</option>
+                                            <option>본문</option>
+                                            <option>ID</option>
+                                            <option>닉네임</option>
+                                            <option>해시태그</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-7 col-md-6 col-sm-12 p-0">
+                                        <input type="text" placeholder="Search..." class="form-control" id="search" name="search">
+                                    </div>
+                                    <div class="col-lg-1 col-md-3 col-sm-12 p-0">
+                                        <button type="submit" class="btn btn-primary">Search</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+        </div>
+    </div>
+<br>
+    <div>
+        <br>
+        <ul class="pagination justify-content-center" >
+            <li class="page-item disabled">
+                <a class="page-link" href="#">&laquo;</a>
+            </li>
+            <li class="page-item active">
+                <a class="page-link" href="#">1</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="#">2</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="#">3</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="#">4</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="#">5</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="#">&raquo;</a>
+            </li>
+        </ul>
+    </div>
 </main>
 
 <footer id="footer"></footer>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
 </body>
 </html>
