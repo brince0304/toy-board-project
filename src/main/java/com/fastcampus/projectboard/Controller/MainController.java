@@ -9,7 +9,7 @@ public class MainController {
 
     @GetMapping("/")
     public String root(){
-        return "redirect:/articles";
+        return "forward:/articles";
     }
 
 }
