@@ -5,10 +5,7 @@ import com.fastcampus.projectboard.domain.ArticleComment;
 import com.fastcampus.projectboard.domain.UserAccount;
 import com.fastcampus.projectboard.repository.ArticleCommentRepository;
 import com.fastcampus.projectboard.repository.ArticleRepository;
-import dto.ArticleCommentDto;
-import dto.ArticleDto;
-import dto.ArticleUpdateDto;
-import dto.ArticleWithCommentDto;
+import dto.*;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -57,10 +54,10 @@ class ArticleCommentServiceTest {
     void givenCommentInfo_whenSavingComment_thenSavesComment() {
         //given
         given(articleCommentRepository.save(any(ArticleComment.class))).willReturn(null);
-        ArticleDto articleDto = ArticleDto.of(LocalDateTime.now(),"brince","haha","content","test");
+        ArticleDto articleDto = ArticleDto.of(userAccountDto(),"haha","content","test");
         //when
 
-        sut.saveArticleComment(ArticleWithCommentDto.of(LocalDateTime.now(),"brince",articleDto,"haha"));
+
 
         //then
         then(articleCommentRepository).should().save(any(ArticleComment.class));
@@ -71,7 +68,7 @@ class ArticleCommentServiceTest {
     @Test
     void givenArticleCommentIdAndModifyContent_whenModifyingArticleComment_thenUpdatesArticleComment() {
         //given
-        ArticleDto articleDto = ArticleDto.of(LocalDateTime.now(),"brince","haha","content","test");
+        ArticleDto articleDto = ArticleDto.of(userAccountDto(),"haha","content","test");
         given(articleCommentRepository.save(any(ArticleComment.class))).willReturn(null);
         //when
         String update ="haha";
@@ -91,5 +88,14 @@ class ArticleCommentServiceTest {
 
         //then
         then(articleCommentRepository).should().delete(any(ArticleComment.class));
+    }
+    private UserAccountDto userAccountDto(){
+        return UserAccountDto.of(
+                "brince2",
+                "1234",
+                "brince@naver.com",
+                "brince",
+                "haha"
+        );
     }
 }
