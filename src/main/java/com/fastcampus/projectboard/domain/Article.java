@@ -16,7 +16,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @Getter //setter는 따로 생성 ( 자동으로 설정되는 값이 있기 때문 )
-@ToString
+@ToString(callSuper = true)
 @Table(indexes = {
         @Index(columnList= "title"),
         @Index(columnList= "hashtag"),
@@ -32,10 +32,11 @@ public class Article extends AuditingFields{
     private Long id;
     //@setter 가 붙은 값이 입력값, 없으면 자동
     @Setter @Column(nullable = false) String title; //null 이 아닌 값을 컬럼에 저장 함
+    @Setter @ManyToOne(optional = false) private UserAccount userAccount;
     @Setter @Column(nullable = false,length = 10000) private String content;
 
     @Setter private String hashtag;
-    @OrderBy("id")  //id 순서
+    @OrderBy("createdAt DESC")  //id 순서
     @OneToMany(mappedBy = "article", cascade = CascadeType.ALL) //양방향 관계 (article이 주체)
     @ToString.Exclude //과부하 발생 예방
     private final Set<ArticleComment> articleComments = new LinkedHashSet<>();
@@ -45,13 +46,13 @@ public class Article extends AuditingFields{
     protected Article() { //기본 빈 생성자
     }
 
-    private Article(String title, String content, String hashtag) {
+    private Article(UserAccount userAccount,String title, String content, String hashtag) {
         this.title = title;
         this.content = content;
         this.hashtag = hashtag;
     }
-    public static Article of(String title, String content, String hashtag) { //게시글 제목 내용 해시태그
-        return new Article(title,content,hashtag);
+    public static Article of(UserAccount userAccount,String title, String content, String hashtag) { //게시글 제목 내용 해시태그
+        return new Article(userAccount,title,content,hashtag);
     }
 
     @Override
