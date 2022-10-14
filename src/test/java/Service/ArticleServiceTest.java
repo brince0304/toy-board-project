@@ -5,13 +5,10 @@ import com.fastcampus.projectboard.domain.UserAccount;
 import com.fastcampus.projectboard.domain.type.SearchType;
 import com.fastcampus.projectboard.repository.ArticleRepository;
 import dto.ArticleDto;
-import dto.ArticleUpdateDto;
 import dto.UserAccountDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
-import org.mockito.BDDMockito.*;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -19,7 +16,6 @@ import org.springframework.data.domain.Page;
 
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;

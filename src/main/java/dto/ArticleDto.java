@@ -39,7 +39,7 @@ return new ArticleDto(id, userAccountdto, title, content, hashtag, createdAt, cr
            entity.getModifiedAt(),
            entity.getModifiedBy()
    );
-    }
+    }//맵핑
 
     public Article toEntity(UserAccount userAccount){
         return Article.of(

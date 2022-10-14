@@ -3,13 +3,10 @@ package Service;
 import com.fastcampus.projectboard.domain.type.SearchType;
 import com.fastcampus.projectboard.repository.ArticleRepository;
 import dto.ArticleDto;
-import dto.ArticleUpdateDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 @Transactional
