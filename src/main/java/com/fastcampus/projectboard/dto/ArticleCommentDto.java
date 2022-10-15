@@ -1,26 +1,24 @@
-package dto;
+package com.fastcampus.projectboard.dto;
 
 import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.ArticleComment;
 import com.fastcampus.projectboard.domain.UserAccount;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
  * A DTO for the {@link com.fastcampus.projectboard.domain.ArticleComment} entity
  */
-public record ArticleCommentDto(        Long id,
-                                        Long articleId,
-                                        UserAccountDto userAccountDto,
-                                        String content,
-                                        LocalDateTime createdAt,
-                                        String createdBy,
-                                        LocalDateTime modifiedAt,
-                                        String modifiedBy){
-    public static ArticleCommentDto of(Long articleId, UserAccountDto userAccountDto, String content) {
-        return new ArticleCommentDto(null, articleId, userAccountDto, content, null, null, null, null);
-    }
+public record ArticleCommentDto(
+        Long id,
+        Long articleId,
+        UserAccountDto userAccountDto,
+        String content,
+        LocalDateTime createdAt,
+        String createdBy,
+        LocalDateTime modifiedAt,
+        String modifiedBy
+) {
     public static ArticleCommentDto of(Long id, Long articleId, UserAccountDto userAccountDto, String content, LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy) {
         return new ArticleCommentDto(id, articleId, userAccountDto, content, createdAt, createdBy, modifiedAt, modifiedBy);
     }
@@ -38,11 +36,12 @@ public record ArticleCommentDto(        Long id,
         );
     }
 
-    public ArticleComment toEntity(Article article, UserAccount userAccount) {
+    public ArticleComment toEntity(Article entity) {
         return ArticleComment.of(
-                article,
-                userAccount,
+                entity,
+                userAccountDto.toEntity(),
                 content
         );
     }
+
 }
