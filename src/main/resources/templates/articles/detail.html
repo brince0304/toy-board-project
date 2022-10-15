@@ -6,12 +6,13 @@
     <link href="/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
+<header id="header">
+    헤더
+    <hr>
+</header>
 
-<header id="header"></header>
-
-
-<main class="container">
-    <table class="table">
+<main id="article-main" class="container">
+    <table class="table" id="article-table">
         <thead>
         <tr>
             <th class="col-1">번호</th>
@@ -23,21 +24,21 @@
         </thead>
         <tbody>
         <tr>
-            <td>1</td>
-            <td>첫글</td>
-            <td>#java</td>
-            <td>test</td>
-            <td>2022-10-06</td>
+            <td class="id">1</td>
+            <td class="title"><a>첫글</a></td>
+            <td class="hashtag">#java</td>
+            <td class="user-id">test</td>
+            <td class="created-at"><time>2022-10-06</time></td>
         </tr>
         </tbody>
     </table>
     <section>
-<article class="col-md-7 col-lg-8">
-    <p>안녕 내이름은 브린스 안녕안녕
+<article class="col-md-7 col-lg-11" id="article-content">
+    <pre><p>안녕 내이름은 브린스 안녕안녕
         <br>
         안녕안녕 하세요 안녕하세요
         <br>
-        브린브린 브린스 안녕하세요<br><br></p>
+        브린브린 브린스 안녕하세요<br><br></p></pre>
 </article>
     </section>
     <section>
@@ -52,7 +53,7 @@
             </div>
         </form>
         <br>
-<ul>
+<ul id="article-comments">
     <li>
         <div>
             <time><small>2022-10-01</small></time>
@@ -105,7 +106,9 @@
 
 </main>
 
-<footer id="footer"></footer>
-
+<footer id="footer">
+    <hr>
+    푸터 삽입부
+</footer>
 </body>
 </html>

@@ -1,4 +1,4 @@
-insert into user_account (id, created_at, created_by, modified_at, modified_by, email, memo, nick_name, user_id, user_password) values (1, '2022-05-01 13:04:04', 'brince', '2022-04-02 16:00:20', 'Adelaida', 'ablunt0@kickstarter.com', 'Vestibulum', 'Yellow', 'brince', '1234');
+insert into user_account (id, created_at, created_by, modified_at, modified_by, email, memo, nickname, user_id, user_password) values (1, '2022-05-01 13:04:04', 'brince', '2022-04-02 16:00:20', 'Adelaida', 'ablunt0@kickstarter.com', 'Vestibulum', 'brince', 'brince', '1234');
 
 insert into article (id, created_at, created_by, modified_at, modified_by, content, hashtag, title, user_account_id) values (1, '2022-01-31 03:12:59', 'Lisbeth', '2021-12-31 00:41:44', 'Babb', 'Curabitur gravida nisi at nibh. In hac habitasse platea dictumst. Aliquam augue quam, sollicitudin vitae, consectetuer eget, rutrum at, lorem.
 
