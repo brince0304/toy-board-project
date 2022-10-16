@@ -1,13 +1,13 @@
 package com.fastcampus.projectboard.Service;
 
-import com.fastcampus.projectboard.Service.ArticleService;
 import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.UserAccount;
 import com.fastcampus.projectboard.domain.type.SearchType;
 import com.fastcampus.projectboard.dto.ArticleWithCommentDto;
+import com.fastcampus.projectboard.dto.UserAccountDto;
 import com.fastcampus.projectboard.repository.ArticleRepository;
 import com.fastcampus.projectboard.dto.ArticleDto;
-import com.fastcampus.projectboard.dto.UserAccountDto;
+import com.fastcampus.projectboard.repository.UserAccountRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -86,6 +86,8 @@ class ArticleServiceTest {
         then(articleRepository).should().findById(articleId);
     }
 
+
+
     @DisplayName("없는 게시글을 조회하면, 예외를 던진다.")
     @Test
     void givenNonexistentArticleId_whenSearchingArticle_thenThrowsException() {
@@ -150,6 +152,7 @@ class ArticleServiceTest {
         then(articleRepository).should().getReferenceById(dto.id());
     }
 
+
     @DisplayName("게시글의 ID를 입력하면, 게시글을 삭제한다")
     @Test
     void givenArticleId_whenDeletingArticle_thenDeletesArticle() {
@@ -202,7 +205,6 @@ class ArticleServiceTest {
 
     private UserAccountDto createUserAccountDto() {
         return UserAccountDto.of(
-                1L,
                 "uno",
                 "password",
                 "uno@mail.com",

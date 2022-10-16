@@ -1,0 +1,33 @@
+<html layout:decorate="~{layout}" xmlns:layout="http://www.w3.org/1999/xhtml" lang="ko">
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<header id="header">
+    헤더
+    <hr>
+</header>
+<div layout:fragment="content" class="container">
+    <br>
+    <h5 class="my-3 border-bottom pb-2">게시글 등록</h5>
+    <form th:action="@{/articles/create}" th:object="${articleForm}" method="post">
+        <div class="alert alert-danger" role="alert" th:if="${#fields.hasAnyErrors()}">
+            <div th:each="err : ${#fields.allErrors()}" th:text="${err}" />
+        </div>
+        <div class="mb-3">
+            <label for="title" class="form-label">제목</label>
+            <input type="text" th:field="*{title}" placeholder="제목을 입력해주세요" name="title" id="title" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label for="content" class="form-label">내용</label>
+            <textarea name="content" th:field="*{content}" placeholder="내용을 입력해주세요" id="content" class="form-control" rows="10"></textarea>
+        </div>
+        <div class="mb-3" style="width:200px">
+            <label for="hashtag" class="form-label">태그</label>
+            <input type="text" name="hashtag" id="hashtag" class="form-control">
+        </div>
+        <input type="submit" value="저장하기" class="btn btn-primary my-2">
+    </form>
+</div>
+<footer id="footer">
+    푸터
+    <hr>
+</footer>
+</html>

@@ -7,6 +7,7 @@ import com.fastcampus.projectboard.dto.ArticleWithCommentDto;
 import com.fastcampus.projectboard.repository.ArticleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,8 @@ import javax.persistence.EntityNotFoundException;
 @Service
 public class ArticleService {
 
-    private final ArticleRepository articleRepository;
+
+   private final ArticleRepository articleRepository;
 
     @Transactional(readOnly = true)
     public Page<ArticleDto> searchArticles(SearchType searchType, String searchKeyword, Pageable pageable) {
