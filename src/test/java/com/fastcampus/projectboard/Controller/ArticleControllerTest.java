@@ -3,6 +3,7 @@ package com.fastcampus.projectboard.Controller;
 
 import com.fastcampus.projectboard.Service.ArticleService;
 import com.fastcampus.projectboard.config.SecurityConfig;
+import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.dto.ArticleWithCommentDto;
 import com.fastcampus.projectboard.dto.UserAccountDto;
 import org.junit.jupiter.api.Disabled;
@@ -27,7 +28,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
 @AutoConfigureMockMvc
 @DisplayName("view 컨트롤러 - 게시글")
@@ -57,6 +57,18 @@ class ArticleControllerTest {
         then(articleService).should().searchArticles(eq(null),eq(null), any(Pageable.class));
 
     }
+    @DisplayName("[view][GET] 게시글 등록 페이지 ")
+    @Test
+    public void givenNothing_whenRequestingSavingArticleView_thenReturnsSavingArticleView() throws Exception {
+        //given
+
+        //when & then
+        mvc.perform(get("/articles/create")).andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
+                .andExpect(view().name("articles/create"));
+    }
+
+
     @DisplayName("[view][GET] 게시글 상세 페이지")
     @Test
     public void givenNothing_whenRequestingArticleView_thenReturnsArticleView() throws Exception {
@@ -114,7 +126,7 @@ class ArticleControllerTest {
     }
 
     private UserAccountDto createUserAccountDto() {
-        return UserAccountDto.of(1L,
+        return UserAccountDto.of(
                 "uno",
                 "pw",
                 "uno@mail.com",
