@@ -24,7 +24,6 @@ import java.util.Set;
         @Index(columnList= "createdBy")
 })  //테이블 컬럼 인덱스 설정
  // 인덱스 이름이 없으니 키 부여
-
 @Entity
 public class Article extends AuditingFields{
     @Id
@@ -32,7 +31,10 @@ public class Article extends AuditingFields{
     private Long id;
     //@setter 가 붙은 값이 입력값, 없으면 자동
     @Setter @Column(nullable = false) String title; //null 이 아닌 값을 컬럼에 저장 함
-    @Setter @ManyToOne(optional = false) private UserAccount userAccount;
+    @Setter
+    @JoinColumn(name = "userId")
+    @ManyToOne(optional = false)
+    private UserAccount userAccount; // 유저 정보 (ID)
     @Setter @Column(nullable = false,length = 10000) private String content;
 
     @Setter private String hashtag;
@@ -47,6 +49,7 @@ public class Article extends AuditingFields{
     }
 
     private Article(UserAccount userAccount,String title, String content, String hashtag) {
+        this.userAccount = userAccount;
         this.title = title;
         this.content = content;
         this.hashtag = hashtag;

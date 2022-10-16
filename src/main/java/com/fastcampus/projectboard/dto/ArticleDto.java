@@ -24,17 +24,17 @@ public record ArticleDto(
     }
 
     public static ArticleDto from(Article entity) {
-        return new ArticleDto(
-                entity.getId(),
-                UserAccountDto.from(entity.getUserAccount()),
-                entity.getTitle(),
-                entity.getContent(),
-                entity.getHashtag(),
-                entity.getCreatedAt(),
-                entity.getCreatedBy(),
-                entity.getModifiedAt(),
-                entity.getModifiedBy()
-        );
+           return ArticleDto.of(
+                    entity.getId(),
+                    UserAccountDto.from(entity.getUserAccount()),
+                    entity.getTitle(),
+                    entity.getContent(),
+                    entity.getHashtag(),
+                    entity.getCreatedAt(),
+                    entity.getCreatedBy(),
+                    entity.getModifiedAt(),
+                    entity.getModifiedBy()
+            );
     }
 
     public Article toEntity() {
