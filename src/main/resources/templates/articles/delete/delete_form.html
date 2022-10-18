@@ -1,0 +1,23 @@
+<html layout:decorate="~{layout}" xmlns:layout="http://www.w3.org/1999/xhtml" lang="ko">
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<header id="header">
+  헤더
+  <hr>
+</header>
+<body>
+<form class="justify-content-center" style="width:200px" th:action="@{/articles/}" th:object="${deleteForm}" method="delete">
+<div class="mb-3" >
+  <label for="password" class="form-label">게시글 비밀번호를 입력해주세요.</label>
+  <input type="text" th:field="*{password}" placeholder="비밀번호" name="password" id="password" class="form-control">
+</div>
+  <div>
+  <input type="submit" value="삭제" class="btn btn-primary my-2">
+    <input type="button" value="취소" onclick="history.back();" class="btn btn-primary my-2"/>
+  </div>
+</form>
+</body>
+<footer id="footer">
+  푸터
+  <hr>
+</footer>
+</html>
