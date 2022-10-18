@@ -1,6 +1,7 @@
 package com.fastcampus.projectboard.dto;
 
 import com.fastcampus.projectboard.domain.UserAccount;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDateTime;
 
@@ -37,6 +38,8 @@ public record UserAccountDto(
     }
 
     public UserAccount toEntity() {
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
         return UserAccount.of(
                 userId,
                 userPassword,
