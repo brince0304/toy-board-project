@@ -62,6 +62,12 @@ public class ArticleService {
         }
     }
 
+
+    public ArticleDto getArticleDto2(Long articleId) {
+        return articleRepository.findById(articleId).map(ArticleDto::from).orElseThrow(() -> new EntityNotFoundException("게시글이 없습니다 - articleId: " + articleId));
+
+    }
+
     public void deleteArticle(long articleId) {
         articleRepository.deleteById(articleId);
     }

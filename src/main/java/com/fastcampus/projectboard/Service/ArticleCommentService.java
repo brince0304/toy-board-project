@@ -2,12 +2,14 @@ package com.fastcampus.projectboard.Service;
 
 import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.ArticleComment;
+import com.fastcampus.projectboard.domain.UserAccount;
 import com.fastcampus.projectboard.dto.ArticleDto;
 import com.fastcampus.projectboard.repository.ArticleCommentRepository;
 import com.fastcampus.projectboard.repository.ArticleRepository;
 import com.fastcampus.projectboard.dto.ArticleCommentDto;
 
 import com.fastcampus.projectboard.dto.ArticleWithCommentDto;
+import com.fastcampus.projectboard.repository.UserAccountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,9 @@ public class ArticleCommentService {
 
     private final ArticleRepository articleRepository;
     private final ArticleCommentRepository articleCommentRepository;
+    private final UserAccountRepository userAccountRepository;
+    private final ArticleService articleService;
+    private final UserService userService;
 
     @Transactional(readOnly = true)
     public List<ArticleCommentDto> searchArticleComments(Long articleId) {
@@ -34,15 +39,17 @@ public class ArticleCommentService {
         return articleCommentDtos;
     }
 
+
     public void saveArticleComment(ArticleCommentDto dto) {
         try {
             Article article = articleRepository.getReferenceById(dto.articleId());
-            articleCommentRepository.save(dto.toEntity(article));
+            UserAccount userAccount = userAccountRepository.findById(dto.userAccountDto().userId()).orElseThrow();
+            ArticleComment articleComment = ArticleComment.of(article,userAccount,dto.content());
+            articleCommentRepository.save(articleComment);
         } catch (EntityNotFoundException e) {
-            log.warn("댓글 등록 실패. 게시글을 찾을 수 없습니다 - dto: {}", dto);
+            log.warn("댓글 저장 실패. 댓글 작성에 필요한 정보를 찾을 수 없습니다 - {}", e.getLocalizedMessage());
         }
     }
-
     public void updateArticleComment(ArticleCommentDto dto) {
         try {
             Article article = articleRepository.getReferenceById(dto.articleId());
