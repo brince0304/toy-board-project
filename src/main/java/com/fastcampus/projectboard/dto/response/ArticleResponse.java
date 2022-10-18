@@ -32,7 +32,7 @@ public record ArticleResponse(
                 dto.id(),
                 dto.title(),
                 dto.content(),
-                dto.hashtag(),
+                "#"+dto.hashtag(),
                 dto.createdAt(),
                 dto.userAccountDto().email(),
                 nickname
