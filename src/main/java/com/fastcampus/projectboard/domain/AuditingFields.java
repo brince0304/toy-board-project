@@ -16,26 +16,26 @@ import java.time.LocalDateTime;
 
 @Getter
 @ToString
-@EntityListeners(AuditingEntityListener.class) //시간에 대해서 자동으로 값을 넣어준다
-@MappedSuperclass //추출
-public class AuditingFields {
+@EntityListeners(AuditingEntityListener.class)
+@MappedSuperclass
+public abstract class AuditingFields {
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @CreatedDate
-    @Column(nullable = false, updatable = false) // 최초 한번만 값을 넣으므로 업데이터블 false
-    LocalDateTime createdAt; //생성 시간 자동저장
+    @Column(nullable = false, updatable = false)
+    LocalDateTime createdAt; // 생성일시
 
     @CreatedBy
-    @Column(nullable = false, updatable = false,length= 100) //마찬가지로 수정 불가
-    private String createdBy; //생성자 자동저장
+    @Column(nullable = false, updatable = false, length = 100)
+    private String createdBy; // 생성자
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @LastModifiedDate
     @Column(nullable = false)
-    LocalDateTime modifiedAt; //수정 시간 자동저장
+    LocalDateTime modifiedAt; // 수정일시
 
     @LastModifiedBy
-    @Column(nullable = false)
-    String modifiedBy;  //수정자 자동 저장
+    @Column(nullable = false, length = 100)
+    private String modifiedBy; // 수정자
 
 }

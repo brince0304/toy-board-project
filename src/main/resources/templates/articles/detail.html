@@ -1,78 +1,142 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:sec="http://www.w3.org/1999/xhtml" xmlns:layout="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <title>게시글 페이지</title>
     <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .field-error{
+            color: red;
+            font-weight: normal;
+            font-size: 0.875rem;
+        }
+        .comment{
+            color: #212529;
+            font-weight : normal;
+            font-size : 1.2rem;
+        }
+        .comment2{
+            color: silver;
+            font-weight : bold;
+            font-size : 0.875rem;
+        }
+        .writer2{
+            font-size: 1.5rem;
+            font-weight : normal;
+            text-align : right;
+        }
+        .writer{
+            font-size : x-large;
+            font-weight : bold;
+        }
+        .writer3{
+            font-weight : bold;
+            text-align : right;
+        }
+        .hashtag{
+            color:silver;
+
+        }
+        .buttons{
+            float : right;
+        }
+        .comment4{
+            text-align: right;
+            float : right;
+        }
+    </style>
 </head>
 <body>
+<header id="header">
+    헤더
+    <hr>
+</header>
+<br>
+<main id="article-main" class="container">
+<!--    <section>-->
+<!--        <table class="table" id="article-table">-->
+<!--            <thead>-->
+<!--            <tr>-->
+<!--                <th class="col-1">번호</th>-->
+<!--                <th class="col-6">제목</th>-->
+<!--                <th class="col-2">해시태그</th>-->
+<!--                <th class="col-1">작성자</th>-->
+<!--                <th class="col">작성일</th>-->
+<!--            </tr>-->
+<!--            </thead>-->
+<!--            <tbody>-->
+<!--            <tr>-->
+<!--                <td class="id">1</td>-->
+<!--                <td class="title"><a>첫글</a></td>-->
+<!--                <td class="hashtag">#java</td>-->
+<!--                <td class="user-id">test</td>-->
+<!--                <td class="created-at"><time>2022-10-06</time></td>-->
+<!--            </tr>-->
+<!--            </tbody>-->
+<!--        </table>-->
+<article  id="article-content">
+    <div class="row">
+        <div class="col-12" id="article-header">
+            <h4 style="display:inline" class="writer" id="nickname">닉네임</h4>
+            <time style="display:inline" id="created-at"> 시간</time>
+            <h1  >게시글</h1>
+            <h3 style="display:inline" class="hashtag" id="hashtag" > hash</h3>
+            <div style="display:inline" class="buttons">
+                <a th:href="@{|/articles/update/${id}|}"
+                   sec:authorize="isAuthenticated()"
+                   th:if="${article.userId() != null and #authentication.getPrincipal().getUsername() == article.userId()}">
+                    <button type="button" class="btn btn-light" >글 수정</button></a>
+                &nbsp;
+                <a th:href="@{|/articles/delete/${articleId}|}"
+                   sec:authorize="isAuthenticated()"
+                   th:if="${article.userId() != null and #authentication.getPrincipal().getUsername() == article.userId()}">
+                    <button type="button" class="btn btn-light" >글 삭제</button></a>        &nbsp;
+            </div>
+        </div>
 
-<header id="header"></header>
 
-
-<main class="container">
-    <table class="table">
-        <thead>
-        <tr>
-            <th class="col-1">번호</th>
-            <th class="col-6">제목</th>
-            <th class="col-2">해시태그</th>
-            <th class="col-1">작성자</th>
-            <th class="col">작성일</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td>1</td>
-            <td>첫글</td>
-            <td>#java</td>
-            <td>test</td>
-            <td>2022-10-06</td>
-        </tr>
-        </tbody>
-    </table>
-    <section>
-<article class="col-md-7 col-lg-8">
-    <p>안녕 내이름은 브린스 안녕안녕
+    </div>
+    <br>
+    <pre><p>안녕 내이름은 브린스 안녕안녕
         <br>
         안녕안녕 하세요 안녕하세요
         <br>
-        브린브린 브린스 안녕하세요<br><br></p>
+        브린브린 브린스 안녕하세요<br><br></p></pre>
 </article>
-    </section>
-    <section>
+<br>
+
+
+    <section >
+        <hr>
+        <br>
+        <p class="comment">댓글</p>
+        <div>
+            <p class="comment2" sec:authorize="isAnonymous()">로그인 후 댓글을 작성할 수 있습니다.</p>
+        </div>
     <div>
-        <form>
-            <div class="input-group" style="width:1000px">
-                <label for="exampleTextarea" class="form-label mt-4" hidden>댓글 작성</label>
-                <textarea class="form-control" id="exampleTextarea" placeholder="댓글을 입력해주세요.." rows="3"></textarea>
-                <br>
-                <button type="submit" class="btn btn-primary">작성</button>
+        <form sec:authorize="isAuthenticated()"
+                th:action="@{|/articles/comments/${articleId}|}" th:object="${commentForm}" method="post">
+            <div class="input-group" style="width:auto">
+
+                <label for="content" class="form-label mt-4" hidden>댓글 작성</label>
+                <input type="text" th:field="*{content}" class="form-control" id="content" name="content" placeholder="댓글을 입력해주세요">
+                <button type="submit" class="btn btn-outline-dark" >작성</button>
                 <br>
             </div>
         </form>
         <br>
-<ul>
-    <li>
-        <div>
-            <time><small>2022-10-01</small></time>
-            <strong>brince</strong>
-            <p>
+<div th:each="articleComment : ${articleComments}">
+        <div >
+            <strong class="writer" th:text="${articleComment.nickname}">brince</strong>
+            <time class="comment4" th:datetime="${articleComment.createdAt}" th:text="${#temporals.format(articleComment.createdAt, 'yyyy-MM-dd HH:mm')}" style="display:inline"><small>2022-10-01</small></time>
+            <p th:text="${articleComment.content}">
                 Lorem ipsum dolor sit amet, consectetur aidpiscino
                 Lorem ipsum dolor sit amet
-            </p>
-        </div>
-    </li>
-    <li>
-        <div>
-            <time><small>2022-10-01</small></time>
-            <strong>brince</strong>
+                <hr>
             <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscino
-            </p>
         </div>
-    </li>
-</ul>
+
+</div>
     </div>
         <div>
             <ul class="pagination pagination-sm">
@@ -99,13 +163,17 @@
                 </li>
             </ul>
         </div>
-
 </section>
+
 
 
 </main>
 
-<footer id="footer"></footer>
-
+<footer id="footer">
+    <hr>
+    푸터 삽입부
+</footer>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+
 </html>

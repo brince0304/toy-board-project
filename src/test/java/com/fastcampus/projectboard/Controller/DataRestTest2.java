@@ -2,8 +2,10 @@ package com.fastcampus.projectboard.Controller;
 
 import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.ArticleComment;
+import com.fastcampus.projectboard.domain.UserAccount;
 import com.fastcampus.projectboard.repository.ArticleCommentRepository;
 import com.fastcampus.projectboard.repository.ArticleRepository;
+import com.fastcampus.projectboard.repository.UserAccountRepository;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,6 +14,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Optional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -40,7 +44,8 @@ public class DataRestTest2 {
     @DisplayName("게시글 단건 조회 테스트")
     @Test
     void articleTest() throws Exception {
-        Article article = Article.of("haha","content","hashtag");
+        UserAccount account = UserAccount.of("brince","1234","brince@naver.com","brince","hhaa");
+        Article article = Article.of(account,"haha","content","hashtag");
         articleRepository.save(article);
         Long id = article.getId();
         //이렇게 id 로 검색해서 가져오기도 가능함
@@ -52,12 +57,7 @@ public class DataRestTest2 {
     @DisplayName("댓글 단건 조회")
     @Test
     void articleCommentTest() throws Exception {
-        Article article = Article.of("haha","content","hashtag");
-        articleRepository.save(article);
-        ArticleComment articleComment = ArticleComment.of(article,"haha this is comment");
-        articleCommentRepository.save(articleComment);
-        Long id = articleComment.getId();
-        mvc.perform(get("/api/articleComments/"+id)).andExpect(status().isOk())
+        mvc.perform(get("/api/articleComments/1")).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.valueOf("application/hal+json")))
                 .andDo(print());
     }

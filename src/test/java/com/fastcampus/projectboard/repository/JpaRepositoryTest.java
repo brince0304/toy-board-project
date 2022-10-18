@@ -2,6 +2,8 @@ package com.fastcampus.projectboard.repository;
 
 import com.fastcampus.projectboard.config.JpaConfig;
 import com.fastcampus.projectboard.domain.Article;
+import com.fastcampus.projectboard.domain.UserAccount;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,14 +54,16 @@ class JpaRepositoryTest {
         List<Article> articles = articleRepository.findAll();
 
         //then
-        assertThat(articles).isNotNull().hasSize(1000);
+        assertThat(articles).isNotNull().hasSize(1);
     }
+    @Disabled
     @DisplayName("insert 테스트")
     @Test
     void givenTestData_whenInserting_thenWorksFine(){
         //given
         long previousArticleCount = articleRepository.count();
-        Article article = Article.of("hi","this","spring"); //새 게시글 of 로 저장
+        UserAccount account = UserAccount.of("brince","1234","brince@naver.com","brince","hhaa");
+        Article article = Article.of(account,"this","spring","haha"); //새 게시글 of 로 저장
 
         //when
         articleRepository.save(article); //새 게시글 저장
