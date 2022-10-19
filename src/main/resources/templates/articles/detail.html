@@ -82,7 +82,7 @@
             <h1  >게시글</h1>
             <h3 style="display:inline" class="hashtag" id="hashtag" > hash</h3>
             <div style="display:inline" class="buttons">
-                <a th:href="@{|/articles/update/${id}|}"
+                <a th:href="@{|/articles/update/${articleId}|}"
                    sec:authorize="isAuthenticated()"
                    th:if="${article.userId() != null and #authentication.getPrincipal().getUsername() == article.userId()}">
                     <button type="button" class="btn btn-light" >글 수정</button></a>

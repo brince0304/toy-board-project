@@ -1,0 +1,49 @@
+<html layout:decorate="~{layout}" xmlns:layout="http://www.w3.org/1999/xhtml" lang="ko">
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+
+<head>
+    <title>게시글 작성</title>
+    <style>
+        .field-error{
+            color: #212529;
+            font-weight: normal;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<header id="header">
+    헤더
+    <hr>
+</header>
+<div layout:fragment="content" class="container">
+    <br>
+    <h5 class="my-3 border-bottom pb-2">게시글 수정</h5>
+    <form th:action="@{|/articles/update/${articleId}|}" th:object="${articleForm}" method="post">
+        <div class="mb-3">
+            <label for="title" class="form-label">제목</label>
+            <input type="text" th:field="*{title}"  name="title" id="title" class="form-control">
+            <div class="field-error" th:errors="*{title}">
+                오류2
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="content" class="form-label">내용</label>
+            <textarea name="content" th:field="*{content}"  id="content" class="form-control" rows="10"></textarea>
+            <div class="field-error" th:errors="*{content}">
+                오류2
+            </div>
+        </div>
+        <div class="mb-3" style="width:200px">
+            <label for="hashtag" class="form-label">태그</label>
+            <input type="text" th:field="*{hashtag}"  name="hashtag"  id="hashtag" class="form-control">
+        </div>
+        <input type="submit" value="수정" class="btn btn-primary my-2">
+    </form>
+</div>
+<footer id="footer">
+    푸터
+    <hr>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+
+</html>

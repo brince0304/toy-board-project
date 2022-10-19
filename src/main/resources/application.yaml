@@ -8,6 +8,10 @@ logging:
     org.hibernate.type.descriptor.sql.BasicBinder: trace
 
 spring:
+  mvc:
+    hidden-method:
+      filter:
+        enabled: true
   datasource:
     url: jdbc:mysql://localhost:3306/board
     username: brince
