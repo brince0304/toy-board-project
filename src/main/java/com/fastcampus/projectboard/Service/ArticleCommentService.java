@@ -64,4 +64,8 @@ public class ArticleCommentService {
         articleCommentRepository.deleteById(Id);
     }
 
+    public ArticleCommentDto getArticleComment(Long articleCommentId) {
+        ArticleComment articleComment = articleCommentRepository.findById(articleCommentId).orElseThrow();
+        return ArticleCommentDto.from(articleComment);
+    }
 }

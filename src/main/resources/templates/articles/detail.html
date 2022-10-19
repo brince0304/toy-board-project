@@ -52,6 +52,12 @@
             text-align: right;
             float: right;
         }
+        .field-error{
+            color: #212529;
+            font-weight: normal;
+            font-size: 0.875rem;
+
+        }
     </style>
 </head>
 <body>
@@ -95,7 +101,7 @@
                        th:if="${article.userId() != null and #authentication.getPrincipal().getUsername() == article.userId()}">
                         <button type="button" class="btn btn-light">글 수정</button>
                     </a>
-                    &nbsp;
+
                     <a th:href="@{|/articles/delete/${articleId}|}"
                        sec:authorize="isAuthenticated()"
                        th:if="${article.userId() != null and #authentication.getPrincipal().getUsername() == article.userId()}">
@@ -125,10 +131,13 @@
         </div>
         <div>
             <form sec:authorize="isAuthenticated()"
-                  th:action="@{|/articles/comments/${articleId}|}" th:object="${commentForm}" method="post">
+                  th:action="@{|/articles/comments/${article.id}|}" th:object="${commentForm}" method="post">
                 <div class="input-group" style="width:auto">
 
                     <label for="content" class="form-label mt-4" hidden>댓글 작성</label>
+                    <div class="field-error" th:errors="*{content}">
+                        오류2
+                    </div>
                     <input type="text" th:field="*{content}" class="form-control" id="content" name="content"
                            placeholder="댓글을 입력해주세요">
                     <button type="submit" class="btn btn-outline-dark">작성</button>
@@ -142,16 +151,16 @@
                     <time class="comment4" th:datetime="${articleComment.createdAt}"
                           th:text="${#temporals.format(articleComment.createdAt, 'yyyy-MM-dd HH:mm')}"
                           style="display:inline"><small>2022-10-01</small></time>
-                    <strong style="display:inline" class="writer" th:text="${articleComment.nickname}">brince</strong>
+                    <strong  class="writer" th:text="${articleComment.nickname}">brince</strong>
                     &nbsp;
+                    <a sec:authorize="isAuthenticated()"
+                       th:if="${articleComment.userId != null and #authentication.getPrincipal().getUsername() == articleComment.userId}"
+                       th:href="@{|/articles/comments/delete/${articleId}/${articleComment.id}|}" >
+                    <button  class="btn btn-light">삭제</button>
+                    </a>
                     <button sec:authorize="isAuthenticated()"
                             th:if="${articleComment.userId != null and #authentication.getPrincipal().getUsername() == articleComment.userId}"
-                            style="display:inline" class="badge bg-secondary">삭제
-                    </button>
-                    <button sec:authorize="isAuthenticated()"
-                            th:if="${articleComment.userId != null and #authentication.getPrincipal().getUsername() == articleComment.userId}"
-                            style="display:inline" class="badge bg-secondary">수정
-                    </button>
+                            style="display:inline" class="btn btn-light">수정</button>
                     <p th:text="${articleComment.content}">
                         Lorem ipsum dolor sit amet, consectetur aidpiscino
                         Lorem ipsum dolor sit amet

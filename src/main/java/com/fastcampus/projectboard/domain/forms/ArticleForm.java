@@ -16,6 +16,9 @@ public class ArticleForm {
     @Size(max = 10000, message = "* 내용은 10000자 이하로 입력해주세요.")
     private String content;
 
+    @Size(min= 1, max = 100, message = "* 댓글은 1자 이상 100자 이하로 작성해주세요.")
+    private String comment;
+
     private String hashtag;
 
 
