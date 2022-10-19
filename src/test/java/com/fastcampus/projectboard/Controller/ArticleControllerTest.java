@@ -1,11 +1,15 @@
 package com.fastcampus.projectboard.Controller;
 
 
+import com.fastcampus.projectboard.Service.ArticleCommentService;
 import com.fastcampus.projectboard.Service.ArticleService;
 import com.fastcampus.projectboard.config.SecurityConfig;
 import com.fastcampus.projectboard.domain.Article;
+import com.fastcampus.projectboard.domain.UserAccount;
+import com.fastcampus.projectboard.dto.ArticleDto;
 import com.fastcampus.projectboard.dto.ArticleWithCommentDto;
 import com.fastcampus.projectboard.dto.UserAccountDto;
+import com.fastcampus.projectboard.repository.UserAccountRepository;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,10 +40,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ArticleControllerTest {
 
     private final MockMvc mvc;
-    @MockBean private ArticleService articleService;
+    @Autowired
+    @MockBean private final ArticleCommentService articleCommentService;
+    @Autowired
+    @MockBean private final ArticleService articleService;
 
-    ArticleControllerTest(@Autowired MockMvc mvc) {
+
+    @Autowired
+    ArticleControllerTest (MockMvc mvc,  ArticleCommentService articleCommentService, ArticleService articleService) {
         this.mvc = mvc;
+        this.articleCommentService = articleCommentService;
+        this.articleService = articleService;
     }
 
 
@@ -86,6 +97,29 @@ class ArticleControllerTest {
 
     }
 
+    @Test
+    void givenNothing_whenUpdatingArticle_thenUpdatesArticle() throws Exception {
+        //given
+        Article article = createArticle();
+        Article newArticle = createArticle();
+        newArticle.setHashtag("new hashtag"); //update hashtag
+        ArticleDto articleDto = ArticleDto.from(newArticle);
+        Long articleId = article.getId();
+
+
+        //when
+        articleService.updateArticle(articleId ,articleDto);
+
+        //then
+        mvc.perform(post("/articles/update/"+articleId))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/articles/"+articleId));
+        then(articleService).should().updateArticle(articleId,articleDto);
+
+
+
+    }
+
     @Disabled
     @DisplayName("[view][GET] 게시글 검색 페이지")
     @Test
@@ -122,6 +156,24 @@ class ArticleControllerTest {
                 "uno",
                 LocalDateTime.now(),
                 "uno"
+        );
+    }
+    private UserAccount createUserAccount() {
+        return UserAccount.of(
+                "uno",
+                "password",
+                "uno@email.com",
+                "Uno",
+                null
+        );
+    }
+
+    private Article createArticle() {
+        return Article.of(
+                createUserAccount(),
+                "title",
+                "content",
+                "#java"
         );
     }
 

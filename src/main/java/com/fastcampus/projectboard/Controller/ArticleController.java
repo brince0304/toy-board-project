@@ -8,26 +8,20 @@ import com.fastcampus.projectboard.domain.ArticleComment;
 import com.fastcampus.projectboard.domain.UserAccount;
 import com.fastcampus.projectboard.domain.forms.ArticleForm;
 import com.fastcampus.projectboard.domain.forms.CommentForm;
-import com.fastcampus.projectboard.domain.forms.DeleteForm;
 import com.fastcampus.projectboard.domain.type.SearchType;
 import com.fastcampus.projectboard.dto.ArticleCommentDto;
 import com.fastcampus.projectboard.dto.ArticleDto;
-import com.fastcampus.projectboard.dto.ArticleWithCommentDto;
-import com.fastcampus.projectboard.dto.UserAccountDto;
-import com.fastcampus.projectboard.dto.response.ArticleCommentResponse;
 import com.fastcampus.projectboard.dto.response.ArticleResponse;
 import com.fastcampus.projectboard.dto.response.ArticleWithCommentResponse;
-import com.fastcampus.projectboard.repository.ArticleCommentRepository;
 import com.fastcampus.projectboard.repository.ArticleRepository;
 import com.fastcampus.projectboard.repository.UserAccountRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -35,7 +29,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
+
 @RequiredArgsConstructor
 @Controller
 @RequestMapping("/articles")
@@ -89,17 +83,45 @@ public class ArticleController {
         if (bindingResult.hasErrors()) {
             return "redirect:/articles/"+articleId;
         }
-        System.out.println("article id"+ articleId);
-        System.out.println("comment content"+ commentForm.getContent());
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserAccount account = userService.getUserAccount(userDetails.getUsername()).toEntity();
-        System.out.println("account id"+ account.getUserId());
-
         ArticleComment articleComment = ArticleComment.of(articleRepository.getReferenceById(articleId),account,commentForm.getContent());
         ArticleCommentDto articleCommentDto = ArticleCommentDto.from(articleComment);
         articleCommentService.saveArticleComment(articleCommentDto);
         return "redirect:/articles/"+articleId;
     }
+
+    @GetMapping("/update/{articleId}")
+    public String articleUpdate(@PathVariable Long articleId, ModelMap map, ArticleForm articleForm){
+        ArticleDto articleDto = articleService.getArticleDto2(articleId);
+        map.addAttribute("dto",articleDto);
+        articleForm.setTitle(articleDto.title());
+        articleForm.setContent(articleDto.content());
+        articleForm.setHashtag(articleDto.hashtag());
+        return "articles/update/article_form";
+    }
+
+
+    @PostMapping("/update/{articleId}")
+    public String updateArticle(
+            @PathVariable Long articleId,
+            @Valid ArticleForm articleForm,
+            BindingResult bindingResult
+    ) {
+        if (bindingResult.hasErrors()) {
+            return "articles/update/article_form";
+        }
+        ArticleDto articleDto = articleService.getArticleDto2(articleId);
+        Article article = articleDto.toEntity();
+        article.setTitle(articleForm.getTitle());
+        article.setContent(articleForm.getContent());
+        article.setHashtag(articleForm.getHashtag());
+
+        articleService.updateArticle(articleId,ArticleDto.from(article));
+        return "redirect:/articles";
+    }
+
+
 
 
 

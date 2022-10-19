@@ -1,16 +1,21 @@
 package com.fastcampus.projectboard.Controller;
 
+
+import com.fastcampus.projectboard.config.SecurityConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 @DisplayName("View 컨트롤러 - 인증")
 @WebMvcTest
+@Import(SecurityConfig.class)
 public class AuthControllerTest {
 
     private final MockMvc mvc;

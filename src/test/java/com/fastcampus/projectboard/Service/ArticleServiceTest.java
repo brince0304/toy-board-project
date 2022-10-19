@@ -128,7 +128,7 @@ class ArticleServiceTest {
         given(articleRepository.getReferenceById(dto.id())).willReturn(article);
 
         // When
-        sut.updateArticle(dto);
+        sut.updateArticle(article.getId(), dto);
 
         // Then
         assertThat(article)
@@ -146,7 +146,7 @@ class ArticleServiceTest {
         given(articleRepository.getReferenceById(dto.id())).willThrow(EntityNotFoundException.class);
 
         // When
-        sut.updateArticle(dto);
+        sut.updateArticle(createArticleDto().id(), dto);
 
         // Then
         then(articleRepository).should().getReferenceById(dto.id());
