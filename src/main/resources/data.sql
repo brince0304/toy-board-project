@@ -1,4 +1,4 @@
-insert into user_account (created_at, created_by, modified_at, modified_by, email, memo, nickname, user_id, user_password) values ('2022-05-01 13:04:04', 'test', '2022-04-02 16:00:20', 'Adelaida', 'ablunt0@kickstarter.com', 'Vestibulum', 'test', 'test', '$2y$08$nEsyXn2n.06lHFVPzb5EL.BFBOItMALb7K1KtM8x4gH.GPCnSyJee');
+insert into user_account (created_at, created_by, modified_at, modified_by, email, memo, nickname, user_id, user_password) values ('2022-05-01 13:04:04', 'test', '2022-04-02 16:00:20', 'Adelaida', 'ablunt0@kickstarter.com', 'Vestibulum', 'test', 'test', '$2a$10$ESEkLtJ50G8ly/StrADSpOvqebjUwvCtY4/ZhtT2ClqO2jfGcSCCe');
 
 insert into article (id,user_id, created_at, created_by, modified_at, modified_by, content, hashtag, title) values (1,'test', '2022-01-31 03:12:59', 'Lisbeth', '2021-12-31 00:41:44', 'Babb', 'Curabitur gravida nisi at nibh. In hac habitasse platea dictumst. Aliquam augue quam, sollicitudin vitae, consectetuer eget, rutrum at, lorem.
 
