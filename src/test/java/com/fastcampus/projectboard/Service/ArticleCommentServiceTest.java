@@ -94,7 +94,7 @@ class ArticleCommentServiceTest {
         given(articleCommentRepository.getReferenceById(dto.id())).willReturn(articleComment);
 
         // When
-        sut.updateArticleComment(dto);
+        sut.updateArticleComment(dto.id(),updatedContent);
 
         // Then
         assertThat(articleComment.getContent())
@@ -111,7 +111,7 @@ class ArticleCommentServiceTest {
         given(articleCommentRepository.getReferenceById(dto.id())).willThrow(EntityNotFoundException.class);
 
         // When
-        sut.updateArticleComment(dto);
+        sut.updateArticleComment(dto.id(),"haha");
 
         // Then
         then(articleCommentRepository).should().getReferenceById(dto.id());
