@@ -99,13 +99,14 @@
                     <a th:href="@{|/articles/update/${articleId}|}"
                        sec:authorize="isAuthenticated()"
                        th:if="${article.userId() != null and #authentication.getPrincipal().getUsername() == article.userId()}">
-                        <button type="button" class="btn btn-light">글 수정</button>
+                        <button type="button" class="btn btn-light" >글 수정</button>
                     </a>
 
-                    <a th:href="@{|/articles/delete/${articleId}|}"
+                    <a href="javascript:void(0);" th:data-uri="@{|/articles/delete/${article.id()}|}"
                        sec:authorize="isAuthenticated()"
-                       th:if="${article.userId() != null and #authentication.getPrincipal().getUsername() == article.userId()}">
-                        <button type="button" class="btn btn-light">글 삭제</button>
+                       th:if="${article.userId() != null and #authentication.getPrincipal().getUsername() == article.userId()}"
+                    class="delete">
+                        <button type="button" class="btn btn-light" >글 삭제</button>
                     </a> &nbsp;
                 </div>
             </div>
@@ -135,11 +136,11 @@
                 <div class="input-group" style="width:auto">
 
                     <label for="content" class="form-label mt-4" hidden>댓글 작성</label>
+                    <input type="text" th:field="*{content}" class="form-control" id="content" name="content"
+                           placeholder="댓글을 입력해주세요">
                     <div class="field-error" th:errors="*{content}">
                         오류2
                     </div>
-                    <input type="text" th:field="*{content}" class="form-control" id="content" name="content"
-                           placeholder="댓글을 입력해주세요">
                     <button type="submit" class="btn btn-outline-dark">작성</button>
                     <br>
                 </div>
@@ -153,14 +154,14 @@
                           style="display:inline"><small>2022-10-01</small></time>
                     <strong  class="writer" th:text="${articleComment.nickname}">brince</strong>
                     &nbsp;
-                    <a sec:authorize="isAuthenticated()"
+                    <a sec:authorize="isAuthenticated()" class="delete"
                        th:if="${articleComment.userId != null and #authentication.getPrincipal().getUsername() == articleComment.userId}"
-                       th:href="@{|/articles/comments/delete/${articleId}/${articleComment.id}|}" >
-                    <button  class="btn btn-light">삭제</button>
+                       href="javascript:void(0);" th:data-uri="@{|/articles/comments/delete/${articleId}/${articleComment.id}|}" >
+                    <button  class="btn btn-light" >삭제</button>
                     </a>
                     <button sec:authorize="isAuthenticated()"
                             th:if="${articleComment.userId != null and #authentication.getPrincipal().getUsername() == articleComment.userId}"
-                            style="display:inline" class="btn btn-light">수정</button>
+                            style="display:inline" class="btn btn-light" >수정</button>
                     <p th:text="${articleComment.content}">
                         Lorem ipsum dolor sit amet, consectetur aidpiscino
                         Lorem ipsum dolor sit amet
@@ -204,7 +205,18 @@
     <hr>
     푸터 삽입부
 </footer>
+<th:block layout:fragment="script"></th:block>
 </body>
+<script layout:fragment="script" type='text/javascript'>
+    const delete_elements = document.getElementsByClassName("delete");
+    Array.from(delete_elements).forEach(function(element) {
+        element.addEventListener('click', function() {
+            if(confirm("삭제하시겠습니까?")) {
+                location.href = this.dataset.uri;
+            };
+        });
+    });
+</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
         crossorigin="anonymous"></script>
