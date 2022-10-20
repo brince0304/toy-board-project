@@ -4,15 +4,17 @@ import com.fastcampus.projectboard.Service.ArticleCommentService;
 import com.fastcampus.projectboard.Service.ArticleService;
 import com.fastcampus.projectboard.Service.UserService;
 import com.fastcampus.projectboard.domain.Article;
-import com.fastcampus.projectboard.domain.ArticleComment;
 import com.fastcampus.projectboard.domain.UserAccount;
 import com.fastcampus.projectboard.domain.forms.ArticleForm;
 import com.fastcampus.projectboard.domain.forms.CommentForm;
 import com.fastcampus.projectboard.domain.type.SearchType;
-import com.fastcampus.projectboard.dto.ArticleCommentDto;
 import com.fastcampus.projectboard.dto.ArticleDto;
+import com.fastcampus.projectboard.dto.request.ArticleCommentRequest;
+import com.fastcampus.projectboard.dto.request.ArticleRequest;
+import com.fastcampus.projectboard.dto.response.ArticleCommentResponse;
 import com.fastcampus.projectboard.dto.response.ArticleResponse;
 import com.fastcampus.projectboard.dto.response.ArticleWithCommentResponse;
+import com.fastcampus.projectboard.dto.security.BoardPrincipal;
 import com.fastcampus.projectboard.repository.ArticleRepository;
 import com.fastcampus.projectboard.repository.UserAccountRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Controller
@@ -49,47 +52,32 @@ public class ArticleController {
         return "articles/index";
     }
     @GetMapping("/{articleId}")
-    public String article(@PathVariable Long articleId, ModelMap map , CommentForm commentForm){
+    public String article(@PathVariable Long articleId, ModelMap map , ArticleCommentRequest dto,
+                          CommentForm commentForm){
         ArticleWithCommentResponse article =  ArticleWithCommentResponse.from(articleService.getArticle(articleId));
         map.addAttribute("article",article);
         map.addAttribute("articleComments", article.articleCommentsResponse());
-        commentForm.setArticleId(articleId);
-        map.addAttribute("commentForm",commentForm);
+        map.addAttribute("dto",dto);
+        commentForm.setContent(article.articleCommentsResponse().stream().peek(n->n.content()).collect(Collectors.toList()).stream().iterator().next().content());
         return "articles/detail";
     }
 
     @GetMapping("/create")
-    public String articleCreate(ArticleForm articleForm){
+    public String articleCreate(ModelMap map,ArticleRequest dto,ArticleForm articleForm){
+        map.addAttribute("dto",dto);
         return "articles/create/article_form";
     }
 
     @PostMapping("/create")
-    public String articleSave(@Valid ArticleForm articleForm , BindingResult bindingResult) {
+    public String articleSave(ArticleRequest dto,@Valid ArticleForm articleForm, BindingResult bindingResult
+    , @AuthenticationPrincipal BoardPrincipal boardPrincipal) {
         if (bindingResult.hasErrors()) {
             return "articles/create/article_form";
         }
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String id = userDetails.getUsername();
-        UserAccount userAccount = userAccountRepository.findById(id).orElseThrow();
-        Article article = Article.of(userAccount,articleForm.getTitle(),articleForm.getContent(),articleForm.getHashtag());
-        ArticleDto articleDto = ArticleDto.from(article);
-        articleService.saveArticle(articleDto);
+        articleService.saveArticle(dto.toDto(boardPrincipal.toDto()));
         return "redirect:/articles";
     }
 
-    @PostMapping("/comments/{articleId}")
-    public String writeArticleComment(@PathVariable Long articleId,
-            @Valid CommentForm commentForm, BindingResult bindingResult){
-        if (bindingResult.hasErrors()) {
-            return "redirect:/articles/"+articleId;
-        }
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserAccount account = userService.getUserAccount(userDetails.getUsername()).toEntity();
-        ArticleComment articleComment = ArticleComment.of(articleRepository.getReferenceById(articleId),account,commentForm.getContent());
-        ArticleCommentDto articleCommentDto = ArticleCommentDto.from(articleComment);
-        articleCommentService.saveArticleComment(articleCommentDto);
-        return "redirect:/articles/"+articleId;
-    }
 
     @GetMapping("/update/{articleId}")
     public String articleUpdate(@PathVariable Long articleId, ModelMap map, ArticleForm articleForm){
@@ -118,7 +106,7 @@ public class ArticleController {
         article.setHashtag(articleForm.getHashtag());
 
         articleService.updateArticle(articleId,ArticleDto.from(article));
-        return "redirect:/articles";
+        return "redirect:/articles/"+articleId;
     }
 
 
