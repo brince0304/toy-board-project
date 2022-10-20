@@ -29,8 +29,6 @@ public class ArticleCommentService {
     private final ArticleRepository articleRepository;
     private final ArticleCommentRepository articleCommentRepository;
     private final UserAccountRepository userAccountRepository;
-    private final ArticleService articleService;
-    private final UserService userService;
 
     @Transactional(readOnly = true)
     public List<ArticleCommentDto> searchArticleComments(Long articleId) {
@@ -50,13 +48,12 @@ public class ArticleCommentService {
             log.warn("댓글 저장 실패. 댓글 작성에 필요한 정보를 찾을 수 없습니다 - {}", e.getLocalizedMessage());
         }
     }
-    public void updateArticleComment(ArticleCommentDto dto) {
+    public void updateArticleComment(Long id,String content) {
         try {
-            Article article = articleRepository.getReferenceById(dto.articleId());
-            ArticleComment articleComment = articleCommentRepository.getReferenceById(dto.id());
-            if (dto.content() != null) { articleComment.setContent(dto.content());}
+            ArticleComment articleComment = articleCommentRepository.getReferenceById(id);
+            if (content != null) { articleComment.setContent(content);}
         } catch (EntityNotFoundException e) {
-            log.warn("댓글 업데이트 실패. 게시글을 찾을 수 없습니다 - dto: {}", dto);
+            log.warn("댓글 업데이트 실패. 게시글을 찾을 수 없습니다 - dto: {}", e.getLocalizedMessage());
         }
     }
 
