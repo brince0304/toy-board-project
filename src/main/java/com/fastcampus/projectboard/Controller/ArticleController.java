@@ -9,8 +9,12 @@ import com.fastcampus.projectboard.domain.forms.ArticleForm;
 import com.fastcampus.projectboard.domain.forms.CommentForm;
 import com.fastcampus.projectboard.domain.type.SearchType;
 import com.fastcampus.projectboard.dto.ArticleDto;
+import com.fastcampus.projectboard.dto.request.ArticleCommentRequest;
+import com.fastcampus.projectboard.dto.request.ArticleRequest;
+import com.fastcampus.projectboard.dto.response.ArticleCommentResponse;
 import com.fastcampus.projectboard.dto.response.ArticleResponse;
 import com.fastcampus.projectboard.dto.response.ArticleWithCommentResponse;
+import com.fastcampus.projectboard.dto.security.BoardPrincipal;
 import com.fastcampus.projectboard.repository.ArticleRepository;
 import com.fastcampus.projectboard.repository.UserAccountRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -26,6 +31,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Controller
@@ -46,29 +52,29 @@ public class ArticleController {
         return "articles/index";
     }
     @GetMapping("/{articleId}")
-    public String article(@PathVariable Long articleId, ModelMap map , CommentForm commentForm){
+    public String article(@PathVariable Long articleId, ModelMap map , ArticleCommentRequest dto,
+                          CommentForm commentForm){
         ArticleWithCommentResponse article =  ArticleWithCommentResponse.from(articleService.getArticle(articleId));
         map.addAttribute("article",article);
         map.addAttribute("articleComments", article.articleCommentsResponse());
+        map.addAttribute("dto",dto);
+        commentForm.setContent(article.articleCommentsResponse().stream().peek(n->n.content()).collect(Collectors.toList()).stream().iterator().next().content());
         return "articles/detail";
     }
 
     @GetMapping("/create")
-    public String articleCreate(ArticleForm articleForm){
+    public String articleCreate(ModelMap map,ArticleRequest dto,ArticleForm articleForm){
+        map.addAttribute("dto",dto);
         return "articles/create/article_form";
     }
 
     @PostMapping("/create")
-    public String articleSave(@Valid ArticleForm articleForm , BindingResult bindingResult) {
+    public String articleSave(ArticleRequest dto,@Valid ArticleForm articleForm, BindingResult bindingResult
+    , @AuthenticationPrincipal BoardPrincipal boardPrincipal) {
         if (bindingResult.hasErrors()) {
             return "articles/create/article_form";
         }
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String id = userDetails.getUsername();
-        UserAccount userAccount = userAccountRepository.findById(id).orElseThrow();
-        Article article = Article.of(userAccount,articleForm.getTitle(),articleForm.getContent(),articleForm.getHashtag());
-        ArticleDto articleDto = ArticleDto.from(article);
-        articleService.saveArticle(articleDto);
+        articleService.saveArticle(dto.toDto(boardPrincipal.toDto()));
         return "redirect:/articles";
     }
 
