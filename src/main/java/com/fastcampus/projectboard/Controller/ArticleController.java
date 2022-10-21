@@ -58,7 +58,6 @@ public class ArticleController {
         map.addAttribute("article",article);
         map.addAttribute("articleComments", article.articleCommentsResponse());
         map.addAttribute("dto",dto);
-        commentForm.setContent(article.articleCommentsResponse().stream().peek(n->n.content()).collect(Collectors.toList()).stream().iterator().next().content());
         return "articles/detail";
     }
 
