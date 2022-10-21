@@ -57,11 +57,11 @@ public class ArticleCommentController {
     @PostMapping("/update/{articleId}/{articleCommentId}")
     public String updateArticleComment(@PathVariable Long articleCommentId
             ,@PathVariable Long articleId
-            ,@Valid CommentForm commentForm, BindingResult bindingResult){
+            ,@Valid CommentForm commentForm, BindingResult bindingResult,ArticleCommentRequest request){
         if (bindingResult.hasErrors()) {
             return "redirect:/articles/"+articleId;
         }
-        articleCommentService.updateArticleComment(articleCommentId,commentForm.getContent());
+        articleCommentService.updateArticleComment(articleCommentId,request.content());
         return "redirect:/articles/"+articleId;
     }
 
