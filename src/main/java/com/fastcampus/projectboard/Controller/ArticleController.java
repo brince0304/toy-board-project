@@ -42,6 +42,8 @@ public class ArticleController {
     private final UserAccountRepository userAccountRepository;
     private final ArticleRepository articleRepository;
     private final UserService userService;
+
+    
     @GetMapping
     public String articles(
             @RequestParam(required = false) SearchType searchType,

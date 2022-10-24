@@ -14,6 +14,9 @@
             integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
             crossorigin="anonymous"></script>
     <style>
+        .return{
+            float: right;
+        }
         .field-error {
             color: red;
             font-weight: normal;
@@ -165,10 +168,11 @@
         브린브린 브린스 안녕하세요<br><br></p></pre>
     </article>
     <br>
-
-
     <section>
         <hr>
+        <a th:href="@{/articles}">
+        <button type="button" class="return btn btn-light">돌아가기</button>
+        </a>
         <br>
         <p class="comment">댓글</p>
         <div>
@@ -191,6 +195,7 @@
             </form>
             <br>
             <div th:each="articleComment : ${articleComments}">
+                <p th:if="${article.articleCommentsResponse().size() ==0 }">댓글이 없습니다.</p>
                 <div>
                     &nbsp
                     <time class="comment4" th:datetime="${articleComment.createdAt}"
@@ -241,31 +246,6 @@
                     <p>
 
                 </div>
-            </div>
-            <div>
-                <ul class="pagination pagination-sm">
-                    <li class="page-item disabled">
-                        <a class="page-link" href="#">&laquo;</a>
-                    </li>
-                    <li class="page-item active">
-                        <a class="page-link" href="#">1</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">2</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">3</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">4</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">5</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">&raquo;</a>
-                    </li>
-                </ul>
             </div>
     </section>
 
