@@ -1,1 +1,1 @@
-# fastcampus-project-board
+# Toy board project
