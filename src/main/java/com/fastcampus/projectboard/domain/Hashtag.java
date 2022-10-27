@@ -12,7 +12,7 @@ import java.util.Set;
 @Entity
 @Getter
 @ToString
-public class hashtag {
+public class Hashtag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,24 +22,24 @@ public class hashtag {
     private String hashtag;
 
     @ToString.Exclude
-    @ManyToMany(mappedBy = "hashtags")
+    @ManyToMany(mappedBy = "Hashtags")
     private Set<Article> articles = new LinkedHashSet<>();
 
-    protected hashtag() {
+    protected Hashtag() {
     }
 
-    public hashtag (String hashtag) {
+    public Hashtag(String hashtag) {
         this.hashtag = hashtag;
     }
 
-    public static hashtag of(String hashtag) {
-        return new hashtag(hashtag);
+    public static Hashtag of(String hashtag) {
+        return new Hashtag(hashtag);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof hashtag hashtag)) return false;
+        if (!(o instanceof Hashtag hashtag)) return false;
         return id.equals(hashtag.id);
     }
 

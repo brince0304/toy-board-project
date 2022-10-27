@@ -3,14 +3,8 @@ package com.fastcampus.projectboard.domain;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -50,9 +44,9 @@ public class Article extends AuditingFields{
             inverseJoinColumns = @JoinColumn(name = "hashtagId")
     )
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private Set<hashtag> hashtags = new LinkedHashSet<>();
+    private Set<Hashtag> Hashtags = new LinkedHashSet<>();
 
-    
+
 
     protected Article() { //기본 빈 생성자
     }
