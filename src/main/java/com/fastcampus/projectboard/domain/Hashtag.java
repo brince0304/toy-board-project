@@ -11,8 +11,8 @@ import java.util.Set;
 
 @Entity
 @Getter
-@ToString
-public class Hashtag {
+@ToString(callSuper = true)
+public class Hashtag{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,6 +28,10 @@ public class Hashtag {
     protected Hashtag() {
     }
 
+    public Hashtag(Long id,String hashtag) {
+        this.id = id;
+        this.hashtag = hashtag;
+    }
     public Hashtag(String hashtag) {
         this.hashtag = hashtag;
     }
@@ -36,11 +40,15 @@ public class Hashtag {
         return new Hashtag(hashtag);
     }
 
+    public static Hashtag of(Long id, String hashtag) {
+        return new Hashtag(id, hashtag);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Hashtag hashtag)) return false;
-        return id.equals(hashtag.id);
+        return id!=null && id.equals(hashtag.id);
     }
 
     @Override

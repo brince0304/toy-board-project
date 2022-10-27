@@ -3,13 +3,13 @@ package com.fastcampus.projectboard.Controller;
 
 import com.fastcampus.projectboard.Service.ArticleCommentService;
 import com.fastcampus.projectboard.Service.ArticleService;
+import com.fastcampus.projectboard.Service.HashtagService;
 import com.fastcampus.projectboard.config.SecurityConfig;
 import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.UserAccount;
 import com.fastcampus.projectboard.dto.ArticleDto;
 import com.fastcampus.projectboard.dto.ArticleWithCommentDto;
 import com.fastcampus.projectboard.dto.UserAccountDto;
-import com.fastcampus.projectboard.repository.UserAccountRepository;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -45,12 +45,17 @@ class ArticleControllerTest {
     @Autowired
     @MockBean private final ArticleService articleService;
 
+    @Autowired
+    @MockBean private final HashtagService hashtagService;
+
+
 
     @Autowired
-    ArticleControllerTest (MockMvc mvc,  ArticleCommentService articleCommentService, ArticleService articleService) {
+    ArticleControllerTest (MockMvc mvc, ArticleCommentService articleCommentService, ArticleService articleService, HashtagService hashtagService) {
         this.mvc = mvc;
         this.articleCommentService = articleCommentService;
         this.articleService = articleService;
+        this.hashtagService = hashtagService;
     }
 
 
