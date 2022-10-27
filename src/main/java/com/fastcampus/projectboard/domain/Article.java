@@ -45,6 +45,7 @@ public class Article extends AuditingFields{
 
 
 
+
     protected Article() { //기본 빈 생성자
     }
 
