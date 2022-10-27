@@ -43,8 +43,16 @@ public class Article extends AuditingFields{
     @ToString.Exclude //과부하 발생 예방
     private final Set<ArticleComment> articleComments = new LinkedHashSet<>();
 
+    @ToString.Exclude
+    @JoinTable(
+            name = "article_hashtag",
+            joinColumns = @JoinColumn(name = "articleId"),
+            inverseJoinColumns = @JoinColumn(name = "hashtagId")
+    )
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<hashtag> hashtags = new LinkedHashSet<>();
 
-
+    
 
     protected Article() { //기본 빈 생성자
     }
