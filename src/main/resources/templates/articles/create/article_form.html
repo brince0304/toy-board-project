@@ -1,4 +1,5 @@
-<html layout:decorate="~{layout}" xmlns:layout="http://www.w3.org/1999/xhtml" lang="ko">
+<html layout:decorate="~{layout}" xmlns:layout="http://www.w3.org/1999/xhtml" lang="ko"
+      xmlns:error="http://www.w3.org/1999/xhtml">
 <link href="/css/bootstrap.min.css" rel="stylesheet">
 
 <head>
@@ -18,15 +19,17 @@
 <div layout:fragment="content" class="container">
     <br>
     <h5 class="my-3 border-bottom pb-2">게시글 등록</h5>
-    <form th:action="@{/articles/create}"  method="post">
+    <form th:action="@{/articles/create}" th:object="${articleForm}" method="post">
         <div class="mb-3">
             <label for="title" class="form-label">제목</label>
             <input type="text"  placeholder="제목을 입력해주세요" name="title" id="title" class="form-control">
         </div>
+        <div  th:errors="*{title}" class="field-error"></div>
         <div class="mb-3">
             <label for="content" class="form-label">내용</label>
             <textarea name="content" placeholder="내용을 입력해주세요" id="content" class="form-control" rows="10"></textarea>
         </div>
+        <div th:errors="*{content}" class="field-error"></div>
         <div class="mb-3" style="width:200px">
             <label for="hashtag" class="form-label">태그</label>
             <input type="text" name="hashtag" id="hashtag" class="form-control">
