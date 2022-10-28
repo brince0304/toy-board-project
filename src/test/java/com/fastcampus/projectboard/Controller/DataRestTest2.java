@@ -45,7 +45,7 @@ public class DataRestTest2 {
     @Test
     void articleTest() throws Exception {
         UserAccount account = UserAccount.of("brince","1234","brince@naver.com","brince","hhaa");
-        Article article = Article.of(account,"haha","content","hashtag");
+        Article article = Article.of(account,"haha","content");
         articleRepository.save(article);
         Long id = article.getId();
         //이렇게 id 로 검색해서 가져오기도 가능함

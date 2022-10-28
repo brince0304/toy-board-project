@@ -18,11 +18,11 @@ public class Hashtag{
     private Long id;
 
     @Setter
-    @Column(nullable = false)
+    @Column(nullable = true, unique = true)
     private String hashtag;
 
     @ToString.Exclude
-    @ManyToMany(mappedBy = "Hashtags")
+    @ManyToMany(mappedBy = "hashtag")
     private Set<Article> articles = new LinkedHashSet<>();
 
     protected Hashtag() {

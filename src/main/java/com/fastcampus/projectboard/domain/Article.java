@@ -32,6 +32,7 @@ public class Article extends AuditingFields{
     @Setter @Column(nullable = false,length = 10000) private String content;
 
     @Setter private String hashtag;
+
     @OrderBy("createdAt DESC")  //id 순서
     @OneToMany(mappedBy = "article", cascade = CascadeType.ALL) //양방향 관계 (article이 주체)
     @ToString.Exclude //과부하 발생 예방
@@ -40,25 +41,29 @@ public class Article extends AuditingFields{
     @ToString.Exclude
     @JoinTable(
             name = "article_hashtag",
-            joinColumns = @JoinColumn(name = "articleId"),
-            inverseJoinColumns = @JoinColumn(name = "hashtagId")
+            joinColumns = @JoinColumn(name = "article_Id"),
+            inverseJoinColumns = @JoinColumn(name = "hashtag_Id")
     )
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private Set<Hashtag> Hashtags = new LinkedHashSet<>();
+    private Set<Hashtag> hashtags = new LinkedHashSet<>();
 
 
 
     protected Article() { //기본 빈 생성자
     }
 
-    private Article(UserAccount userAccount,String title, String content, String hashtag) {
+    private Article(UserAccount userAccount,String title, String content, Set<Hashtag> hashtags) {
         this.userAccount = userAccount;
         this.title = title;
         this.content = content;
-        this.hashtag = hashtag;
+        this.hashtags = hashtags;
     }
-    public static Article of(UserAccount userAccount,String title, String content, String hashtag) { //게시글 제목 내용 해시태그
-        return new Article(userAccount,title,content,hashtag);
+    public static Article of(UserAccount userAccount,String title, String content, Set<Hashtag> hashtags) { //게시글 제목 내용 해시태그
+        return new Article(userAccount,title,content,hashtags);
+    }
+
+    public static Article of(UserAccount userAccount,String title, String content) { //게시글 제목 내용
+        return new Article(userAccount,title,content,null);
     }
 
     @Override

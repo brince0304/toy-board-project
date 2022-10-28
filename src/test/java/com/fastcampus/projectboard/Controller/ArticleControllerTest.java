@@ -6,6 +6,7 @@ import com.fastcampus.projectboard.Service.ArticleService;
 import com.fastcampus.projectboard.Service.HashtagService;
 import com.fastcampus.projectboard.config.SecurityConfig;
 import com.fastcampus.projectboard.domain.Article;
+import com.fastcampus.projectboard.domain.Hashtag;
 import com.fastcampus.projectboard.domain.UserAccount;
 import com.fastcampus.projectboard.dto.ArticleDto;
 import com.fastcampus.projectboard.dto.ArticleWithCommentDto;
@@ -24,6 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -83,6 +85,24 @@ class ArticleControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
                 .andExpect(view().name("articles/create"));
     }
+
+    @DisplayName("[view][POST] 게시글 등록 ")
+    @Test
+    public void givenArticleInfo_whenSavingArticle_thenSavesArticle() throws Exception {
+        //given
+       ArticleDto articleDto = ArticleDto.from(createArticle());
+        //when & then
+        mvc.perform(post("/articles/create")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .param("title", articleDto.title())
+                .param("content", articleDto.content())
+                .param("hashtags", articleDto.hashtags().toString()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/articles"));
+        then(articleService).should().saveArticle(any(ArticleDto.class));
+    }
+
+
 
 
     @DisplayName("[view][GET] 게시글 상세 페이지")
@@ -174,11 +194,12 @@ class ArticleControllerTest {
     }
 
     private Article createArticle() {
+        Set<Hashtag> hashtags = new HashSet<>();
         return Article.of(
                 createUserAccount(),
                 "title",
                 "content",
-                "#java"
+                hashtags
         );
     }
 

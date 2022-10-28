@@ -116,8 +116,7 @@ public class UserServiceTest {
         return Article.of(
                 createUserAccount(),
                 "title",
-                "content",
-                "#java"
+                "content"
         );
     }
 
@@ -130,7 +129,7 @@ public class UserServiceTest {
                 createUserAccountDto(),
                 title,
                 content,
-                hashtag,
+                null,
                 LocalDateTime.now(),
                 "Uno",
                 LocalDateTime.now(),

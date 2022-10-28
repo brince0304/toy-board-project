@@ -2,6 +2,7 @@ package com.fastcampus.projectboard.Controller;
 
 import com.fastcampus.projectboard.Service.ArticleCommentService;
 import com.fastcampus.projectboard.Service.ArticleService;
+import com.fastcampus.projectboard.Service.HashtagService;
 import com.fastcampus.projectboard.Service.UserService;
 import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.UserAccount;
@@ -42,6 +43,7 @@ public class ArticleController {
     private final UserAccountRepository userAccountRepository;
     private final ArticleRepository articleRepository;
     private final UserService userService;
+    private final HashtagService hashtagService;
 
     
     @GetMapping
@@ -64,18 +66,18 @@ public class ArticleController {
     }
 
     @GetMapping("/create")
-    public String articleCreate(ModelMap map,ArticleRequest dto,ArticleForm articleForm){
-        map.addAttribute("dto",dto);
+    public String articleCreate(){
         return "articles/create/article_form";
     }
 
     @PostMapping("/create")
-    public String articleSave(ArticleRequest dto,@Valid ArticleForm articleForm, BindingResult bindingResult
-    , @AuthenticationPrincipal BoardPrincipal boardPrincipal) {
-        if (bindingResult.hasErrors()) {
-            return "articles/create/article_form";
-        }
+    public String articleSave(@Valid ArticleRequest dto,BindingResult bindingResult,
+        @AuthenticationPrincipal BoardPrincipal boardPrincipal) {
+            if(bindingResult.hasErrors()){
+                return "articles/create/article_form";
+            }
         articleService.saveArticle(dto.toDto(boardPrincipal.toDto()));
+        hashtagService.saveHashtags(dto.getHashtags());
         return "redirect:/articles";
     }
 
@@ -84,9 +86,6 @@ public class ArticleController {
     public String articleUpdate(@PathVariable Long articleId, ModelMap map, ArticleForm articleForm){
         ArticleDto articleDto = articleService.getArticleDto2(articleId);
         map.addAttribute("dto",articleDto);
-        articleForm.setTitle(articleDto.title());
-        articleForm.setContent(articleDto.content());
-        articleForm.setHashtag(articleDto.hashtag());
         return "articles/update/article_form";
     }
 

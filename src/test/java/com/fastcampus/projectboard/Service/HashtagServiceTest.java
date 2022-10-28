@@ -1,6 +1,7 @@
 package com.fastcampus.projectboard.Service;
 
 import com.fastcampus.projectboard.domain.Hashtag;
+import com.fastcampus.projectboard.dto.HashtagDto;
 import com.fastcampus.projectboard.repository.HashtagRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,16 +32,17 @@ public class HashtagServiceTest {
         //given
         String hashtagName = "test1, test2, test3";
         StringTokenizer st = new StringTokenizer(hashtagName, ",");
-        Set<Hashtag> hashtags = new HashSet<>();
+        Set<HashtagDto> hashtags2 = new HashSet<>();
         while (st.hasMoreTokens()) {
             long id = 1L;
-            hashtags.add(Hashtag.of(id,st.nextToken().trim()));
+            hashtags2.add(HashtagDto.from(Hashtag.of(id,st.nextToken().trim())));
             id++;
         }
+        Set<Hashtag> hashtags = hashtags2.stream().map(HashtagDto::toEntity).collect(Collectors.toSet());
         given(hashtagRepository.saveAll(hashtags)).willReturn(hashtags.stream().collect(Collectors.toList()));
 
         //when
-        sut.saveHashtags(hashtags);
+        sut.saveHashtags(hashtags2);
 
         //then
         then(hashtagRepository).should().saveAll(hashtags);

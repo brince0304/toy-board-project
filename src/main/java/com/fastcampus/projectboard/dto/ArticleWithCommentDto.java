@@ -17,14 +17,14 @@ public record ArticleWithCommentDto(
         Set<ArticleCommentDto> articleCommentDtos,
         String title,
         String content,
-        String hashtag,
+        Set<HashtagDto> hashtagDtos,
         LocalDateTime createdAt,
         String createdBy,
         LocalDateTime modifiedAt,
         String modifiedBy
 ) {
-    public static ArticleWithCommentDto of(Long id, UserAccountDto userAccountDto, Set<ArticleCommentDto> articleCommentDtos, String title, String content, String hashtag, LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy) {
-        return new ArticleWithCommentDto(id, userAccountDto, articleCommentDtos, title, content, hashtag, createdAt, createdBy, modifiedAt, modifiedBy);
+    public static ArticleWithCommentDto of(Long id, UserAccountDto userAccountDto, Set<ArticleCommentDto> articleCommentDtos, String title, String content, Set<HashtagDto> hashtagdtos, LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy) {
+        return new ArticleWithCommentDto(id, userAccountDto, articleCommentDtos, title, content, hashtagdtos, createdAt, createdBy, modifiedAt, modifiedBy);
     }
 
     public static ArticleWithCommentDto from(Article entity) {
@@ -36,7 +36,9 @@ public record ArticleWithCommentDto(
                         .collect(Collectors.toCollection(LinkedHashSet::new)),
                 entity.getTitle(),
                 entity.getContent(),
-                entity.getHashtag(),
+                entity.getHashtags().stream()
+                        .map(HashtagDto::from)
+                        .collect(Collectors.toCollection(LinkedHashSet::new)),
                 entity.getCreatedAt(),
                 entity.getCreatedBy(),
                 entity.getModifiedAt(),
