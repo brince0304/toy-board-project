@@ -18,20 +18,14 @@
 <div layout:fragment="content" class="container">
     <br>
     <h5 class="my-3 border-bottom pb-2">게시글 등록</h5>
-    <form th:action="@{/articles/create}" th:object="${articleForm}" method="post">
+    <form th:action="@{/articles/create}"  method="post">
         <div class="mb-3">
             <label for="title" class="form-label">제목</label>
-            <input type="text" th:field="*{title}" placeholder="제목을 입력해주세요" name="title" id="title" class="form-control">
-            <div class="field-error" th:errors="*{title}">
-                오류2
-            </div>
+            <input type="text"  placeholder="제목을 입력해주세요" name="title" id="title" class="form-control">
         </div>
         <div class="mb-3">
             <label for="content" class="form-label">내용</label>
-            <textarea name="content" th:field="*{content}" placeholder="내용을 입력해주세요" id="content" class="form-control" rows="10"></textarea>
-            <div class="field-error" th:errors="*{content}">
-                오류2
-            </div>
+            <textarea name="content" placeholder="내용을 입력해주세요" id="content" class="form-control" rows="10"></textarea>
         </div>
         <div class="mb-3" style="width:200px">
             <label for="hashtag" class="form-label">태그</label>
