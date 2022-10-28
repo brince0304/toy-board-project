@@ -27,14 +27,17 @@ public class ArticleRequest{
     String title;
     @Size(min = 5, message = "* 내용은 5자 이상 입력해주세요.")
       String content;
+
       String hashtag;
       Set<HashtagDto> hashtags = new HashSet<>();
 
     public ArticleRequest(String title, String content,String hashtag) {
         Set<HashtagDto> hashtags = new HashSet<>();
-        StringTokenizer st = new StringTokenizer(hashtag, ",");
-        while (st.hasMoreTokens()) {
-            hashtags.add(HashtagDto.of(st.nextToken()));
+        if (hashtag != null) {
+            StringTokenizer st = new StringTokenizer(hashtag, ",");
+            while (st.hasMoreTokens()) {
+                hashtags.add(HashtagDto.of(st.nextToken()));
+            }
         }
 
         this.title = title;
@@ -53,8 +56,7 @@ public class ArticleRequest{
         return ArticleDto.of(
                 userAccountDto,
                 title,
-                content,
-                hashtags
+                content
         );
     }
 }

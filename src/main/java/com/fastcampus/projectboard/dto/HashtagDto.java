@@ -22,6 +22,7 @@ public record HashtagDto(Long id, String hashtag) {
             );
         }
 
+
         public com.fastcampus.projectboard.domain.Hashtag toEntity() {
             return com.fastcampus.projectboard.domain.Hashtag.of(
                     id,

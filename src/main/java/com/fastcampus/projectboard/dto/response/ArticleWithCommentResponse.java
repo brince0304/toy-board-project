@@ -12,37 +12,34 @@ public record ArticleWithCommentResponse(
         Long id,
         String title,
         String content,
-        Set<HashtagDto> hashtags,
         LocalDateTime createdAt,
         String email,
         String nickname,
         String userId,
-        Set<ArticleCommentResponse> articleCommentsResponse
+        Set<ArticleCommentResponse> articleCommentsResponse,
+        Set<HashtagDto> hashtags
 ) implements Serializable {
 
-    public static ArticleWithCommentResponse of(Long id, String title, String content, Set<HashtagDto> hashtags, LocalDateTime createdAt, String email, String nickname,String userId, Set<ArticleCommentResponse> articleCommentResponses) {
-        return new ArticleWithCommentResponse(id, title, content, hashtags, createdAt, email, nickname, userId,articleCommentResponses);
+    public static ArticleWithCommentResponse of(Long id, String title, String content,  LocalDateTime createdAt, String email, String nickname,String userId, Set<ArticleCommentResponse> articleCommentResponses, Set<HashtagDto> hashtags) {
+        return new ArticleWithCommentResponse(id, title, content, createdAt, email, nickname, userId,articleCommentResponses,hashtags);
     }
 
     public static ArticleWithCommentResponse from(ArticleWithCommentDto dto) {
-        String nickname = dto.userAccountDto().nickname();
+        String nickname = dto.getUserAccountDto().nickname();
         if (nickname == null || nickname.isBlank()) {
-            nickname = dto.userAccountDto().userId();
+            nickname = dto.getUserAccountDto().userId();
         }
 
         return new ArticleWithCommentResponse(
-                dto.id(),
-                dto.title(),
-                dto.content(),
-                dto.hashtagDtos(),
-                dto.createdAt(),
-                dto.userAccountDto().email(),
+                dto.getId(),
+                dto.getTitle(),
+                dto.getContent(),
+                dto.getCreatedAt(),
+                dto.getUserAccountDto().email(),
                 nickname,
-                dto.userAccountDto().userId(),
-                dto.articleCommentDtos().stream()
-                        .map(ArticleCommentResponse::from)
-                        .collect(Collectors.toCollection(LinkedHashSet::new))
-        );
+                dto.getUserAccountDto().userId(),
+                dto.getArticleCommentDtos().stream().map(ArticleCommentResponse::from).collect(Collectors.toCollection(LinkedHashSet::new)),
+                dto.getHashtags());
     }
 
 }
