@@ -5,9 +5,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Getter
@@ -21,9 +19,9 @@ public class Hashtag{
     @Column(nullable = true, unique = true)
     private String hashtag;
 
+    @OneToMany(mappedBy = "hashtag")
     @ToString.Exclude
-    @ManyToMany(mappedBy = "hashtag")
-    private Set<Article> articles = new LinkedHashSet<>();
+    private Set<ArticleHashtag> articles = new HashSet<>();
 
     protected Hashtag() {
     }
