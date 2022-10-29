@@ -18,7 +18,7 @@
 <div layout:fragment="content" class="container">
     <br>
     <h5 class="my-3 border-bottom pb-2">게시글 수정</h5>
-    <form th:action="@{|/articles/update/${articleId}|}" th:object="${articleForm}" method="post">
+    <form th:action="@{|/articles/put/${articleId}|}" th:object="${articleForm}" method="post">
         <div class="mb-3">
             <label for="title" class="form-label">제목</label>
             <input type="text" th:value="${dto.title}"   name="title" id="title" class="form-control">
@@ -37,7 +37,7 @@
             <label for="hashtag" class="form-label">태그</label>
             <input type="text"  th:value="${hashtag}"  name="hashtag" id="hashtag" class="form-control">
         </div>
-        <input href="javascript:void(0);" th:data-uri="@{|/articles/update/${articleId}|}" type="submit" value="수정" class="update btn btn-primary">
+        <input href="javascript:void(0);" th:data-uri="@{|/articles/put/${articleId}|}" type="submit" value="수정" class="update btn btn-primary">
     </form>
 </div>
 <footer id="footer">
