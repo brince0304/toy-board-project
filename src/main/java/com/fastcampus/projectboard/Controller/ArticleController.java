@@ -2,6 +2,7 @@ package com.fastcampus.projectboard.Controller;
 
 import com.fastcampus.projectboard.Service.ArticleCommentService;
 import com.fastcampus.projectboard.Service.ArticleService;
+import com.fastcampus.projectboard.Service.HashtagService;
 import com.fastcampus.projectboard.Service.UserService;
 import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.UserAccount;
@@ -9,6 +10,9 @@ import com.fastcampus.projectboard.domain.forms.ArticleForm;
 import com.fastcampus.projectboard.domain.forms.CommentForm;
 import com.fastcampus.projectboard.domain.type.SearchType;
 import com.fastcampus.projectboard.dto.ArticleDto;
+import com.fastcampus.projectboard.dto.ArticleWithCommentDto;
+import com.fastcampus.projectboard.dto.HashtagDto;
+import com.fastcampus.projectboard.dto.UserAccountDto;
 import com.fastcampus.projectboard.dto.request.ArticleCommentRequest;
 import com.fastcampus.projectboard.dto.request.ArticleRequest;
 import com.fastcampus.projectboard.dto.response.ArticleCommentResponse;
@@ -31,6 +35,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -42,6 +47,7 @@ public class ArticleController {
     private final UserAccountRepository userAccountRepository;
     private final ArticleRepository articleRepository;
     private final UserService userService;
+    private final HashtagService hashtagService;
 
     
     @GetMapping
@@ -64,49 +70,46 @@ public class ArticleController {
     }
 
     @GetMapping("/create")
-    public String articleCreate(ModelMap map,ArticleRequest dto,ArticleForm articleForm){
-        map.addAttribute("dto",dto);
+    public String articleCreate(ArticleForm articleForm){
         return "articles/create/article_form";
     }
 
     @PostMapping("/create")
-    public String articleSave(ArticleRequest dto,@Valid ArticleForm articleForm, BindingResult bindingResult
-    , @AuthenticationPrincipal BoardPrincipal boardPrincipal) {
-        if (bindingResult.hasErrors()) {
-            return "articles/create/article_form";
-        }
-        articleService.saveArticle(dto.toDto(boardPrincipal.toDto()));
+    public String articleSave(@Valid ArticleForm articleForm,BindingResult bindingResult,
+        ArticleRequest dto,
+        @AuthenticationPrincipal BoardPrincipal boardPrincipal) {
+            if(bindingResult.hasErrors()){
+                return "articles/create/article_form";
+            }
+        articleService.saveArticle(dto.toDto(boardPrincipal.toDto()),dto.getHashtags());
         return "redirect:/articles";
     }
 
 
     @GetMapping("/update/{articleId}")
     public String articleUpdate(@PathVariable Long articleId, ModelMap map, ArticleForm articleForm){
-        ArticleDto articleDto = articleService.getArticleDto2(articleId);
+        ArticleWithCommentDto articleDto = articleService.getArticle(articleId);
+        Set<HashtagDto> hashtagDto = articleDto.getHashtags();
+        StringBuffer sb = new StringBuffer();
+        for(int i=0; i<hashtagDto.size(); i++){
+            if(i != hashtagDto.size()-1){sb.append("#").append(hashtagDto.stream().toList().get(i).hashtag()).append(" ");}
+            else{sb.append("#").append(hashtagDto.stream().toList().get(i).hashtag());}}
+        map.addAttribute("hashtag",sb);
         map.addAttribute("dto",articleDto);
-        articleForm.setTitle(articleDto.title());
-        articleForm.setContent(articleDto.content());
-        articleForm.setHashtag(articleDto.hashtag());
         return "articles/update/article_form";
     }
 
 
     @PostMapping("/update/{articleId}")
     public String updateArticle(
-            @PathVariable Long articleId,
+            @PathVariable Long articleId,ArticleRequest dto,
             @Valid ArticleForm articleForm,
-            BindingResult bindingResult
-    ) {
+            BindingResult bindingResult,
+            @AuthenticationPrincipal BoardPrincipal boardPrincipal){
         if (bindingResult.hasErrors()) {
             return "articles/update/article_form";
         }
-        ArticleDto articleDto = articleService.getArticleDto2(articleId);
-        Article article = articleDto.toEntity();
-        article.setTitle(articleForm.getTitle());
-        article.setContent(articleForm.getContent());
-        article.setHashtag(articleForm.getHashtag());
-
-        articleService.updateArticle(articleId,ArticleDto.from(article));
+        articleService.updateArticle(articleId,dto);
         return "redirect:/articles/"+articleId;
     }
 
@@ -119,7 +122,7 @@ public class ArticleController {
     public String articleDelete(@PathVariable Long articleId){
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String id = userDetails.getUsername();
-        if(articleService.getArticle(articleId).userAccountDto().userId().equals(id)){
+        if(articleService.getArticle(articleId).getUserAccountDto().userId().equals(id)){
             articleService.deleteArticle(articleId);
         }
         else{

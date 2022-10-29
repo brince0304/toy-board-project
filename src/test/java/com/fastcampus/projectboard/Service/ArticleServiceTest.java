@@ -133,8 +133,7 @@ class ArticleServiceTest {
         // Then
         assertThat(article)
                 .hasFieldOrPropertyWithValue("title", dto.title())
-                .hasFieldOrPropertyWithValue("content", dto.content())
-                .hasFieldOrPropertyWithValue("hashtag", dto.hashtag());
+                .hasFieldOrPropertyWithValue("content", dto.content());
         then(articleRepository).should().getReferenceById(dto.id());
     }
 
@@ -182,8 +181,7 @@ class ArticleServiceTest {
         return Article.of(
                 createUserAccount(),
                 "title",
-                "content",
-                "#java"
+                "content"
         );
     }
 
@@ -192,11 +190,12 @@ class ArticleServiceTest {
     }
 
     private ArticleDto createArticleDto(String title, String content, String hashtag) {
+
         return ArticleDto.of(1L,
                 createUserAccountDto(),
                 title,
                 content,
-                hashtag,
+                null,
                 LocalDateTime.now(),
                 "Uno",
                 LocalDateTime.now(),

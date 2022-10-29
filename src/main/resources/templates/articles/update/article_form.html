@@ -21,21 +21,21 @@
     <form th:action="@{|/articles/update/${articleId}|}" th:object="${articleForm}" method="post">
         <div class="mb-3">
             <label for="title" class="form-label">제목</label>
-            <input type="text" th:field="*{title}"  name="title" id="title" class="form-control">
+            <input type="text" th:value="${dto.title}"   name="title" id="title" class="form-control">
             <div class="field-error" th:errors="*{title}">
                 오류2
             </div>
         </div>
         <div class="mb-3">
             <label for="content" class="form-label">내용</label>
-            <textarea name="content" th:field="*{content}"  id="content" class="form-control" rows="10"></textarea>
+            <textarea name="content" th:text="${dto.content}"  id="content" class="form-control" rows="10"></textarea>
             <div class="field-error" th:errors="*{content}">
                 오류2
             </div>
         </div>
         <div class="mb-3" style="width:200px">
             <label for="hashtag" class="form-label">태그</label>
-            <input type="text" th:field="*{hashtag}"  name="hashtag"  id="hashtag" class="form-control">
+            <input type="text"  th:value="${hashtag}"  name="hashtag" id="hashtag" class="form-control">
         </div>
         <input href="javascript:void(0);" th:data-uri="@{|/articles/update/${articleId}|}" type="submit" value="수정" class="update btn btn-primary">
     </form>

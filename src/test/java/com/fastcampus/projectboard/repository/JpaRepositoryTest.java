@@ -63,7 +63,7 @@ class JpaRepositoryTest {
         //given
         long previousArticleCount = articleRepository.count();
         UserAccount account = UserAccount.of("brince","1234","brince@naver.com","brince","hhaa");
-        Article article = Article.of(account,"this","spring","haha"); //새 게시글 of 로 저장
+        Article article = Article.of(account,"this","spring"); //새 게시글 of 로 저장
 
         //when
         articleRepository.save(article); //새 게시글 저장
