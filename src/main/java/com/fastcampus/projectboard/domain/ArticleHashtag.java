@@ -22,4 +22,20 @@ public class ArticleHashtag {
     @JoinColumn(name = "hashtag_id")
     private Hashtag hashtag;
 
+    protected ArticleHashtag() {
+    }
+
+    public ArticleHashtag(Long id, Article article, Hashtag hashtag) {
+        this.id = id;
+        this.article = article;
+        this.hashtag = hashtag;
+    }
+
+    public ArticleHashtag(Article article, Hashtag hashtag) {
+        this.article = article;
+        this.hashtag = hashtag;
+    }
+    public static ArticleHashtag of(Article article, Hashtag hashtag) {
+        return new ArticleHashtag(article, hashtag);
+    }
 }
