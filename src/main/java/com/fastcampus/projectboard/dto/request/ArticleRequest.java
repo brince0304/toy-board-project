@@ -15,6 +15,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
 /**
  * A DTO for the {@link com.fastcampus.projectboard.domain.Article} entity
@@ -24,22 +25,24 @@ import java.util.StringTokenizer;
 @Setter
 public class ArticleRequest{
     @Size(min = 5, message = "* 제목은 5자 이상 입력해주세요.")
-    String title;
+    private String title;
     @Size(min = 5, message = "* 내용은 5자 이상 입력해주세요.")
-      String content;
+      private String content;
 
-      String hashtag;
-      Set<HashtagDto> hashtags = new HashSet<>();
+
+      private String hashtag;
+      private Set<HashtagDto> hashtags = new HashSet<>();
+
 
     public ArticleRequest(String title, String content,String hashtag) {
         Set<HashtagDto> hashtags = new HashSet<>();
-        if (hashtag != null) {
-            StringTokenizer st = new StringTokenizer(hashtag, ",");
+        if (hashtag.contains("#")) {
+            String newHashtag = hashtag.replaceAll(" ", "");
+            StringTokenizer st = new StringTokenizer(newHashtag, "#");
             while (st.hasMoreTokens()) {
                 hashtags.add(HashtagDto.of(st.nextToken()));
             }
         }
-
         this.title = title;
         this.content = content;
         this.hashtags = hashtags;
