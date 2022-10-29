@@ -63,34 +63,30 @@ public class ArticleService {
         article.setHashtags(hashtags);
         return article;
     }
-
+    @Transactional
     public void saveArticle(ArticleDto dto, Set<HashtagDto> hashtagDto) {
-        articleRepository.save(dto.toEntity());
+        Article article =articleRepository.saveAndFlush(dto.toEntity());
         for (HashtagDto hashtag : hashtagDto) {
-                ArticleHashtag articleHashtag = new ArticleHashtag();
-                articleHashtag.setArticle(articleRepository.getReferenceById(articleRepository.count()));
-                hashtagRepository.findByHashtag(hashtag.hashtag()).orElseGet(()-> hashtagRepository.save(hashtag.toEntity()));
-                articleHashtag.setHashtag(hashtagRepository.findByHashtag(hashtag.hashtag()).get());
-                articlehashtagrepository.save(articleHashtag);
+                Hashtag hashtag1= hashtagRepository.findByHashtag(hashtag.hashtag()).orElseGet(()-> hashtagRepository.saveAndFlush(hashtag.toEntity()));
+                articlehashtagrepository.save(ArticleHashtag.of(article,hashtag1));
 
         }
     }
+        @Transactional
         public void updateArticle (Long articleId, ArticleRequest dto){
             Article article = articleRepository.findById(articleId)
                     .orElseThrow(() -> new EntityNotFoundException("게시글이 없습니다 - articleId: " + articleId));
-            article.setTitle(dto.getTitle());
             articlehashtagrepository.findByArticleId(articleId).stream().forEach(articleHashtag -> {
                 articleHashtag.setArticle(null);
                 articleHashtag.setHashtag(null);
             });
-            article.setContent(dto.getContent());
             for( HashtagDto hashtag: dto.getHashtags()){
-                ArticleHashtag articleHashtag = new ArticleHashtag();
-                articleHashtag.setArticle(articleRepository.getReferenceById(articleId));
                 hashtagRepository.findByHashtag(hashtag.hashtag()).orElseGet(()-> hashtagRepository.save(hashtag.toEntity()));
-                articleHashtag.setHashtag(hashtagRepository.findByHashtag(hashtag.hashtag()).get());
-                articlehashtagrepository.save(articleHashtag);
+                Hashtag hashtag1 = hashtagRepository.findByHashtag(hashtag.hashtag()).get();
+                articlehashtagrepository.save(ArticleHashtag.of(article,hashtag1));
             }
+            if(dto.getTitle() != null) article.setTitle(dto.getTitle());
+            if(dto.getContent() != null) article.setContent(dto.getContent());
         }
 
 
@@ -101,6 +97,10 @@ public class ArticleService {
     }
 
     public void deleteArticle(long articleId) {
+        for( ArticleHashtag articleHashtag : articlehashtagrepository.findByArticleId(articleId)){
+            articleHashtag.setArticle(null);
+            articleHashtag.setHashtag(null);
+        }
         articleRepository.deleteById(articleId);
     }
 
