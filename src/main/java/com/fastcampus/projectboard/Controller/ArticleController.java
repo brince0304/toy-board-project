@@ -91,10 +91,9 @@ public class ArticleController {
         ArticleWithCommentDto articleDto = articleService.getArticle(articleId);
         Set<HashtagDto> hashtagDto = articleDto.getHashtags();
         StringBuffer sb = new StringBuffer();
-        hashtagDto.stream().forEach(hashtag->{
-            sb.append(hashtag.hashtag());
-            sb.append(",");
-        });
+        for(int i=0; i<hashtagDto.size(); i++){
+            if(i != hashtagDto.size()-1){sb.append("#").append(hashtagDto.stream().toList().get(i).hashtag()).append(" ");}
+            else{sb.append("#").append(hashtagDto.stream().toList().get(i).hashtag());}}
         map.addAttribute("hashtag",sb);
         map.addAttribute("dto",articleDto);
         return "articles/update/article_form";
