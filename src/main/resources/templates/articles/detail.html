@@ -142,7 +142,7 @@
                 <time style="display:inline" id="created-at"> 시간</time>
                 <h1>게시글</h1>
                 <div style="display:inline" th:each="hashtag : ${article.hashtags()}">
-                <h3  class="hashtag" id="hashtag" th:text="'#'+${hashtag.hashtag}"> hash</h3>
+                <h3  style="display:inline" class="hashtag" id="hashtag" th:text="'#'+${hashtag.hashtag}"> hash</h3>
                 </div>
                 <div style="display:inline" class="buttons">
                     <a th:href="@{|/articles/update/${articleId}|}"
