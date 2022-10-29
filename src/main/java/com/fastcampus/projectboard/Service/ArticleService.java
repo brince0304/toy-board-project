@@ -63,7 +63,6 @@ public class ArticleService {
         article.setHashtags(hashtags);
         return article;
     }
-    @Transactional
     public void saveArticle(ArticleDto dto, Set<HashtagDto> hashtagDto) {
         Article article =articleRepository.saveAndFlush(dto.toEntity());
         for (HashtagDto hashtag : hashtagDto) {
@@ -72,7 +71,6 @@ public class ArticleService {
 
         }
     }
-        @Transactional
         public void updateArticle (Long articleId, ArticleRequest dto){
             Article article = articleRepository.findById(articleId)
                     .orElseThrow(() -> new EntityNotFoundException("게시글이 없습니다 - articleId: " + articleId));

@@ -38,7 +38,7 @@ public class Article extends AuditingFields{
 
     @OneToMany(mappedBy = "article") //양방향 관계 (article이 주체)
     @ToString.Exclude //과부하 발생 예방
-
+    @Setter
     private Set<ArticleHashtag> hashtags = new HashSet<>();
 
 
