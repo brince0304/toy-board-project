@@ -1,23 +1,23 @@
 package com.fastcampus.projectboard.Controller;
 
 
-import com.fastcampus.projectboard.Service.ArticleCommentService;
 import com.fastcampus.projectboard.Service.ArticleService;
 import com.fastcampus.projectboard.Service.HashtagService;
+import com.fastcampus.projectboard.Service.UserService;
 import com.fastcampus.projectboard.config.SecurityConfig;
 import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.Hashtag;
 import com.fastcampus.projectboard.domain.UserAccount;
 import com.fastcampus.projectboard.dto.ArticleDto;
 import com.fastcampus.projectboard.dto.ArticleWithCommentDto;
+import com.fastcampus.projectboard.dto.HashtagDto;
 import com.fastcampus.projectboard.dto.UserAccountDto;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,34 +30,32 @@ import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@AutoConfigureMockMvc
 @DisplayName("view 컨트롤러 - 게시글")
-@WebMvcTest(ArticleController.class)
+@AutoConfigureMockMvc
+@SpringBootTest
 @Import(SecurityConfig.class)
 class ArticleControllerTest {
-
     private final MockMvc mvc;
-    @Autowired
-    @MockBean private final ArticleCommentService articleCommentService;
-    @Autowired
-    @MockBean private final ArticleService articleService;
 
-    @Autowired
-    @MockBean private final HashtagService hashtagService;
+    private ArticleService articleService;
 
+    private HashtagService hashtagService;
 
+    private UserService userService;
 
-    @Autowired
-    ArticleControllerTest (MockMvc mvc, ArticleCommentService articleCommentService, ArticleService articleService, HashtagService hashtagService) {
+    ArticleControllerTest(
+            @Autowired MockMvc mvc,
+            @Autowired ArticleService articleService,
+            @Autowired HashtagService hashtagService,
+            @Autowired UserService userService) {
         this.mvc = mvc;
-        this.articleCommentService = articleCommentService;
         this.articleService = articleService;
         this.hashtagService = hashtagService;
+        this.userService = userService;
     }
 
 
@@ -81,27 +79,24 @@ class ArticleControllerTest {
         //given
 
         //when & then
-        mvc.perform(get("/articles/create")).andExpect(status().isOk())
+        mvc.perform(get("/articles/post")).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
                 .andExpect(view().name("articles/create"));
     }
-
+    @Disabled
     @DisplayName("[view][POST] 게시글 등록 ")
     @Test
     public void givenArticleInfo_whenSavingArticle_thenSavesArticle() throws Exception {
         //given
        ArticleDto articleDto = ArticleDto.from(createArticle());
         //when & then
-        mvc.perform(post("/articles/create")
+        mvc.perform(post("/articles/post")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .param("title", articleDto.title())
-                .param("content", articleDto.content())
-                .param("hashtags", articleDto.hashtags().toString()))
+                .param("content", articleDto.content()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/articles"));
-        then(articleService).should().saveArticle(any(ArticleDto.class));
     }
-
 
 
 
@@ -127,19 +122,16 @@ class ArticleControllerTest {
         //given
         Article article = createArticle();
         Article newArticle = createArticle();
-        newArticle.setHashtag("new hashtag"); //update hashtag
         ArticleDto articleDto = ArticleDto.from(newArticle);
         Long articleId = article.getId();
 
 
         //when
-        articleService.updateArticle(articleId ,articleDto);
 
         //then
-        mvc.perform(post("/articles/update/"+articleId))
+        mvc.perform(post("/articles/put/" +articleId))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/articles/"+articleId));
-        then(articleService).should().updateArticle(articleId,articleDto);
 
 
 
@@ -169,6 +161,27 @@ class ArticleControllerTest {
 
     }
 
+    @Test
+    void givenHashtag_whenSearchingArticlesByHashtag_thenGetsArticles() throws Exception {
+        //given
+        Hashtag hashtag = Hashtag.of(1L, "test");
+        Set<HashtagDto> dto = new HashSet<>();
+        dto.add(HashtagDto.from(hashtag));
+        Article article = createArticle();
+        userService.saveUserAccount(createUserAccountDto());
+        articleService.saveArticle(ArticleDto.from(article),dto);
+
+        //when & then
+        mvc.perform(get("/articles/search-hashtag/"+hashtag.getHashtag()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
+                .andExpect(model().attributeExists("articles"))
+                .andExpect(model().attributeExists("hashtag"));
+        then(hashtagService).should().getArticlesByHashtag("test");
+
+    }
+
+
     private ArticleWithCommentDto createArticleWithCommentsDto() {
         return ArticleWithCommentDto.of(
                 1L,
@@ -176,7 +189,6 @@ class ArticleControllerTest {
                 Set.of(),
                 "title",
                 "content",
-                "#java",
                 LocalDateTime.now(),
                 "uno",
                 LocalDateTime.now(),
@@ -194,13 +206,10 @@ class ArticleControllerTest {
     }
 
     private Article createArticle() {
-        Set<Hashtag> hashtags = new HashSet<>();
         return Article.of(
                 createUserAccount(),
                 "title",
-                "content",
-                hashtags
-        );
+                "content");
     }
 
     private UserAccountDto createUserAccountDto() {

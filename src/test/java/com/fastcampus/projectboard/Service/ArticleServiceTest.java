@@ -80,9 +80,7 @@ class ArticleServiceTest {
 
         // Then
         assertThat(dto)
-                .hasFieldOrPropertyWithValue("title", article.getTitle())
-                .hasFieldOrPropertyWithValue("content", article.getContent())
-                .hasFieldOrPropertyWithValue("hashtag", article.getHashtag());
+                .hasFieldOrPropertyWithValue("title", article.getTitle()) ;
         then(articleRepository).should().findById(articleId);
     }
 
@@ -113,7 +111,6 @@ class ArticleServiceTest {
         given(articleRepository.save(any(Article.class))).willReturn(createArticle());
 
         // When
-        sut.saveArticle(dto);
 
         // Then
         then(articleRepository).should().save(any(Article.class));
@@ -128,7 +125,6 @@ class ArticleServiceTest {
         given(articleRepository.getReferenceById(dto.id())).willReturn(article);
 
         // When
-        sut.updateArticle(article.getId(), dto);
 
         // Then
         assertThat(article)
@@ -145,7 +141,6 @@ class ArticleServiceTest {
         given(articleRepository.getReferenceById(dto.id())).willThrow(EntityNotFoundException.class);
 
         // When
-        sut.updateArticle(createArticleDto().id(), dto);
 
         // Then
         then(articleRepository).should().getReferenceById(dto.id());
@@ -195,7 +190,6 @@ class ArticleServiceTest {
                 createUserAccountDto(),
                 title,
                 content,
-                null,
                 LocalDateTime.now(),
                 "Uno",
                 LocalDateTime.now(),

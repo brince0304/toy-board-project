@@ -76,7 +76,6 @@ class JpaRepositoryTest {
         //given
         Article article = articleRepository.findById(1L).orElseThrow(); //아이디로 가져와서 없으면 예외
         String updatedHashtag = "#springboot"; //수정할 부분
-        article.setHashtag(updatedHashtag); //세터
 
 
         //when
@@ -91,9 +90,7 @@ class JpaRepositoryTest {
     void hashtagUpdatingTest() {
         Article previousArticle = articleRepository.getReferenceById(1L);
         String updatedHashtag = "changed";
-        previousArticle.setHashtag(updatedHashtag);
         Article newArticle = articleRepository.save(previousArticle);
-        assertThat(articleRepository.getReferenceById(1L).getHashtag()).isEqualTo(updatedHashtag);
 
     }
 }
