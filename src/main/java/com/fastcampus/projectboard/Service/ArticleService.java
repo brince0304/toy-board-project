@@ -64,11 +64,10 @@ public class ArticleService {
         return article;
     }
     public void saveArticle(ArticleDto dto, Set<HashtagDto> hashtagDto) {
-        Article article =articleRepository.saveAndFlush(dto.toEntity());
+        Article article =articleRepository.save(dto.toEntity());
         for (HashtagDto hashtag : hashtagDto) {
-                Hashtag hashtag1= hashtagRepository.findByHashtag(hashtag.hashtag()).orElseGet(()-> hashtagRepository.saveAndFlush(hashtag.toEntity()));
+                Hashtag hashtag1= hashtagRepository.findByHashtag(hashtag.hashtag()).orElseGet(()-> hashtagRepository.save(hashtag.toEntity()));
                 articlehashtagrepository.save(ArticleHashtag.of(article,hashtag1));
-
         }
     }
         public void updateArticle (Long articleId, ArticleRequest dto){
@@ -79,8 +78,7 @@ public class ArticleService {
                 articleHashtag.setHashtag(null);
             });
             for( HashtagDto hashtag: dto.getHashtags()){
-                hashtagRepository.findByHashtag(hashtag.hashtag()).orElseGet(()-> hashtagRepository.save(hashtag.toEntity()));
-                Hashtag hashtag1 = hashtagRepository.findByHashtag(hashtag.hashtag()).get();
+                Hashtag hashtag1 = hashtagRepository.findByHashtag(hashtag.hashtag()).orElseGet(()-> hashtagRepository.save(hashtag.toEntity()));
                 articlehashtagrepository.save(ArticleHashtag.of(article,hashtag1));
             }
             if(dto.getTitle() != null) article.setTitle(dto.getTitle());
