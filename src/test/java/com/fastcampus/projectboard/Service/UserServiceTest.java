@@ -129,7 +129,6 @@ public class UserServiceTest {
                 createUserAccountDto(),
                 title,
                 content,
-                null,
                 LocalDateTime.now(),
                 "Uno",
                 LocalDateTime.now(),

@@ -1,7 +1,10 @@
 package com.fastcampus.projectboard.Service;
 
+import com.fastcampus.projectboard.domain.Article;
+import com.fastcampus.projectboard.domain.ArticleHashtag;
 import com.fastcampus.projectboard.domain.Hashtag;
 import com.fastcampus.projectboard.dto.HashtagDto;
+import com.fastcampus.projectboard.repository.ArticleHashtagRepository;
 import com.fastcampus.projectboard.repository.HashtagRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +30,9 @@ public class HashtagServiceTest {
     @Mock
     private HashtagRepository hashtagRepository;
 
+    @Mock
+    private ArticleHashtagRepository articleHashtagRepository;
+
     @Test
     void givenHashtagName_whenWritingHashtags_thenSavesHashtags() {
         //given
@@ -46,5 +52,20 @@ public class HashtagServiceTest {
 
         //then
         then(hashtagRepository).should().saveAll(hashtags);
+    }
+
+
+    @Test
+    void givenStringHashtag_whenGettingArticlesByHashtag_thenGetsArticles() {
+        //given
+        String hashtag = "test1";
+        Hashtag hashtag1 = Hashtag.of(1L, hashtag);
+        given(hashtagRepository.findByHashtag(hashtag)).willReturn(java.util.Optional.of(hashtag1));
+
+        //when
+        sut.getArticlesByHashtag(hashtag);
+
+        //then
+        then(articleHashtagRepository).should().findByHashtag(hashtag1);
     }
 }

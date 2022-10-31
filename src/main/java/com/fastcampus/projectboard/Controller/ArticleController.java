@@ -4,7 +4,6 @@ import com.fastcampus.projectboard.Service.ArticleCommentService;
 import com.fastcampus.projectboard.Service.ArticleService;
 import com.fastcampus.projectboard.Service.HashtagService;
 import com.fastcampus.projectboard.Service.UserService;
-import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.UserAccount;
 import com.fastcampus.projectboard.domain.forms.ArticleForm;
 import com.fastcampus.projectboard.domain.forms.CommentForm;
@@ -12,10 +11,8 @@ import com.fastcampus.projectboard.domain.type.SearchType;
 import com.fastcampus.projectboard.dto.ArticleDto;
 import com.fastcampus.projectboard.dto.ArticleWithCommentDto;
 import com.fastcampus.projectboard.dto.HashtagDto;
-import com.fastcampus.projectboard.dto.UserAccountDto;
 import com.fastcampus.projectboard.dto.request.ArticleCommentRequest;
 import com.fastcampus.projectboard.dto.request.ArticleRequest;
-import com.fastcampus.projectboard.dto.response.ArticleCommentResponse;
 import com.fastcampus.projectboard.dto.response.ArticleResponse;
 import com.fastcampus.projectboard.dto.response.ArticleWithCommentResponse;
 import com.fastcampus.projectboard.dto.security.BoardPrincipal;
@@ -36,7 +33,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Set;
-import java.util.stream.Collectors;
+
 
 @RequiredArgsConstructor
 @Controller
@@ -69,24 +66,33 @@ public class ArticleController {
         return "articles/detail";
     }
 
-    @GetMapping("/create")
-    public String articleCreate(ArticleForm articleForm){
-        return "articles/create/article_form";
+    @GetMapping("/search-hashtag/{hashtag}")
+    public String hashtag(@PathVariable String hashtag, ModelMap map){
+        Set<ArticleDto> set=hashtagService.getArticlesByHashtag(hashtag);
+        HashtagDto dto = hashtagService.getHashtag(hashtag);
+        map.addAttribute("articles",set);
+        map.addAttribute("hashtag",dto);
+        return "articles/tag/result";
     }
 
-    @PostMapping("/create")
+    @GetMapping("/post")
+    public String articleCreate(ArticleForm articleForm){
+        return "articles/post/article_form";
+    }
+
+    @PostMapping("/post")
     public String articleSave(@Valid ArticleForm articleForm,BindingResult bindingResult,
         ArticleRequest dto,
         @AuthenticationPrincipal BoardPrincipal boardPrincipal) {
             if(bindingResult.hasErrors()){
-                return "articles/create/article_form";
+                return "articles/post/article_form";
             }
         articleService.saveArticle(dto.toDto(boardPrincipal.toDto()),dto.getHashtags());
         return "redirect:/articles";
     }
 
 
-    @GetMapping("/update/{articleId}")
+    @GetMapping("/put/{articleId}")
     public String articleUpdate(@PathVariable Long articleId, ModelMap map, ArticleForm articleForm){
         ArticleWithCommentDto articleDto = articleService.getArticle(articleId);
         Set<HashtagDto> hashtagDto = articleDto.getHashtags();
@@ -96,18 +102,18 @@ public class ArticleController {
             else{sb.append("#").append(hashtagDto.stream().toList().get(i).hashtag());}}
         map.addAttribute("hashtag",sb);
         map.addAttribute("dto",articleDto);
-        return "articles/update/article_form";
+        return "articles/put/article_form";
     }
 
 
-    @PostMapping("/update/{articleId}")
+    @PostMapping("/put/{articleId}")
     public String updateArticle(
             @PathVariable Long articleId,ArticleRequest dto,
             @Valid ArticleForm articleForm,
             BindingResult bindingResult,
             @AuthenticationPrincipal BoardPrincipal boardPrincipal){
         if (bindingResult.hasErrors()) {
-            return "articles/update/article_form";
+            return "articles/put/article_form";
         }
         articleService.updateArticle(articleId,dto);
         return "redirect:/articles/"+articleId;

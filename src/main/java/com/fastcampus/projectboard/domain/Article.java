@@ -36,9 +36,9 @@ public class Article extends AuditingFields{
     @ToString.Exclude //과부하 발생 예방
     private final Set<ArticleComment> articleComments = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "article") //양방향 관계 (article이 주체)
-    @ToString.Exclude //과부하 발생 예방
-
+    @OneToMany(mappedBy = "article")
+    @ToString.Exclude
+    @Setter
     private Set<ArticleHashtag> hashtags = new HashSet<>();
 
 

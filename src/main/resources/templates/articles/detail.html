@@ -142,10 +142,12 @@
                 <time style="display:inline" id="created-at"> 시간</time>
                 <h1>게시글</h1>
                 <div style="display:inline" th:each="hashtag : ${article.hashtags()}">
+                    <a th:href="@{|/articles/search-hashtag/${hashtag.hashtag}|}">
                 <h3  style="display:inline" class="hashtag" id="hashtag" th:text="'#'+${hashtag.hashtag}"> hash</h3>
+                    </a>
                 </div>
                 <div style="display:inline" class="buttons">
-                    <a th:href="@{|/articles/update/${articleId}|}"
+                    <a th:href="@{|/articles/put/${articleId}|}"
                        sec:authorize="isAuthenticated()"
                        th:if="${article.userId() != null and #authentication.getPrincipal().getUsername() == article.userId()}">
                         <button type="button" class="btn btn-light">글 수정</button>
@@ -221,7 +223,7 @@
                     <div class="collapse" th:id="c + ${articleComment.id}">
                         <form sec:authorize="isAuthenticated()"
                               th:if="${articleComment.userId != null and #authentication.getPrincipal().getUsername() == articleComment.userId} "
-                              th:action="@{|/articles/comments/update/${article.id}/${articleComment.id}|}"
+                              th:action="@{|/articles/comments/put/${article.id}/${articleComment.id}|}"
                               th:object="${dto}" method="post">
                             <div class="input-group" style="width:auto">
                                 <label for="content" class="form-label mt-4" hidden>댓글 작성</label>

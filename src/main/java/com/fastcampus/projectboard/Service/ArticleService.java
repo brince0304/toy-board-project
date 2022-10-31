@@ -63,16 +63,13 @@ public class ArticleService {
         article.setHashtags(hashtags);
         return article;
     }
-    @Transactional
     public void saveArticle(ArticleDto dto, Set<HashtagDto> hashtagDto) {
-        Article article =articleRepository.saveAndFlush(dto.toEntity());
+        Article article =articleRepository.save(dto.toEntity());
         for (HashtagDto hashtag : hashtagDto) {
-                Hashtag hashtag1= hashtagRepository.findByHashtag(hashtag.hashtag()).orElseGet(()-> hashtagRepository.saveAndFlush(hashtag.toEntity()));
+                Hashtag hashtag1= hashtagRepository.findByHashtag(hashtag.hashtag()).orElseGet(()-> hashtagRepository.save(hashtag.toEntity()));
                 articlehashtagrepository.save(ArticleHashtag.of(article,hashtag1));
-
         }
     }
-        @Transactional
         public void updateArticle (Long articleId, ArticleRequest dto){
             Article article = articleRepository.findById(articleId)
                     .orElseThrow(() -> new EntityNotFoundException("게시글이 없습니다 - articleId: " + articleId));
@@ -81,8 +78,7 @@ public class ArticleService {
                 articleHashtag.setHashtag(null);
             });
             for( HashtagDto hashtag: dto.getHashtags()){
-                hashtagRepository.findByHashtag(hashtag.hashtag()).orElseGet(()-> hashtagRepository.save(hashtag.toEntity()));
-                Hashtag hashtag1 = hashtagRepository.findByHashtag(hashtag.hashtag()).get();
+                Hashtag hashtag1 = hashtagRepository.findByHashtag(hashtag.hashtag()).orElseGet(()-> hashtagRepository.save(hashtag.toEntity()));
                 articlehashtagrepository.save(ArticleHashtag.of(article,hashtag1));
             }
             if(dto.getTitle() != null) article.setTitle(dto.getTitle());

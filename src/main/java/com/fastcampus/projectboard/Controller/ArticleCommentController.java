@@ -2,19 +2,13 @@ package com.fastcampus.projectboard.Controller;
 
 import com.fastcampus.projectboard.Service.ArticleCommentService;
 import com.fastcampus.projectboard.Service.UserService;
-import com.fastcampus.projectboard.domain.ArticleComment;
-import com.fastcampus.projectboard.domain.UserAccount;
-import com.fastcampus.projectboard.domain.forms.ArticleForm;
 import com.fastcampus.projectboard.domain.forms.CommentForm;
-import com.fastcampus.projectboard.dto.ArticleCommentDto;
 import com.fastcampus.projectboard.dto.request.ArticleCommentRequest;
 import com.fastcampus.projectboard.dto.security.BoardPrincipal;
 import com.fastcampus.projectboard.repository.ArticleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -54,7 +48,7 @@ public class ArticleCommentController {
     } //로그인 유무를 확인하지만 어차피 본인 댓글이 아닐시에 버튼이 활성화 되지 않으므로 직접적인 접속은 막아놓지 않는다
 
     @PreAuthorize("isAuthenticated()")
-    @PostMapping("/update/{articleId}/{articleCommentId}")
+    @PostMapping("/put/{articleId}/{articleCommentId}")
     public String updateArticleComment(@PathVariable Long articleCommentId
             ,@PathVariable Long articleId
             ,@Valid CommentForm commentForm, BindingResult bindingResult,ArticleCommentRequest request){

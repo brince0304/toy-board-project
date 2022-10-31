@@ -1,5 +1,7 @@
 package com.fastcampus.projectboard.dto;
 
+import com.fastcampus.projectboard.domain.Hashtag;
+
 import java.io.Serializable;
 
 /**
@@ -15,7 +17,7 @@ public record HashtagDto(Long id, String hashtag) {
             return new HashtagDto(id, hashtag);
         }
 
-        public static HashtagDto from(com.fastcampus.projectboard.domain.Hashtag entity) {
+        public static HashtagDto from(Hashtag entity) {
             return new HashtagDto(
                     entity.getId(),
                     entity.getHashtag()
@@ -23,8 +25,8 @@ public record HashtagDto(Long id, String hashtag) {
         }
 
 
-        public com.fastcampus.projectboard.domain.Hashtag toEntity() {
-            return com.fastcampus.projectboard.domain.Hashtag.of(
+        public Hashtag toEntity() {
+            return Hashtag.of(
                     id,
                     hashtag
             );

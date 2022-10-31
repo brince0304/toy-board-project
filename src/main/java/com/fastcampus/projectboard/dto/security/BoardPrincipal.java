@@ -31,8 +31,7 @@ public record BoardPrincipal(
                 roleTypes.stream()
                         .map(UserAccountRole::getValue)
                         .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toUnmodifiableSet())
-                ,
+                        .collect(Collectors.toUnmodifiableSet()),
                 email,
                 nickname,
                 memo
