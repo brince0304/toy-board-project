@@ -45,7 +45,13 @@
 </header>
 
 
+
 <main class="container">
+
+    <h1 th:text="'#'+${hashtag.hashtag}" id="hashtag">
+해시태그
+    </h1>
+    <h3 th:text="${hashtag.hashtag}+'와 연관된 게시글은'+${articles.size()}+'개 입니다.'" ></h3>
     <table class="table" id="article-table">
         <thead>
         <tr>
