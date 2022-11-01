@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:sec="http://www.w3.org/1999/xhtml" xmlns:layout="http://www.w3.org/1999/xhtml">
 <head>
+    <script src="https://cdn.ckeditor.com/ckeditor5/35.2.0/classic/ckeditor.js"></script>
+
     <meta charset="UTF-8">
     <title>게시글 페이지</title>
     <link href="/css/bootstrap.min.css" rel="stylesheet">
@@ -58,6 +60,7 @@
 
         .buttons {
             float: right;
+
         }
 
         .comment4 {
@@ -155,7 +158,7 @@
 
                     <a href="javascript:void(0);" th:data-uri="@{|/articles/delete/${article.id()}|}"
                        sec:authorize="isAuthenticated()"
-                       th:if="${article.userId() != null and #authentication.getPrincipal().getUsername() == article.userId()}"
+                       th:if="${article.userId() != null and #authentication.getPrincipal().getUsername() == article.userId() }"
                        class="delete">
                         <button type="button" class="btn btn-light">글 삭제</button>
                     </a> &nbsp;
@@ -165,11 +168,8 @@
 
         </div>
         <br>
-        <pre><p>안녕 내이름은 브린스 안녕안녕
-        <br>
-        안녕안녕 하세요 안녕하세요
-        <br>
-        브린브린 브린스 안녕하세요<br><br></p></pre>
+        <div th:utext="*{content}">
+        </div>
     </article>
     <br>
     <section>
@@ -199,8 +199,7 @@
             </form>
             <br>
             <div th:each="articleComment : ${articleComments}">
-                <p th:if="${article.articleCommentsResponse().size() ==0 }">댓글이 없습니다.</p>
-                <div>
+                <div th:if="${articleComment.deleted != 'Y'}">
                     &nbsp
                     <time class="comment4" th:datetime="${articleComment.createdAt}"
                           th:text="${#temporals.format(articleComment.createdAt, 'yyyy-MM-dd HH:mm')}"
@@ -208,7 +207,7 @@
                     <strong class="writer" th:text="${articleComment.nickname}">brince</strong>
                     &nbsp;
                     <a sec:authorize="isAuthenticated()" class="delete"
-                       th:if="${articleComment.userId != null and #authentication.getPrincipal().getUsername() == articleComment.userId}"
+                       th:if="${articleComment.userId != null and #authentication.getPrincipal().getUsername() == articleComment.userId || #authentication.getAuthorities().contains('ROLE_ADMIN')}"
                        href="javascript:void(0);"
                        th:data-uri="@{|/articles/comments/delete/${articleId}/${articleComment.id}|}">
                         <button class="btn btn-light">삭제</button>
@@ -250,6 +249,65 @@
                     <p>
 
                 </div>
+                <div>
+                    <p th:if="${articleComment.deleted == 'Y'}" >
+                        <span class="comment3">삭제된 댓글입니다.</span>
+                    </p>
+                </div>
+                <div th:if="${articleComment.deleted == 'Y'}" sec:authorize="hasAnyRole('ROLE_ADMIN')">
+                    <div>
+                        <time class="comment4" th:datetime="${articleComment.createdAt}"
+                              th:text="${#temporals.format(articleComment.createdAt, 'yyyy-MM-dd HH:mm')}"
+                              style="display:inline"><small>2022-10-01</small></time>
+                        <strong class="writer" th:text="${articleComment.nickname}">brince</strong>
+                        &nbsp;
+                        <a sec:authorize="isAuthenticated()" class="delete"
+                           th:if="${articleComment.userId != null and #authentication.getPrincipal().getUsername() == articleComment.userId || #authentication.getAuthorities().contains('ROLE_ADMIN')}"
+                           href="javascript:void(0);"
+                           th:data-uri="@{|/articles/comments/delete/${articleId}/${articleComment.id}|}">
+                            <button class="btn btn-light">삭제</button>
+                        </a>
+                        <button type="button"
+                                data-bs-toggle="collapse"
+                                sec:authorize="isAuthenticated()"
+                                th:attr="data-bs-target=|#c${articleComment.id}"
+                                th:if="${articleComment.userId != null and #authentication.getPrincipal().getUsername() == articleComment.userId}"
+                                style="display:inline" class="btn btn-light">수정
+                        </button>
+                        <div class="collapse" th:id="c + ${articleComment.id}">
+                            <form sec:authorize="isAuthenticated()"
+                                  th:if="${articleComment.userId != null and #authentication.getPrincipal().getUsername() == articleComment.userId} "
+                                  th:action="@{|/articles/comments/put/${article.id}/${articleComment.id}|}"
+                                  th:object="${dto}" method="post">
+                                <div class="input-group" style="width:auto">
+                                    <label for="content" class="form-label mt-4" hidden>댓글 작성</label>
+                                    <input type="text" th:field="*{content}" class="form-control" id="update" name="update"
+                                           th:attr="placeholder=${articleComment.content}">
+                                    <div class="field-error" th:errors="*{content}">
+                                        오류2
+                                    </div>
+                                    <button href="javascript:void(0);"
+                                            th:data-uri="@{|/articles/comments/update/${articleId}/${articleComment.id}|}"
+                                            type="submit" class="update btn btn-outline-dark">수정
+                                    </button>
+                                    <br>
+                                </div>
+                                <br>
+                            </form>
+                        </div>
+
+
+                        <p th:text="${articleComment.content}+'//삭제된 댓글입니다.'">
+                            Lorem ipsum dolor sit amet, consectetur aidpiscino
+                            Lorem ipsum dolor sit amet
+                        <hr>
+                        <p>
+
+                    </div>
+                    </div>
+                </div>
+
+
             </div>
     </section>
 
@@ -292,8 +350,10 @@
         }
     }
 </script>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
         crossorigin="anonymous"></script>
+<script src="https://cdn.ckeditor.com/ckeditor5/34.0.0/classic/translations/ko.js"></script>
 
 </html>
