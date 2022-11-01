@@ -41,6 +41,10 @@ public class Article extends AuditingFields{
     @Setter
     private Set<ArticleHashtag> hashtags = new HashSet<>();
 
+    @Setter
+    @Column(nullable = false)
+    private String deleted = "N";
+
 
 
     protected Article() { //기본 빈 생성자
