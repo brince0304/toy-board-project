@@ -10,7 +10,6 @@
         <attr sel="#nickname" th:text="*{nickname}" />
         <attr sel="#email" th:text="*{email}" />
         <attr sel="#created-at" th:datetime="*{createdAt}" th:text="*{#temporals.format(createdAt, 'yyyy-MM-dd HH:mm')}" />
-        <attr sel="#article-content/pre" th:text="*{content}" />
     </attr>
 
     <attr sel="#article-comments" th:remove="all-but-first">

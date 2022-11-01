@@ -93,8 +93,12 @@ public class ArticleController {
 
 
     @GetMapping("/put/{articleId}")
-    public String articleUpdate(@PathVariable Long articleId, ModelMap map, ArticleForm articleForm){
+    public String articleUpdate(@PathVariable Long articleId, ModelMap map, ArticleForm articleForm,
+                                @AuthenticationPrincipal BoardPrincipal boardPrincipal){
         ArticleWithCommentDto articleDto = articleService.getArticle(articleId);
+        if(!articleDto.getUserAccountDto().userId().equals(boardPrincipal.username())){
+            return "redirect:/articles";
+        }
         Set<HashtagDto> hashtagDto = articleDto.getHashtags();
         StringBuffer sb = new StringBuffer();
         for(int i=0; i<hashtagDto.size(); i++){
@@ -115,6 +119,7 @@ public class ArticleController {
         if (bindingResult.hasErrors()) {
             return "articles/put/article_form";
         }
+
         articleService.updateArticle(articleId,dto);
         return "redirect:/articles/"+articleId;
     }
@@ -125,14 +130,18 @@ public class ArticleController {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/delete/{articleId}")
-    public String articleDelete(@PathVariable Long articleId){
+    public String articleDelete(@PathVariable Long articleId ,@AuthenticationPrincipal BoardPrincipal boardPrincipal){
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String id = userDetails.getUsername();
+        String role = userDetails.getAuthorities().toString();
         if(articleService.getArticle(articleId).getUserAccountDto().userId().equals(id)){
             articleService.deleteArticle(articleId);
         }
+        else if(role.equals("[ROLE_ADMIN]")){
+            articleService.deleteArticleByAdmin(articleId);
+        }
         else{
-            throw new IllegalArgumentException("삭제 권한이 없습니다.");
+            return "redirect:/articles";
         }
         return "redirect:/articles";
     }

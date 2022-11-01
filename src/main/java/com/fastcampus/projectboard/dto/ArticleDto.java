@@ -19,14 +19,15 @@ public record ArticleDto(
         LocalDateTime createdAt,
         String createdBy,
         LocalDateTime modifiedAt,
-        String modifiedBy
+        String modifiedBy,
+        String deleted
 ) {
 
     public static ArticleDto of(UserAccountDto userAccountDto, String title, String content) {
-        return new ArticleDto(null, userAccountDto, title, content,  null, null,null, null);
+        return new ArticleDto(null, userAccountDto, title, content,  null, null,null, null,null);
     }
-    public static ArticleDto of(Long id, UserAccountDto userAccountDto, String title, String content, LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy) {
-        return new ArticleDto(id, userAccountDto, title, content,  createdAt, createdBy, modifiedAt, modifiedBy);
+    public static ArticleDto of(Long id, UserAccountDto userAccountDto, String title, String content, LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy, String deleted) {
+        return new ArticleDto(id, userAccountDto, title, content,  createdAt, createdBy, modifiedAt, modifiedBy,deleted);
     }
 
     public static ArticleDto from(Article entity) {
@@ -39,6 +40,7 @@ public record ArticleDto(
                     entity.getCreatedBy(),
                     entity.getModifiedAt(),
                     entity.getModifiedBy()
+                   ,entity.getDeleted()
             );
     }
 

@@ -42,18 +42,37 @@ public class ArticleCommentController {
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/delete/{articleId}/{articleCommentId}")
     public String deleteArticleComment(@PathVariable Long articleCommentId
-            ,@PathVariable Long articleId){
-        articleCommentService.deleteArticleComment(articleCommentId);
+            ,@PathVariable Long articleId,
+                                       @AuthenticationPrincipal BoardPrincipal principal){
+        if(articleCommentService.getArticleComment(articleCommentId).userAccountDto().userId().equals(principal.username())){
+            articleCommentService.deleteArticleComment(articleCommentId);
+        }
+        else if(principal.getAuthorities().stream().anyMatch(a->a.getAuthority().equals("ROLE_ADMIN"))){
+            articleCommentService.deleteArticleComment(articleCommentId);
+        }
+        else{
+            throw new IllegalArgumentException("권한이 없습니다.");
+        }
         return "redirect:/articles/"+articleId;
-    } //로그인 유무를 확인하지만 어차피 본인 댓글이 아닐시에 버튼이 활성화 되지 않으므로 직접적인 접속은 막아놓지 않는다
+    }
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/put/{articleId}/{articleCommentId}")
     public String updateArticleComment(@PathVariable Long articleCommentId
             ,@PathVariable Long articleId
-            ,@Valid CommentForm commentForm, BindingResult bindingResult,ArticleCommentRequest request){
+            ,@Valid CommentForm commentForm, BindingResult bindingResult,ArticleCommentRequest request,
+                                       @AuthenticationPrincipal BoardPrincipal principal){
         if (bindingResult.hasErrors()) {
             return "redirect:/articles/"+articleId;
+        }
+        if (articleCommentService.getArticleComment(articleCommentId).userAccountDto().userId().equals(principal.username())) {
+            articleCommentService.updateArticleComment(articleCommentId,request.content());
+        }
+        else if(principal.getAuthorities().stream().anyMatch(a->a.getAuthority().equals("ROLE_ADMIN"))){
+            articleCommentService.updateArticleComment(articleCommentId, request.content());
+        }
+        else{
+            throw new IllegalArgumentException("권한이 없습니다.");
         }
         articleCommentService.updateArticleComment(articleCommentId,request.content());
         return "redirect:/articles/"+articleId;

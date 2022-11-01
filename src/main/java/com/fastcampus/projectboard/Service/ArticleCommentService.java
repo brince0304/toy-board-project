@@ -57,7 +57,8 @@ public class ArticleCommentService {
     }
 
     public void deleteArticleComment(Long Id) {
-        articleCommentRepository.deleteById(Id);
+
+        articleCommentRepository.getReferenceById(Id).setDeleted("Y");
     }
 
     public ArticleCommentDto getArticleComment(Long articleCommentId) {

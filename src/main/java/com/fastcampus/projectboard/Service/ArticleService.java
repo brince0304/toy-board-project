@@ -100,4 +100,7 @@ public class ArticleService {
         articleRepository.deleteById(articleId);
     }
 
+    public void deleteArticleByAdmin(Long articleId) {
+        articleRepository.getReferenceById(articleId).setDeleted("Y");
+    }
 }
