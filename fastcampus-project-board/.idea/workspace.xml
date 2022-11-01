@@ -6,6 +6,27 @@
   <component name="ChangeListManager">
     <list default="true" id="8cc4254c-a000-414e-b69b-335728ccf3c6" name="변경" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/Controller/ArticleCommentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/Controller/ArticleCommentController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/Controller/ArticleController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/Controller/ArticleController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/Controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/Controller/UserController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/Service/ArticleCommentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/Service/ArticleCommentService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/Service/ArticleService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/Service/ArticleService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/Service/UserSecurityService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/Service/UserSecurityService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/config/JpaConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/config/JpaConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/domain/Article.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/domain/Article.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/domain/ArticleComment.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/domain/ArticleComment.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/dto/ArticleCommentDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/dto/ArticleCommentDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/dto/ArticleDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/dto/ArticleDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/dto/response/ArticleCommentResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/dto/response/ArticleCommentResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/dto/response/ArticleResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/com/fastcampus/projectboard/dto/response/ArticleResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/resources/data.sql" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/resources/data.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/resources/templates/articles/detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/resources/templates/articles/detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/resources/templates/articles/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/resources/templates/articles/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/resources/templates/articles/index.th.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/resources/templates/articles/index.th.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/resources/templates/articles/post/article_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/resources/templates/articles/post/article_form.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/resources/templates/articles/put/article_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/resources/templates/articles/put/article_form.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/resources/templates/user/login_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/resources/templates/user/login_form.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,6 +90,19 @@
   }
 }</component>
   <component name="RunManager">
+    <configuration default="true" type="JetRunConfigurationType">
+      <module name="fastcampus-project-board" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <module name="fastcampus-project-board" />
+      <option name="filePath" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="FastcampusProjectBoardApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
       <module name="project-board.main" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.fastcampus.projectboard.FastcampusProjectBoardApplication" />
@@ -95,6 +129,8 @@
       <workItem from="1665063018983" duration="15000" />
       <workItem from="1666853904053" duration="56000" />
       <workItem from="1666853972610" duration="598000" />
+      <workItem from="1667214549124" duration="32000" />
+      <workItem from="1667214864750" duration="600000" />
     </task>
     <servers />
   </component>

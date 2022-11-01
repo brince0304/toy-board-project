@@ -5,7 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,8 +26,14 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.authorizeRequests().antMatchers("/**").permitAll()
+        http.httpBasic().disable()
+                        .authorizeRequests().antMatchers("/login","/","/signup").permitAll()
+                .antMatchers("/admin/**").hasRole("ADMIN")
+                .mvcMatchers("/articles/post","/articles/put","/articles/delete").hasRole("USER")
                 .and()
+                .anonymous().principal("anonymousUser").authorities("ROLE_ANONYMOUS")
+                .and()
+                .rememberMe().and()
                 .csrf().ignoringAntMatchers("/h2-console/**")
                 .and()
                 .headers()
