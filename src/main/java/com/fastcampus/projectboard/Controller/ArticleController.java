@@ -1,9 +1,8 @@
 package com.fastcampus.projectboard.Controller;
 
-import com.fastcampus.projectboard.Service.ArticleCommentService;
-import com.fastcampus.projectboard.Service.ArticleService;
-import com.fastcampus.projectboard.Service.HashtagService;
-import com.fastcampus.projectboard.Service.UserService;
+import com.fastcampus.projectboard.Service.*;
+import com.fastcampus.projectboard.Util.CookieUtil;
+import com.fastcampus.projectboard.Util.TokenProvider;
 import com.fastcampus.projectboard.domain.UserAccount;
 import com.fastcampus.projectboard.domain.forms.ArticleForm;
 import com.fastcampus.projectboard.domain.forms.CommentForm;
@@ -31,7 +30,10 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.Arrays;
 import java.util.Set;
 
 
@@ -44,7 +46,10 @@ public class ArticleController {
     private final UserAccountRepository userAccountRepository;
     private final ArticleRepository articleRepository;
     private final UserService userService;
+    private final UserSecurityService userSecurityService;
     private final HashtagService hashtagService;
+    private final CookieUtil cookieUtil;
+    private final TokenProvider tokenProvider;
 
     
     @GetMapping
@@ -58,8 +63,15 @@ public class ArticleController {
     }
     @GetMapping("/{articleId}")
     public String article(@PathVariable Long articleId, ModelMap map , ArticleCommentRequest dto,
-                          CommentForm commentForm){
+                          CommentForm commentForm, HttpServletRequest req, HttpServletResponse res){
         ArticleWithCommentResponse article =  ArticleWithCommentResponse.from(articleService.getArticle(articleId));
+        if(cookieUtil.getCookie(req,"refreshToken") != null){
+            String refreshToken = cookieUtil.getCookie(req,"refreshToken").getValue();
+            map.addAttribute("principal",tokenProvider.getUsername(refreshToken));
+        }
+        else{
+            map.addAttribute("principal",null);
+        }
         map.addAttribute("article",article);
         map.addAttribute("articleComments", article.articleCommentsResponse());
         map.addAttribute("dto",dto);
@@ -87,25 +99,30 @@ public class ArticleController {
             if(bindingResult.hasErrors()){
                 return "articles/post/article_form";
             }
-        articleService.saveArticle(dto.toDto(boardPrincipal.toDto()),dto.getHashtags());
+        BoardPrincipal principal = (BoardPrincipal) userSecurityService.loadUserByUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
+        articleService.saveArticle(dto.toDto(principal.toDto()),dto.getHashtags());
         return "redirect:/articles";
     }
 
 
     @GetMapping("/put/{articleId}")
     public String articleUpdate(@PathVariable Long articleId, ModelMap map, ArticleForm articleForm,
-                                @AuthenticationPrincipal BoardPrincipal boardPrincipal){
-        ArticleWithCommentDto articleDto = articleService.getArticle(articleId);
-        if(!articleDto.getUserAccountDto().userId().equals(boardPrincipal.username())){
-            return "redirect:/articles";
+                                HttpServletResponse res, HttpServletRequest req){
+        String refreshToken;
+        if(cookieUtil.getCookie(req,"refreshToken") != null){
+            refreshToken = cookieUtil.getCookie(req,"refreshToken").getValue();
+            ArticleWithCommentDto articleDto = articleService.getArticle(articleId);
+            if(!articleDto.getUserAccountDto().userId().equals(tokenProvider.getUsername(refreshToken))){
+                return "redirect:/articles";
+            }
+            Set<HashtagDto> hashtagDto = articleDto.getHashtags();
+            StringBuffer sb = new StringBuffer();
+            for(int i=0; i<hashtagDto.size(); i++){
+                if(i != hashtagDto.size()-1){sb.append("#").append(hashtagDto.stream().toList().get(i).hashtag()).append(" ");}
+                else{sb.append("#").append(hashtagDto.stream().toList().get(i).hashtag());}}
+            map.addAttribute("hashtag",sb);
+            map.addAttribute("dto",articleDto);
         }
-        Set<HashtagDto> hashtagDto = articleDto.getHashtags();
-        StringBuffer sb = new StringBuffer();
-        for(int i=0; i<hashtagDto.size(); i++){
-            if(i != hashtagDto.size()-1){sb.append("#").append(hashtagDto.stream().toList().get(i).hashtag()).append(" ");}
-            else{sb.append("#").append(hashtagDto.stream().toList().get(i).hashtag());}}
-        map.addAttribute("hashtag",sb);
-        map.addAttribute("dto",articleDto);
         return "articles/put/article_form";
     }
 
@@ -131,7 +148,7 @@ public class ArticleController {
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/delete/{articleId}")
     public String articleDelete(@PathVariable Long articleId ,@AuthenticationPrincipal BoardPrincipal boardPrincipal){
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserDetails userDetails = userSecurityService.loadUserByUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
         String id = userDetails.getUsername();
         String role = userDetails.getAuthorities().toString();
         if(articleService.getArticle(articleId).getUserAccountDto().userId().equals(id)){
