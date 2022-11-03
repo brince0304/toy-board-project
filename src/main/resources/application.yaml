@@ -7,7 +7,10 @@ logging:
     org.springframework.web.servlet: debug
     org.hibernate.type.descriptor.sql.BasicBinder: trace
 
+
 spring:
+  jwt:
+    secret: "secresecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecrett"
   mvc:
     hidden-method:
       filter:
@@ -30,3 +33,8 @@ spring:
     base-path: /api
     detection-strategy: annotated
   thymeleaf3.decoupled-logic: true
+  cache:
+    type: redis
+  redis:
+    host: localhost
+    port: 6379

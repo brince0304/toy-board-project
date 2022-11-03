@@ -20,6 +20,7 @@ import java.util.Objects;
 public class UserAccount extends AuditingFields {
     @Id
     @Column(length = 50)
+    @Setter
     private String userId;
 
     @Setter @Column(nullable = false) private String userPassword;
@@ -27,9 +28,14 @@ public class UserAccount extends AuditingFields {
     @Setter @Column(length = 100) private String email;
     @Setter @Column(length = 100) private String nickname;
     @Setter private String memo;
+    @Column(name = "role")
+    @Enumerated(EnumType.STRING)
+    private UserAccountRole role = UserAccountRole.USER;
 
 
-    protected UserAccount() {}
+
+
+    public UserAccount() {}
 
     private UserAccount(String userId, String userPassword, String email, String nickname, String memo) {
         this.userId = userId;

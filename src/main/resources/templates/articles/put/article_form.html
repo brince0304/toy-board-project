@@ -2,6 +2,8 @@
 <link href="/css/bootstrap.min.css" rel="stylesheet">
 
 <head>
+    <script src="https://cdn.ckeditor.com/ckeditor5/35.2.0/classic/ckeditor.js"></script>
+
     <title>게시글 작성</title>
     <style>
         .field-error{
@@ -63,4 +65,15 @@
         });
     });
 </script>
+<script>
+    ClassicEditor
+        .create( document.querySelector( '#content' ), {
+            language: "ko"
+        } )
+        .catch( error => {
+            console.error( error );
+        } );
+</script>
+<script src="https://cdn.ckeditor.com/ckeditor5/34.0.0/classic/translations/ko.js"></script>
+
 </html>
