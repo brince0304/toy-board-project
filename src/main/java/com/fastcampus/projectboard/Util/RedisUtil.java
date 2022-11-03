@@ -16,7 +16,7 @@ public class RedisUtil {
 
 
 
-    private final String REDIS_KEY_PREFIX = "logout";
+    private final String REDIS_KEY_PREFIX = "LOGOUT_";
 
     private final String EXPIRED_DURATION = "EXPIRE_DURATION";
 
@@ -47,8 +47,8 @@ public class RedisUtil {
         return Boolean.TRUE.equals(stringRedisTemplate.hasKey(key));
     }
 
-    public void setBlackList(String key, Object o, int minutes) {
-          stringRedisTemplate.opsForValue().set(REDIS_KEY_PREFIX + key, o.toString(), Duration.ofMinutes(minutes));
+    public void setBlackList(String key, Object o, Long second) {
+          stringRedisTemplate.opsForValue().set(REDIS_KEY_PREFIX + key, o.toString(), Duration.ofMillis(second));
     }
 
     public Object getBlackList(String key) {
