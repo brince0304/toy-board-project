@@ -1,9 +1,12 @@
 package com.fastcampus.projectboard.dto;
 
 import com.fastcampus.projectboard.domain.UserAccount;
+import com.fastcampus.projectboard.domain.UserAccountRole;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Set;
 
 /**
  * A DTO for the {@link com.fastcampus.projectboard.domain.UserAccount} entity
@@ -17,13 +20,17 @@ public record UserAccountDto(
         LocalDateTime createdAt,
         String createdBy,
         LocalDateTime modifiedAt,
-        String modifiedBy
+        String modifiedBy,
+        Set<UserAccountRole> roles
+
 ) {
-    public static UserAccountDto of(String userId, String userPassword, String email, String nickname, String memo) {
-        return new UserAccountDto(userId, userPassword, email, nickname, memo, null,null,null,null);
+    public static UserAccountDto of(String userId, String userPassword, String email, String nickname, String memo, Set<UserAccountRole> roles) {
+        return new UserAccountDto(userId, userPassword, email, nickname, memo, null,null,null,null,roles);
     }
-    public static UserAccountDto of(String userId, String userPassword, String email, String nickname, String memo, LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy) {
-        return new UserAccountDto(userId, userPassword, email, nickname, memo, createdAt, createdBy, modifiedAt, modifiedBy);
+
+
+    public static UserAccountDto of(String userId, String userPassword, String email, String nickname, String memo, LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy,Set<UserAccountRole> roles) {
+        return new UserAccountDto(userId, userPassword, email, nickname, memo, createdAt, createdBy, modifiedAt, modifiedBy,roles);
     }
 
     public static UserAccountDto from(UserAccount entity) {
@@ -36,7 +43,8 @@ public record UserAccountDto(
                 entity.getCreatedAt(),
                 entity.getCreatedBy(),
                 entity.getModifiedAt(),
-                entity.getModifiedBy()
+                entity.getModifiedBy(),
+                entity.getRoles()
         );
     }
 
@@ -48,7 +56,8 @@ public record UserAccountDto(
                 userPassword,
                 email,
                 nickname,
-                memo
+                memo,
+                roles
         );
     }
 

@@ -21,17 +21,13 @@ public record BoardPrincipal(
         String nickname,
         String memo
 )  implements UserDetails {
-    public static BoardPrincipal of(String username, String password, String email, String nickname, String memo) {
+    public static BoardPrincipal of(String username, String password, Collection<? extends GrantedAuthority> authorities,String email, String nickname, String memo) {
         // 지금은 인증만 하고 권한을 다루고 있지 않아서 임의로 세팅한다.
-        Set<UserAccountRole> roleTypes = Set.of(UserAccountRole.USER);
 
         return new BoardPrincipal(
                 username,
                 password,
-                roleTypes.stream()
-                        .map(UserAccountRole::getValue)
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toUnmodifiableSet()),
+                authorities,
                 email,
                 nickname,
                 memo
@@ -41,6 +37,7 @@ public record BoardPrincipal(
         return BoardPrincipal.of(
                 dto.userId(),
                 dto.userPassword(),
+                dto.roles().stream().map(role -> new SimpleGrantedAuthority(role.name())).collect(Collectors.toSet()),
                 dto.email(),
                 dto.nickname(),
                 dto.memo()
@@ -48,7 +45,7 @@ public record BoardPrincipal(
     }
 
     public UserAccountDto toDto() {
-        return UserAccountDto.of(username,password, email, nickname, memo);
+        return UserAccountDto.of(username,password, email, nickname, memo, authorities.stream().map(role -> UserAccountRole.valueOf(role.getAuthority())).collect(Collectors.toSet()));
     }
 
 
