@@ -1,5 +1,6 @@
 package com.fastcampus.projectboard.Service;
 
+import com.fastcampus.projectboard.Util.RedisUtil;
 import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.ArticleHashtag;
 import com.fastcampus.projectboard.domain.Hashtag;
@@ -35,6 +36,7 @@ public class ArticleService {
    private final ArticleRepository articleRepository;
    private final HashtagRepository hashtagRepository;
    private final ArticleHashtagRepository articlehashtagrepository;
+   private final RedisUtil redisUtil;
 
     @Transactional(readOnly = true)
     public Page<ArticleDto> searchArticles(SearchType searchType, String searchKeyword, Pageable pageable) {
@@ -63,6 +65,18 @@ public class ArticleService {
         article.setHashtags(hashtags);
         return article;
     }
+
+    public void updateViewCount(String clientIp, Long articleId) {
+        if(redisUtil.isFirstIpRequest(clientIp,articleId)){
+            redisUtil.writeClientRequest(clientIp,articleId);
+            Article article = articleRepository.findById(articleId).orElseThrow(EntityNotFoundException::new);
+            article.setViewCount(article.getViewCount()+1);
+        }
+    }
+
+
+
+
     public void saveArticle(ArticleDto dto, Set<HashtagDto> hashtagDto) {
         Article article =articleRepository.save(dto.toEntity());
         for (HashtagDto hashtag : hashtagDto) {
