@@ -1,5 +1,6 @@
 package com.fastcampus.projectboard.Service;
 
+import com.fastcampus.projectboard.Util.RedisUtil;
 import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.ArticleHashtag;
 import com.fastcampus.projectboard.domain.Hashtag;
@@ -13,7 +14,6 @@ import com.fastcampus.projectboard.repository.ArticleRepository;
 import com.fastcampus.projectboard.repository.HashtagRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityNotFoundException;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -35,6 +34,7 @@ public class ArticleService {
    private final ArticleRepository articleRepository;
    private final HashtagRepository hashtagRepository;
    private final ArticleHashtagRepository articlehashtagrepository;
+   private final RedisUtil redisUtil;
 
     @Transactional(readOnly = true)
     public Page<ArticleDto> searchArticles(SearchType searchType, String searchKeyword, Pageable pageable) {
@@ -63,6 +63,26 @@ public class ArticleService {
         article.setHashtags(hashtags);
         return article;
     }
+
+    public void updateViewCount(String clientIp, Long articleId) {
+        if(redisUtil.isFirstIpRequest(clientIp,articleId)){
+            redisUtil.writeClientRequest(clientIp,articleId);
+            Article article = articleRepository.findById(articleId).orElseThrow(EntityNotFoundException::new);
+            article.setViewCount(article.getViewCount()+1);
+        }
+    }
+
+    public void updateLike(String clientIp,Long articleId) {
+        if(redisUtil.isFirstIpRequest2(clientIp, articleId)) {
+            redisUtil.writeClientRequest2(clientIp, articleId);
+            Article article = articleRepository.findById(articleId).orElseThrow(EntityNotFoundException::new);
+            article.setLikeCount(article.getLikeCount() + 1);
+        }
+    }
+
+
+
+
     public void saveArticle(ArticleDto dto, Set<HashtagDto> hashtagDto) {
         Article article =articleRepository.save(dto.toEntity());
         for (HashtagDto hashtag : hashtagDto) {

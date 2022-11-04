@@ -31,6 +31,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -64,13 +65,22 @@ public class ArticleController {
     }
     @GetMapping("/{articleId}")
     public String article(@PathVariable Long articleId, ModelMap map , ArticleCommentRequest dto,
-                          CommentForm commentForm, @AuthenticationPrincipal BoardPrincipal principal){
+                          CommentForm commentForm, @AuthenticationPrincipal BoardPrincipal principal, HttpServletRequest req, HttpServletResponse res){
         ArticleWithCommentResponse article =  ArticleWithCommentResponse.from(articleService.getArticle(articleId));
+        articleService.updateViewCount(req.getRemoteAddr(),articleId);
         map.addAttribute("article",article);
         map.addAttribute("articleComments", article.articleCommentsResponse());
         map.addAttribute("dto",dto);
         return "articles/detail";
     }
+
+    @GetMapping("/{articleId}/like")
+    public String likeArticle(@PathVariable Long articleId, HttpServletRequest req, HttpServletResponse res){
+        articleService.updateLike(req.getRemoteAddr(),articleId);
+        return "redirect:/articles/"+articleId;
+    }
+
+
 
     @GetMapping("/search-hashtag/{hashtag}")
     public String hashtag(@PathVariable String hashtag, ModelMap map){
