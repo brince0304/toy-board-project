@@ -37,11 +37,8 @@ public class UserSecurityService implements UserDetailsService {
             }
             UserAccount account = _account.get();
             List<GrantedAuthority> authorities = new ArrayList<>();
-            if ("test".equals(userId)) {
-                authorities.add(new SimpleGrantedAuthority(UserAccountRole.ADMIN.getValue()));
-                authorities.add(new SimpleGrantedAuthority(UserAccountRole.USER.getValue()));
-            } else {
-                authorities.add(new SimpleGrantedAuthority(UserAccountRole.USER.getValue()));
+            for (UserAccountRole role : account.getRoles()) {
+                authorities.add(new SimpleGrantedAuthority(role.getValue()));
             }
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         return new BoardPrincipal(account.getUserId(), account.getUserPassword(), authorities, account.getEmail(), account.getNickname(), account.getMemo());

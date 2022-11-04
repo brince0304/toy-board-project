@@ -151,14 +151,13 @@
                 </div>
                 <div style="display:inline" class="buttons">
                     <a th:href="@{|/articles/put/${articleId}|}"
-                       sec:authorize="isAuthenticated()"
-                       th:if="${article.userId() != null and article.userId().equals(principal)}">
+                     sec:authorize="isAuthenticated()" th:if="${article.userId() != null && #authentication.getName() == article.userId()}">
                         <button type="button" class="btn btn-light">글 수정</button>
                     </a>
 
                     <a href="javascript:void(0);" th:data-uri="@{|/articles/delete/${article.id()}|}"
                        sec:authorize="isAuthenticated()"
-                       th:if="${article.userId() != null and article.userId().equals(principal)}"
+                       th:if="${article.userId() != null && #authentication.getName() == article.userId() || #authorization.expression('hasRole(''ADMIN'')')}"
                        class="delete">
                         <button type="button" class="btn btn-light">글 삭제</button>
                     </a> &nbsp;
@@ -207,7 +206,7 @@
                     <strong class="writer" th:text="${articleComment.nickname}">brince</strong>
                     &nbsp;
                     <a sec:authorize="isAuthenticated()" class="delete"
-                       th:if="${articleComment.userId != null and articleComment.userId.equals(principal)}"
+                       th:if="${articleComment.userId != null && articleComment.userId == #authentication.getName()|| #authorization.expression('hasRole(''ADMIN'')')}"
                        href="javascript:void(0);"
                        th:data-uri="@{|/articles/comments/delete/${articleId}/${articleComment.id}|}">
                         <button class="btn btn-light">삭제</button>
@@ -216,12 +215,12 @@
                             data-bs-toggle="collapse"
                             sec:authorize="isAuthenticated()"
                             th:attr="data-bs-target=|#c${articleComment.id}"
-                            th:if="${articleComment.userId != null and articleComment.userId.equals(principal)}"
+                            th:if="${articleComment.userId != null and articleComment.userId.equals(#authentication.getName())}"
                             style="display:inline" class="btn btn-light">수정
                     </button>
                     <div class="collapse" th:id="c + ${articleComment.id}">
                         <form sec:authorize="isAuthenticated()"
-                              th:if="${articleComment.userId != null and articleComment.userId.equals(principal)}"
+                              th:if="${articleComment.userId != null and articleComment.userId.equals(#authentication.getName()) || #authorization.expression('hasRole(''ADMIN'')')}"
                               th:action="@{|/articles/comments/put/${article.id}/${articleComment.id}|}"
                               th:object="${dto}" method="post">
                             <div class="input-group" style="width:auto">
@@ -254,7 +253,7 @@
                         <span class="comment3">삭제된 댓글입니다.</span>
                     </p>
                 </div>
-                <div th:if="${articleComment.deleted == 'Y' && principal=='test'}" >
+                <div th:if="${articleComment.deleted == 'Y' && #authorization.expression('hasRole(''ADMIN'')')}" sec:authorize="hasRole('ADMIN')">
                     <div>
                         <time class="comment4" th:datetime="${articleComment.createdAt}"
                               th:text="${#temporals.format(articleComment.createdAt, 'yyyy-MM-dd HH:mm')}"

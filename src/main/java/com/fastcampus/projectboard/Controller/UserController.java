@@ -6,6 +6,7 @@ import com.fastcampus.projectboard.Util.CookieUtil;
 import com.fastcampus.projectboard.Util.RedisUtil;
 import com.fastcampus.projectboard.Util.TokenProvider;
 import com.fastcampus.projectboard.domain.UserAccount;
+import com.fastcampus.projectboard.domain.UserAccountRole;
 import com.fastcampus.projectboard.domain.forms.UserCreateForm;
 import com.fastcampus.projectboard.dto.LoginDto;
 import com.fastcampus.projectboard.dto.UserAccountDto;
@@ -25,6 +26,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
@@ -71,9 +74,11 @@ public class UserController {
                     "패스워드가 일치하지 않습니다.");
             return "user/signup_form";
         }
-        UserAccount account = UserAccount.of(userCreateForm.getUserId(), userCreateForm.getPassword1(),
-                userCreateForm.getEmail(), userCreateForm.getNickname(), userCreateForm.getMemo());
-        userService.saveUserAccount(UserAccountDto.from(account));
+        Set<UserAccountRole> roles= new HashSet<>();
+        roles.add(UserAccountRole.ROLE_USER);
+        roles.add(UserAccountRole.ROLE_ADMIN);
+        UserAccountDto userAccountDto = UserAccountDto.of(userCreateForm.getUserId(), userCreateForm.getPassword1(),userCreateForm.getEmail() , userCreateForm.getNickname(), userCreateForm.getMemo(), roles);
+        userService.saveUserAccount(userAccountDto);
 
         return "redirect:/";
     }
