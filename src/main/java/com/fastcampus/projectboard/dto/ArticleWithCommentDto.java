@@ -3,7 +3,6 @@ package com.fastcampus.projectboard.dto;
 import com.fastcampus.projectboard.domain.Article;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -32,7 +31,9 @@ public class ArticleWithCommentDto {
             String deleted ;
             Integer viewCount ;
 
-    public ArticleWithCommentDto(Long id, UserAccountDto userAccountDto, Set<ArticleCommentDto> articleCommentDtos, String title, String content, LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy, Set<HashtagDto> hashtags, String deleted, Integer viewCount) {
+            Integer likeCount ;
+
+    public ArticleWithCommentDto(Long id, UserAccountDto userAccountDto, Set<ArticleCommentDto> articleCommentDtos, String title, String content, LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy, Set<HashtagDto> hashtags, String deleted, Integer viewCount, Integer likeCount) {
         this.id = id;
         this.userAccountDto = userAccountDto;
         this.articleCommentDtos = articleCommentDtos;
@@ -45,13 +46,14 @@ public class ArticleWithCommentDto {
         this.hashtags = hashtags;
         this.deleted = deleted;
         this.viewCount = viewCount;
+        this.likeCount = likeCount;
     }
 
-    public static ArticleWithCommentDto of(Long id, UserAccountDto userAccountDto, Set<ArticleCommentDto> articleCommentDtos, String title, String content, LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy, Set<HashtagDto> hashtags, String deleted, Integer viewCount) {
-        return new ArticleWithCommentDto(id, userAccountDto, articleCommentDtos, title, content,  createdAt, createdBy, modifiedAt, modifiedBy,hashtags,deleted, viewCount);
+    public static ArticleWithCommentDto of(Long id, UserAccountDto userAccountDto, Set<ArticleCommentDto> articleCommentDtos, String title, String content, LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy, Set<HashtagDto> hashtags, String deleted, Integer viewCount, Integer likeCount) {
+        return new ArticleWithCommentDto(id, userAccountDto, articleCommentDtos, title, content,  createdAt, createdBy, modifiedAt, modifiedBy,hashtags,deleted, viewCount, likeCount);
     }
-    public static ArticleWithCommentDto of(Long id, UserAccountDto userAccountDto, Set<ArticleCommentDto> articleCommentDtos, String title, String content, LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy, String deleted, Integer viewCount) {
-        return new ArticleWithCommentDto(id, userAccountDto, articleCommentDtos, title, content,  createdAt, createdBy, modifiedAt, modifiedBy,null,deleted, viewCount);
+    public static ArticleWithCommentDto of(Long id, UserAccountDto userAccountDto, Set<ArticleCommentDto> articleCommentDtos, String title, String content, LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy, String deleted, Integer viewCount, Integer likeCount) {
+        return new ArticleWithCommentDto(id, userAccountDto, articleCommentDtos, title, content,  createdAt, createdBy, modifiedAt, modifiedBy,null,deleted, viewCount, likeCount);
     }
 
     public static ArticleWithCommentDto from(Article entity) {
@@ -69,7 +71,8 @@ public class ArticleWithCommentDto {
                 entity.getModifiedBy(),
                 null,
                 entity.getDeleted(),
-                entity.getViewCount()
+                entity.getViewCount(),
+                entity.getLikeCount()
         );
     }
 

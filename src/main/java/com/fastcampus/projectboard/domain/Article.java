@@ -50,6 +50,10 @@ public class Article extends AuditingFields{
     @Column(nullable = false)
     private Integer viewCount = 0;
 
+    @Setter
+    @Column(nullable = false)
+    private Integer likeCount =0;
+
 
 
     protected Article() { //기본 빈 생성자
