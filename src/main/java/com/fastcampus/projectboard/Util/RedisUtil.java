@@ -7,18 +7,34 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class RedisUtil {
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
-
-
-
     private final String REDIS_KEY_PREFIX = "LOGOUT_";
 
     private final String EXPIRED_DURATION = "EXPIRE_DURATION";
+
+    public boolean isFirstIpRequest(String clientAddress, Long articleId) {
+        String key = generateKey(clientAddress, articleId);
+        return !Boolean.TRUE.equals(stringRedisTemplate.hasKey(key));
+    }
+
+    public void writeClientRequest(String clientAddress, Long articleId) {
+        String key = generateKey(clientAddress, articleId);
+        stringRedisTemplate.opsForValue().set(key, "id"+articleId);
+        stringRedisTemplate.expire(key, 60*60*2 , TimeUnit.SECONDS);
+    }
+
+    // key 형식 : 'client Address + postId' ->  '\xac\xed\x00\x05t\x00\x0f127.0.0.1 + 500'
+    private String generateKey(String clientAddress, Long articleId) {
+        return clientAddress + " + " + articleId;
+    }
+
+
 
     public String getData(String key){
         ValueOperations<String,String> valueOperations = stringRedisTemplate.opsForValue();
