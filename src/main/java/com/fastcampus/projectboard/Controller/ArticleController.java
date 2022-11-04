@@ -74,6 +74,14 @@ public class ArticleController {
         return "articles/detail";
     }
 
+    @GetMapping("/{articleId}/like")
+    public String likeArticle(@PathVariable Long articleId, HttpServletRequest req, HttpServletResponse res){
+        articleService.updateLike(req.getRemoteAddr(),articleId);
+        return "redirect:/articles/"+articleId;
+    }
+
+
+
     @GetMapping("/search-hashtag/{hashtag}")
     public String hashtag(@PathVariable String hashtag, ModelMap map){
         Set<ArticleDto> set=hashtagService.getArticlesByHashtag(hashtag);
