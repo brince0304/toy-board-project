@@ -21,11 +21,12 @@ public record ArticleResponse(
         LocalDateTime createdAt,
         String email,
         String nickname,
-        String deleted
+        String deleted,
+        Integer viewCount
 ) implements Serializable {
 
-    public static ArticleResponse of(Long id, String title, String content,  LocalDateTime createdAt, String email, String nickname, String deleted) {
-        return new ArticleResponse(id, title, content,  createdAt, email, nickname, deleted);
+    public static ArticleResponse of(Long id, String title, String content,  LocalDateTime createdAt, String email, String nickname, String deleted,Integer viewCount) {
+        return new ArticleResponse(id, title, content,  createdAt, email, nickname, deleted,viewCount);
     }
 
     public static ArticleResponse from(ArticleDto dto) {
@@ -41,7 +42,8 @@ public record ArticleResponse(
                 dto.createdAt(),
                 dto.userAccountDto().email(),
                 nickname,
-                dto.deleted()
+                dto.deleted(),
+                dto.viewCount()
         );
     }
 

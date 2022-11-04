@@ -46,6 +46,11 @@ public class Article extends AuditingFields{
     private String deleted = "N";
 
 
+    @Setter
+    @Column(nullable = false)
+    private Integer viewCount = 0;
+
+
 
     protected Article() { //기본 빈 생성자
     }
