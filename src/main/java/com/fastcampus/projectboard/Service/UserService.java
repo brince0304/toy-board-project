@@ -5,6 +5,7 @@ import com.fastcampus.projectboard.Util.RedisUtil;
 import com.fastcampus.projectboard.Util.SaltUtil;
 import com.fastcampus.projectboard.Util.TokenProvider;
 import com.fastcampus.projectboard.domain.UserAccount;
+import com.fastcampus.projectboard.domain.UserAccountRole;
 import com.fastcampus.projectboard.dto.UserAccountDto;
 import com.fastcampus.projectboard.dto.security.BoardPrincipal;
 import com.fastcampus.projectboard.repository.UserAccountRepository;
@@ -22,6 +23,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j

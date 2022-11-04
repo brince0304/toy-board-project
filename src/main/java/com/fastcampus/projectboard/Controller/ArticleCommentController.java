@@ -11,6 +11,7 @@ import com.fastcampus.projectboard.repository.ArticleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Controller;
@@ -39,39 +40,36 @@ public class ArticleCommentController {
     public String writeArticleComment(@PathVariable Long articleId, ArticleCommentRequest dto,
                                       @Valid CommentForm commentForm,
                                       BindingResult bindingResult,
-                                      HttpServletRequest req){
+                                      @AuthenticationPrincipal BoardPrincipal principal) {
         if (bindingResult.hasErrors()) {
-            return "redirect:/articles/"+articleId;
+            return "redirect:/articles/" + articleId;
         }
-        if(cookieUtil.getCookie(req,"refreshToken")==null){
-            return "redirect:/login";
-        }
-        else if(cookieUtil.getCookie(req,"refreshToken")!=null){
-            String username = tokenProvider.getUsername(cookieUtil.getCookie(req,"refreshToken").getValue());
-            BoardPrincipal principal = (BoardPrincipal) userDetailsSErvice.loadUserByUsername(username);
+        if (principal.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_USER"))) {
             articleCommentService.saveArticleComment(dto.toDto(principal.toDto()));
-            return "redirect:/articles/"+articleId;
+            return "redirect:/articles/" + articleId;
         }
-        return "redirect:/articles/"+articleId;
-    } //현재 접속한 사용자의 정보를 받아와 DTO로 넘겨주고 , 댓글을 작성함
+        return "redirect:/articles/" + articleId;
+    }
+    //현재 접속한 사용자의 정보를 받아와 DTO로 넘겨주고 , 댓글을 작성함
 
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/delete/{articleId}/{articleCommentId}")
     public String deleteArticleComment(@PathVariable Long articleCommentId
             ,@PathVariable Long articleId,
-                                      HttpServletResponse res,HttpServletRequest req) {
-        if (cookieUtil.getCookie(req, "refreshToken") == null) {
+                                      @AuthenticationPrincipal BoardPrincipal principal) {
+        if(principal==null){
             return "redirect:/login";
-        } else if (cookieUtil.getCookie(req, "refreshToken") != null) {
-            String username = tokenProvider.getUsername(cookieUtil.getCookie(req, "refreshToken").getValue());
-            if (articleCommentService.getArticleComment(articleCommentId).userAccountDto().userId().equals(username)) {
-                articleCommentService.deleteArticleComment(articleCommentId);
-                return "redirect:/articles/" + articleId;
-
-            }
         }
-        return "redirect:/articles/" + articleId;
+        if(articleCommentService.getArticleComment(articleCommentId).userAccountDto().userId().equals(principal.getUsername())){
+            articleCommentService.deleteArticleComment(articleCommentId);
+            return "redirect:/articles/"+articleId;
+        }
+        else if(principal.getAuthorities().stream().anyMatch(a->a.getAuthority().equals("ROLE_ADMIN"))){
+            articleCommentService.deleteArticleComment(articleCommentId);
+            return "redirect:/articles/"+articleId;
+        }
+        return "redirect:/articles/"+articleId;
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -79,15 +77,14 @@ public class ArticleCommentController {
     public String updateArticleComment(@PathVariable Long articleCommentId
             ,@PathVariable Long articleId
             ,@Valid CommentForm commentForm, BindingResult bindingResult,ArticleCommentRequest request,
-                                      HttpServletRequest req) {
+                                      @AuthenticationPrincipal BoardPrincipal principal) {
         if (bindingResult.hasErrors()) {
             return "redirect:/articles/"+articleId;
         }
-        if (cookieUtil.getCookie(req, "refreshToken") == null) {
+        if (principal== null) {
             return "redirect:/login";
-        } else if (cookieUtil.getCookie(req, "refreshToken") != null) {
-            String username = tokenProvider.getUsername(cookieUtil.getCookie(req, "refreshToken").getValue());
-            if (articleCommentService.getArticleComment(articleCommentId).userAccountDto().userId().equals(username)) {
+        } else {
+            if (articleCommentService.getArticleComment(articleCommentId).userAccountDto().userId().equals(principal.getUsername())) {
                 articleCommentService.updateArticleComment(articleCommentId,request.content());
                 return "redirect:/articles/" + articleId;
 

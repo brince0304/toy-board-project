@@ -67,7 +67,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 if (tokenProvider.validateToken(jwt)) {
                     logger.info("validateToken : " + jwt);
-                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(username, null, null);
+                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                     usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
                     SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
                 }
@@ -88,7 +88,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             if (refreshJwt != null) {
                 refreshUname = redisUtil.getData(refreshJwt);
                 if (refreshUname.equals(tokenProvider.getUsername(refreshJwt))) {
-                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(refreshUname, null, null);
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(refreshUname);
+                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null,userDetails.getAuthorities() );
                     usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
                     SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
                     Cookie newAccessToken = cookieUtil.createCookie(TokenProvider.ACCESS_TOKEN_NAME, tokenProvider.doGenerateToken(refreshUname, TokenProvider.TOKEN_VALIDATION_SECOND));

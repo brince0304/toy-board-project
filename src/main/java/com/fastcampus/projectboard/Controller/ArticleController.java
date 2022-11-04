@@ -23,6 +23,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -63,15 +64,8 @@ public class ArticleController {
     }
     @GetMapping("/{articleId}")
     public String article(@PathVariable Long articleId, ModelMap map , ArticleCommentRequest dto,
-                          CommentForm commentForm, HttpServletRequest req, HttpServletResponse res){
+                          CommentForm commentForm, @AuthenticationPrincipal BoardPrincipal principal){
         ArticleWithCommentResponse article =  ArticleWithCommentResponse.from(articleService.getArticle(articleId));
-        if(cookieUtil.getCookie(req,"refreshToken") != null){
-            String refreshToken = cookieUtil.getCookie(req,"refreshToken").getValue();
-            map.addAttribute("principal",tokenProvider.getUsername(refreshToken));
-        }
-        else{
-            map.addAttribute("principal",null);
-        }
         map.addAttribute("article",article);
         map.addAttribute("articleComments", article.articleCommentsResponse());
         map.addAttribute("dto",dto);
@@ -99,22 +93,18 @@ public class ArticleController {
             if(bindingResult.hasErrors()){
                 return "articles/post/article_form";
             }
-        BoardPrincipal principal = (BoardPrincipal) userSecurityService.loadUserByUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
-        articleService.saveArticle(dto.toDto(principal.toDto()),dto.getHashtags());
+        articleService.saveArticle(dto.toDto(boardPrincipal.toDto()),dto.getHashtags());
         return "redirect:/articles";
     }
 
 
     @GetMapping("/put/{articleId}")
     public String articleUpdate(@PathVariable Long articleId, ModelMap map, ArticleForm articleForm,
-                                HttpServletResponse res, HttpServletRequest req){
-        String refreshToken;
-        if(cookieUtil.getCookie(req,"refreshToken") != null){
-            refreshToken = cookieUtil.getCookie(req,"refreshToken").getValue();
-            ArticleWithCommentDto articleDto = articleService.getArticle(articleId);
-            if(!articleDto.getUserAccountDto().userId().equals(tokenProvider.getUsername(refreshToken))){
-                return "redirect:/articles";
-            }
+                                @AuthenticationPrincipal BoardPrincipal boardPrincipal){
+         ArticleWithCommentDto articleDto = articleService.getArticle(articleId);
+         if(!articleDto.getUserAccountDto().userId().equals(boardPrincipal.username())){
+             return "redirect:/articles";}
+         else{
             Set<HashtagDto> hashtagDto = articleDto.getHashtags();
             StringBuffer sb = new StringBuffer();
             for(int i=0; i<hashtagDto.size(); i++){
@@ -136,7 +126,6 @@ public class ArticleController {
         if (bindingResult.hasErrors()) {
             return "articles/put/article_form";
         }
-
         articleService.updateArticle(articleId,dto);
         return "redirect:/articles/"+articleId;
     }
@@ -148,13 +137,11 @@ public class ArticleController {
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/delete/{articleId}")
     public String articleDelete(@PathVariable Long articleId ,@AuthenticationPrincipal BoardPrincipal boardPrincipal){
-        UserDetails userDetails = userSecurityService.loadUserByUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
-        String id = userDetails.getUsername();
-        String role = userDetails.getAuthorities().toString();
+        String id = boardPrincipal.getUsername();
         if(articleService.getArticle(articleId).getUserAccountDto().userId().equals(id)){
             articleService.deleteArticle(articleId);
         }
-        else if(role.equals("[ROLE_ADMIN]")){
+        else if(boardPrincipal.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))){
             articleService.deleteArticleByAdmin(articleId);
         }
         else{
@@ -163,13 +150,4 @@ public class ArticleController {
         return "redirect:/articles";
     }
 
-    private UserAccount createUserAccount() {
-        return UserAccount.of(
-                "brince",
-                "1234",
-                "brince@naver.com",
-                "brince",
-                null
-        );
-
-}}
+ }
