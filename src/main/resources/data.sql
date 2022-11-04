@@ -5,7 +5,7 @@ insert into user_account_roles(user_account_user_id, roles) values ('test', 'ROL
 insert into user_account_roles(user_account_user_id, roles) values ('test2', 'ROLE_ADMIN');
 insert into user_account_roles(user_account_user_id, roles) values ('test2', 'ROLE_USER');
 
-insert into article (id,created_at, created_by, modified_at, modified_by, title, content, user_id,deleted) values (1,'2022-05-01 13:04:04', 'test', '2022-04-02 16:00:20', 'Adelaida', 'testtest', 'testesttesttest', 'test','N');
+insert into article (id,created_at, created_by, modified_at, modified_by, title, content, user_id,deleted, view_count) values (1,'2022-05-01 13:04:04', 'test', '2022-04-02 16:00:20', 'Adelaida', 'testtest', 'testesttesttest', 'test','N',0);
 
 insert into hashtag (id,hashtag) values (1,'text');
 
