@@ -60,6 +60,10 @@
 
         .buttons {
             float: right;
+        }
+
+        .likebutton{
+            float: left;
 
         }
 
@@ -147,6 +151,11 @@
                 <div style="display:inline" th:each="hashtag : ${article.hashtags()}">
                     <a th:href="@{|/articles/search-hashtag/${hashtag.hashtag}|}">
                 <h3  style="display:inline" class="hashtag" id="hashtag" th:text="'#'+${hashtag.hashtag}"> hash</h3>
+                    </a>
+                </div>
+                <div class="buttons">
+                    <a th:href="@{|/articles/${articleId}/like|}" sec:authorize="isAuthenticated()">
+                        <button type="button" style="display:inline" class="btn btn-light">추천</button>
                     </a>
                 </div>
                 <div style="display:inline" class="buttons">
