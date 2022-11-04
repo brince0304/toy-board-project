@@ -9,6 +9,7 @@
                 <attr sel="td.user-id" th:text="${article.userAccountDto.nickname}" />
                 <attr sel="td.title/a" th:text="${article.title}" th:href="@{'/articles/' + ${article.id}}" />
                 <attr sel="td.created-at/time" th:datetime="${article.createdAt}" th:text="${#temporals.format(article.createdAt, 'yyyy-MM-dd')}" />
+                <attr sel="td.view-count" th:text="${article.viewCount}" />
             </attr>
         </attr>
     </attr>
