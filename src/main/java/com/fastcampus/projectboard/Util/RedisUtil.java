@@ -19,19 +19,33 @@ public class RedisUtil {
     private final String EXPIRED_DURATION = "EXPIRE_DURATION";
 
     public boolean isFirstIpRequest(String clientAddress, Long articleId) {
-        String key = generateKey(clientAddress, articleId);
+        String key = generateViewKey(clientAddress, articleId);
         return !Boolean.TRUE.equals(stringRedisTemplate.hasKey(key));
     }
 
     public void writeClientRequest(String clientAddress, Long articleId) {
-        String key = generateKey(clientAddress, articleId);
+        String key = generateViewKey(clientAddress, articleId);
         stringRedisTemplate.opsForValue().set(key, "id"+articleId);
-        stringRedisTemplate.expire(key, 60*60*2 , TimeUnit.SECONDS);
+        stringRedisTemplate.expire(key, 60*60*24 , TimeUnit.SECONDS);
+    }
+    public boolean isFirstIpRequest2(String clientAddress, Long articleId) {
+        String key = generateLikeKey(clientAddress, articleId);
+        return !Boolean.TRUE.equals(stringRedisTemplate.hasKey(key));
+    }
+
+    public void writeClientRequest2(String clientAddress, Long articleId) {
+        String key = generateLikeKey(clientAddress, articleId);
+        stringRedisTemplate.opsForValue().set(key, "id"+articleId);
+        stringRedisTemplate.expire(key, 60*60*24 , TimeUnit.SECONDS);
     }
 
     // key 형식 : 'client Address + postId' ->  '\xac\xed\x00\x05t\x00\x0f127.0.0.1 + 500'
-    private String generateKey(String clientAddress, Long articleId) {
-        return clientAddress + " + " + articleId;
+    private String generateViewKey(String clientAddress, Long articleId) {
+        return clientAddress + "view + " + articleId;
+    }
+
+    private String generateLikeKey(String clientAddress, Long articleId) {
+        return clientAddress + "like + " + articleId;
     }
 
 
