@@ -35,15 +35,9 @@ import java.util.concurrent.TimeUnit;
 @RequestMapping
 public class UserController {
     private final UserService userService;
-
     private final TokenProvider tokenProvider;
     private final CookieUtil cookieUtil;
     private final RedisUtil redisUtil;
-
-    private final StringRedisTemplate redisTemplate;
-
-    private final UserSecurityService userSecurityService;
-
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     @GetMapping("/signup")
@@ -95,7 +89,9 @@ public class UserController {
         try {
             final BoardPrincipal principal = userService.loginUser(user.getUsername(), user.getPassword());
             Cookie accessToken = cookieUtil.createCookie(TokenProvider.ACCESS_TOKEN_NAME, tokenProvider.generateToken(principal));
+            accessToken.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds(TokenProvider.TOKEN_VALIDATION_SECOND));
             Cookie refreshToken = cookieUtil.createCookie(TokenProvider.REFRESH_TOKEN_NAME, tokenProvider.generateRefreshToken(principal));
+            refreshToken.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds(TokenProvider.REFRESH_TOKEN_VALIDATION_SECOND));
             redisUtil.setDataExpire(refreshToken.getValue(), principal.getUsername(), TokenProvider.REFRESH_TOKEN_VALIDATION_SECOND);
             res.addCookie(accessToken);
             res.addCookie(refreshToken);
@@ -105,21 +101,6 @@ public class UserController {
             return "redirect:/login";
         }
     }
-
-    @GetMapping("/reissue")
-    public String reissue(
-            HttpServletRequest req,
-            HttpServletResponse res) {
-        if (cookieUtil.getCookie(req, TokenProvider.REFRESH_TOKEN_NAME) != null) {
-            String username = redisUtil.getData(cookieUtil.getCookie(req, TokenProvider.REFRESH_TOKEN_NAME).getValue());
-            String accessToken = tokenProvider.doGenerateToken(username, TokenProvider.TOKEN_VALIDATION_SECOND);
-            Cookie cookie = cookieUtil.createCookie(TokenProvider.ACCESS_TOKEN_NAME, accessToken);
-            res.addCookie(cookie);
-            return "redirect:/articles";
-        }
-        return "forward:/articles";
-    }
-
 
     @GetMapping("/logout")
     public String logout(

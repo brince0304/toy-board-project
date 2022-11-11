@@ -19,7 +19,6 @@ public class CookieUtil {
         token.setPath("/");
         return token;
     }
-
     public Cookie getCookie(HttpServletRequest req, String cookieName){
         final Cookie[] cookies = req.getCookies();
         if(cookies==null) return null;
@@ -29,5 +28,4 @@ public class CookieUtil {
         }
         return null;
     }
-
 }

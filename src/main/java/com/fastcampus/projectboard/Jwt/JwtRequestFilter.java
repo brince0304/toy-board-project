@@ -33,16 +33,12 @@ import javax.servlet.http.HttpServletResponse;
 
 @Service
 public class JwtRequestFilter extends OncePerRequestFilter {
-
     @Autowired
     private UserSecurityService userDetailsService;
-
     @Autowired
     private TokenProvider tokenProvider;
-
     @Autowired
     private CookieUtil cookieUtil;
-
     @Autowired
     private RedisUtil redisUtil;
 
