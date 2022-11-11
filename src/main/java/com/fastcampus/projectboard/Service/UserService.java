@@ -122,9 +122,6 @@ public class UserService {
                     new UsernamePasswordAuthenticationToken(username, password);
             Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            String authorities = authentication.getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .collect(Collectors.joining(","));
             BoardPrincipal principal1 = BoardPrincipal.from(UserAccountDto.from(userAccountRepository.findById(username).orElseThrow()));
             return principal1;
     }
