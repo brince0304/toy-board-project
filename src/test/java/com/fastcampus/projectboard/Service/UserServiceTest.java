@@ -40,7 +40,6 @@ public class UserServiceTest {
     void givenUserId_whenGettingUserAccount_thenGetsUserAccount() {
         //given
         UserAccountDto userAccountDto = createUserAccountDto();
-        sut.saveUserAccount(userAccountDto);
         given(userAccountRepository.findById(userAccountDto.userId())).willReturn(Optional.of(userAccountDto.toEntity()));
 
         //when
@@ -75,7 +74,8 @@ public class UserServiceTest {
                 , "12345"
                 , userDto.email()
                 ,userDto.nickname()
-                ,"memo123");
+                ,"memo123",
+                null);
         given(userAccountRepository.findById(account.getUserId())).willReturn(Optional.of(account));
         String encodedPassword = passwordEncoder.encode(updatedAccount.getUserPassword());
         //when
@@ -108,6 +108,7 @@ public class UserServiceTest {
                 "password",
                 "uno@email.com",
                 "Uno",
+                null,
                 null
         );
     }
@@ -132,7 +133,11 @@ public class UserServiceTest {
                 LocalDateTime.now(),
                 "Uno",
                 LocalDateTime.now(),
-                "Uno");
+                "Uno",
+                "N",
+                0,
+                0
+        );
     }
 
     private UserAccountDto createUserAccountDto() {
@@ -146,6 +151,7 @@ public class UserServiceTest {
                 "uno",
                 LocalDateTime.now(),
                 "uno"
+                ,null
         );
     }
 }

@@ -7,6 +7,7 @@ import com.fastcampus.projectboard.dto.ArticleCommentDto;
 import com.fastcampus.projectboard.dto.UserAccountDto;
 import com.fastcampus.projectboard.repository.ArticleCommentRepository;
 import com.fastcampus.projectboard.repository.ArticleRepository;
+import com.fastcampus.projectboard.repository.UserAccountRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,6 +32,8 @@ import static org.mockito.BDDMockito.*;
 class ArticleCommentServiceTest {
 
     @InjectMocks private ArticleCommentService sut;
+
+    @Mock private UserAccountRepository userAccountRepository;
 
     @Mock private ArticleRepository articleRepository;
     @Mock private ArticleCommentRepository articleCommentRepository;
@@ -121,16 +125,35 @@ class ArticleCommentServiceTest {
     @Test
     void givenArticleCommentId_whenDeletingArticleComment_thenDeletesArticleComment() {
         // Given
-        Long articleCommentId = 1L;
-        willDoNothing().given(articleCommentRepository).deleteById(articleCommentId);
+        Long commentId = 1L;
+        given(articleCommentRepository.getReferenceById(commentId)).willReturn(createArticleComment("content"));
 
         // When
-        sut.deleteArticleComment(articleCommentId);
+        sut.deleteArticleComment(commentId);
 
         // Then
-        then(articleCommentRepository).should().deleteById(articleCommentId);
+        then(articleCommentRepository).should().getReferenceById(commentId);
+        assertThat(articleCommentRepository.getReferenceById(commentId).getDeleted()).isEqualTo("Y");
     }
 
+    @DisplayName("대상 댓글이 존재하면 대댓글을 등록한다.")
+    @Test
+    void givenParentArticleComment_whenSavingChildrenComment_thenSavesChildrenComment() {
+// Given
+        Long parentId = 1L;
+        ArticleComment parent = createArticleComment("parent");
+        given(articleCommentRepository.getReferenceById(parentId)).willReturn(parent);
+        given(articleCommentRepository.save(any(ArticleComment.class))).willReturn(null);
+
+        // When
+        sut.saveChildrenComment(parentId, createArticleCommentDto("children"));
+
+        // Then
+        assertThat(parent.getChildren())
+                .hasSize(1)
+                .first().hasFieldOrPropertyWithValue("content", "children");
+        then(articleCommentRepository).should().getReferenceById(parentId);
+    }
 
     private ArticleCommentDto createArticleCommentDto(String content) {
         return ArticleCommentDto.of(
@@ -141,9 +164,31 @@ class ArticleCommentServiceTest {
                 LocalDateTime.now(),
                 "uno",
                 LocalDateTime.now(),
-                "uno"
+                "uno",
+                "N",
+                null,
+                null
         );
     }
+
+    private ArticleCommentDto createArticleCommentDto2(String content) {
+        return ArticleCommentDto.of(
+                2L,
+                1L,
+                createUserAccountDto(),
+                content,
+                LocalDateTime.now(),
+                "uno",
+                LocalDateTime.now(),
+                "uno",
+                "N",
+                null,
+                "N"
+        );
+    }
+
+
+
 
     private UserAccountDto createUserAccountDto() {
         return UserAccountDto.of(
@@ -155,7 +200,8 @@ class ArticleCommentServiceTest {
                 LocalDateTime.now(),
                 "uno",
                 LocalDateTime.now(),
-                "uno"
+                "uno",
+                Set.of()
         );
     }
 
@@ -167,13 +213,23 @@ class ArticleCommentServiceTest {
         );
     }
 
+    private ArticleComment createArticleComment2(String content) {
+        return ArticleComment.of(
+                Article.of(createUserAccount(), "title", "content"),
+                createUserAccount(),
+                content,
+                createArticleComment("댓글")
+        );
+    }
+
     private UserAccount createUserAccount() {
         return UserAccount.of(
                 "uno",
                 "password",
                 "uno@email.com",
                 "Uno",
-                null
+                null,
+                Set.of()
         );
     }
 
