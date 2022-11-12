@@ -3,8 +3,12 @@ package com.fastcampus.projectboard.dto;
 import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.ArticleComment;
 import com.fastcampus.projectboard.domain.UserAccount;
+import com.fastcampus.projectboard.dto.response.ArticleCommentResponse;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A DTO for the {@link com.fastcampus.projectboard.domain.ArticleComment} entity
@@ -18,13 +22,15 @@ public record ArticleCommentDto(
         String createdBy,
         LocalDateTime modifiedAt,
         String modifiedBy,
-        String deleted
+        String deleted,
+        Set<ArticleCommentDto> children,
+        String isParent
 ) {
-    public static ArticleCommentDto of(Long articleId, UserAccountDto userAccountDto, String content) {
-        return new ArticleCommentDto(null, articleId, userAccountDto, content, null, null, null, null, null);
+    public static ArticleCommentDto of(Long articleId, UserAccountDto userAccountDto, String content,  Set<ArticleCommentDto> children,String isParent) {
+        return new ArticleCommentDto(null, articleId, userAccountDto, content, null, null, null, null, null,  children, isParent);
     }
-    public static ArticleCommentDto of(Long id, Long articleId, UserAccountDto userAccountDto, String content, LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy,String deleted) {
-        return new ArticleCommentDto(id, articleId, userAccountDto, content, createdAt, createdBy, modifiedAt, modifiedBy, deleted);
+    public static ArticleCommentDto of(Long id, Long articleId, UserAccountDto userAccountDto, String content, LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy,String deleted,  Set<ArticleCommentDto> children,String isParent) {
+        return new ArticleCommentDto(id, articleId, userAccountDto, content, createdAt, createdBy, modifiedAt, modifiedBy, deleted,  children, isParent);
     }
 
     public static ArticleCommentDto from(ArticleComment entity) {
@@ -37,7 +43,11 @@ public record ArticleCommentDto(
                 entity.getCreatedBy(),
                 entity.getModifiedAt(),
                 entity.getModifiedBy(),
-                entity.getDeleted()
+                entity.getDeleted(),
+                entity.getChildren().stream()
+                        .map(ArticleCommentDto::from)
+                        .collect(Collectors.toCollection(LinkedHashSet::new)),
+                entity.getIsParent()
         );
     }
 

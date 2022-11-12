@@ -32,8 +32,7 @@ dependencies {
 	implementation group: 'org.javassist', name: 'javassist', version: '3.15.0-GA'
 	implementation"com.querydsl:querydsl-core"
 	implementation"com.querydsl:querydsl-collections"
-    testImplementation 'org.projectlombok:lombok:1.18.22'
-	testImplementation 'org.projectlombok:lombok:1.18.22'
+    testImplementation 'org.projectlombok:lombok:1.18.24'
 	annotationProcessor"com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jpa"
 	annotationProcessor"jakarta.annotation:jakarta.annotation-api"
 	annotationProcessor"jakarta.persistence:jakarta.persistence-api"
@@ -48,6 +47,7 @@ dependencies {
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.security:spring-security-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
 }

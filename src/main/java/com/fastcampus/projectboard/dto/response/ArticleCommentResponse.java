@@ -3,6 +3,8 @@ package com.fastcampus.projectboard.dto.response;
 import com.fastcampus.projectboard.dto.ArticleCommentDto;
 
 import java.time.LocalDateTime;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public record ArticleCommentResponse(
         Long id,
@@ -11,11 +13,14 @@ public record ArticleCommentResponse(
         String email,
         String nickname,
         String userId,
-        String deleted
+        String deleted,
+        Set<ArticleCommentDto> children,
+        String isParent
+
 ) {
 
-    public static ArticleCommentResponse of(Long id, String content, LocalDateTime createdAt, String email, String nickname, String userId, String deleted) {
-        return new ArticleCommentResponse(id, content, createdAt, email, nickname, userId, deleted);
+    public static ArticleCommentResponse of(Long id, String content, LocalDateTime createdAt, String email, String nickname, String userId, String deleted,Set<ArticleCommentDto> children,String isParent ) {
+        return new ArticleCommentResponse(id, content, createdAt, email, nickname, userId, deleted,children,isParent);
     }
 
     public static ArticleCommentResponse from(ArticleCommentDto dto) {
@@ -31,7 +36,10 @@ public record ArticleCommentResponse(
                 dto.userAccountDto().email(),
                 nickname,
                 dto.userAccountDto().userId()
-                ,dto.deleted()
+                ,dto.deleted(),
+                dto.children(),
+                dto.isParent()
+
         );
     }
 }

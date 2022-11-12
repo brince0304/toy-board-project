@@ -13,10 +13,15 @@ import java.io.Serializable;
 public record ArticleCommentRequest(
         Long articleId
         ,
-        String content) implements Serializable {
+        String content,
+        Long parentId) implements Serializable {
 
     public static ArticleCommentRequest of(Long articleId, String content) {
-        return new ArticleCommentRequest(articleId, content);
+        return new ArticleCommentRequest(articleId, content,null);
+    }
+
+    public static ArticleCommentRequest of(Long articleId, String content, Long parentId) {
+        return new ArticleCommentRequest(articleId, content,parentId);
     }
 
 
@@ -24,8 +29,11 @@ public record ArticleCommentRequest(
         return ArticleCommentDto.of(
                 articleId,
                 userAccountDto,
-                content
+                content,
+                null,
+                null
         );
     }
+
 
 }

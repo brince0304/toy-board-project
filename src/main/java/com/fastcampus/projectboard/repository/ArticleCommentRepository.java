@@ -1,7 +1,6 @@
 package com.fastcampus.projectboard.repository;
 
 import com.fastcampus.projectboard.domain.ArticleComment;
-import com.fastcampus.projectboard.domain.QArticle;
 import com.fastcampus.projectboard.domain.QArticleComment;
 import com.querydsl.core.types.dsl.DateTimeExpression;
 import com.querydsl.core.types.dsl.StringExpression;

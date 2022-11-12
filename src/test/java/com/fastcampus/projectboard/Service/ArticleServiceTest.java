@@ -33,6 +33,7 @@ class ArticleServiceTest {
 
     @InjectMocks private ArticleService sut;
 
+
     @Mock private ArticleRepository articleRepository;
 
     @DisplayName("검색어 없이 게시글을 검색하면, 게시글 페이지를 반환한다.")
@@ -169,6 +170,7 @@ class ArticleServiceTest {
                 "uno@email.com",
                 "Uno",
                 null
+                ,null
         );
     }
 
@@ -193,7 +195,11 @@ class ArticleServiceTest {
                 LocalDateTime.now(),
                 "Uno",
                 LocalDateTime.now(),
-                "Uno");
+                "Uno",
+                "N",
+                0,
+                0
+                );
     }
 
     private UserAccountDto createUserAccountDto() {
@@ -206,7 +212,8 @@ class ArticleServiceTest {
                 LocalDateTime.now(),
                 "uno",
                 LocalDateTime.now(),
-                "uno"
+                "uno",
+                null
         );
     }
 

@@ -6,12 +6,14 @@ import com.fastcampus.projectboard.Service.HashtagService;
 import com.fastcampus.projectboard.Service.UserService;
 import com.fastcampus.projectboard.config.SecurityConfig;
 import com.fastcampus.projectboard.domain.Article;
+import com.fastcampus.projectboard.domain.ArticleComment;
 import com.fastcampus.projectboard.domain.Hashtag;
 import com.fastcampus.projectboard.domain.UserAccount;
 import com.fastcampus.projectboard.dto.ArticleDto;
 import com.fastcampus.projectboard.dto.ArticleWithCommentDto;
 import com.fastcampus.projectboard.dto.HashtagDto;
 import com.fastcampus.projectboard.dto.UserAccountDto;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,6 +25,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -65,6 +68,26 @@ class ArticleControllerTest {
     }
 
 
+    @BeforeEach
+    void setUp() {
+        UserAccount userAccount = UserAccount.of(
+                "test",
+                "12341234",
+                "test@email.com",
+                "test",
+                "test",
+                null);
+
+        Article article = Article.of(
+                userAccount,"haha","haha"
+        );
+
+        ArticleComment articleComment = ArticleComment.
+                of(article,userAccount,"haha");
+
+        userService.saveUserAccount(UserAccountDto.from(userAccount));
+    }
+
     @DisplayName("[view][GET] 게시글 페이지 ")
     @Test
     public void givenNothing_whenRequestingArticlesView_thenReturnsArticlesView() throws Exception {
@@ -87,11 +110,12 @@ class ArticleControllerTest {
         //when & then
         mvc.perform(get("/articles/post")).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
-                .andExpect(view().name("articles/create"));
+                .andExpect(view().name("articles/post/article_form"));
     }
-    @Disabled
+
     @DisplayName("[view][POST] 게시글 등록 ")
     @Test
+    @WithUserDetails("test")
     public void givenArticleInfo_whenSavingArticle_thenSavesArticle() throws Exception {
         //given
        ArticleDto articleDto = ArticleDto.from(createArticle());
@@ -99,7 +123,8 @@ class ArticleControllerTest {
         mvc.perform(post("/articles/post")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .param("title", articleDto.title())
-                .param("content", articleDto.content()))
+                .param("content", articleDto.content())
+                .param("hashtag", "haha"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/articles"));
     }
@@ -197,7 +222,12 @@ class ArticleControllerTest {
                 LocalDateTime.now(),
                 "uno",
                 LocalDateTime.now(),
-                "uno"
+                String.valueOf(LocalDateTime.now()),
+                "N",
+                0,
+                0
+
+
         );
     }
     private UserAccount createUserAccount() {
@@ -206,6 +236,7 @@ class ArticleControllerTest {
                 "password",
                 "uno@email.com",
                 "Uno",
+                null,
                 null
         );
     }
@@ -227,7 +258,8 @@ class ArticleControllerTest {
                 LocalDateTime.now(),
                 "uno",
                 LocalDateTime.now(),
-                "uno"
+                "uno",
+                null
         );
     }
 
