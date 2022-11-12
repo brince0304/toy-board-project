@@ -52,6 +52,15 @@ public class ArticleCommentController {
     }
     //현재 접속한 사용자의 정보를 받아와 DTO로 넘겨주고 , 댓글을 작성함
 
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/{articleId}/reply")
+    public String writeChildrenComment(@PathVariable Long articleId,ArticleCommentRequest dto, @AuthenticationPrincipal BoardPrincipal principal) {
+        if (principal.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_USER"))) {
+            articleCommentService.saveChildrenComment(dto.parentId(),dto.toDto(principal.toDto()));
+            return "redirect:/articles/" + articleId;
+        }
+        return "redirect:/articles/" + articleId;
+    }
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/delete/{articleId}/{articleCommentId}")
