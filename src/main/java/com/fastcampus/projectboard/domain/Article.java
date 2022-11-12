@@ -31,7 +31,7 @@ public class Article extends AuditingFields{
     @Setter @Column(nullable = false,length = 10000) private String content;
 
 
-    @OrderBy("createdAt DESC")  //id 순서
+    @OrderBy("createdAt")  //id 순서
     @OneToMany(mappedBy = "article", cascade = CascadeType.ALL) //양방향 관계 (article이 주체)
     @ToString.Exclude //과부하 발생 예방
     private final Set<ArticleComment> articleComments = new LinkedHashSet<>();
