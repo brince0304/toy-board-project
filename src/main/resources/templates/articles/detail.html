@@ -16,6 +16,13 @@
             integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
             crossorigin="anonymous"></script>
     <style>
+        .replyicon {
+            width: 20px;
+            height: 20px;
+        }
+        .children{
+            margin-left: 20px;
+        }
         .return{
             float: right;
         }
@@ -207,7 +214,7 @@
             </form>
             <br>
             <div th:each="articleComment : ${articleComments}">
-                <div th:if="${articleComment.deleted != 'Y'}">
+                <div th:if="${articleComment.deleted != 'Y' && articleComment.isParent.equals('Y')}">
                     &nbsp
                     <time class="comment4" th:datetime="${articleComment.createdAt}"
                           th:text="${#temporals.format(articleComment.createdAt, 'yyyy-MM-dd HH:mm')}"
@@ -220,6 +227,13 @@
                        th:data-uri="@{|/articles/comments/delete/${articleId}/${articleComment.id}|}">
                         <button class="btn btn-light">삭제</button>
                     </a>
+                    <button type="button"
+                            data-bs-toggle="collapse"
+                            sec:authorize="isAuthenticated()"
+                            th:attr="data-bs-target=|#r${articleComment.id}"
+                            th:if="${articleComment.userId != null and articleComment.userId.equals(#authentication.getName())}"
+                            style="display:inline" class="btn btn-light">답글달기
+                    </button>
                     <button type="button"
                             data-bs-toggle="collapse"
                             sec:authorize="isAuthenticated()"
@@ -256,13 +270,100 @@
                     <hr>
                     <p>
 
+                    <div class="collapse" th:id="r + ${articleComment.id}">
+                        <form sec:authorize="isAuthenticated()"  th:action="@{|/articles/comments/${article.id}/reply|}" method="post" th:object="${dto}">
+                            <div class="input-group" style="width:auto">
+                                <label for="content" class="form-label mt-4" hidden>댓글 작성</label>
+                                <input type="text"  th:name="content" class="form-control" id="reply1" name="reply1">
+                                <input type="hidden" th:name="parentId" th:value="${articleComment.id}"/>
+                                <button type="submit" class="btn btn-outline-dark">답글작성</button>
+                                <br>
+                            </div>
+                            <br>
+                        </form>
+                    </div>
                 </div>
-                <div>
-                    <p th:if="${articleComment.deleted == 'Y'}" >
+                <div th:each="reply : ${articleComment.children}">
+                    <div class="children" th:if="${reply.deleted != 'Y' }">
+                        &nbsp;
+                        <time class="comment4" th:datetime="${reply.createdAt}"
+                              th:text="${#temporals.format(reply.createdAt, 'yyyy-MM-dd HH:mm')}"
+                              style="display:inline"><small>2022-10-01</small></time>
+                        <img src="/img/reply-ico.png" alt="답글" style="display:inline" class="replyicon">
+                        <strong class="writer" th:text="${reply.userAccountDto.nickname}">brince</strong>
+                        &nbsp;
+                        <a sec:authorize="isAuthenticated()" class="delete"
+                           th:if="${reply.userAccountDto.userId != null && reply.userAccountDto.userId == #authentication.getName()|| #authorization.expression('hasRole(''ADMIN'')')}"
+                           href="javascript:void(0);"
+                           th:data-uri="@{|/articles/comments/delete/${articleId}/${reply.id}|}">
+                            <button class="btn btn-light">삭제</button>
+                        </a>
+                        <button type="button"
+                                data-bs-toggle="collapse"
+                                sec:authorize="isAuthenticated()"
+                                th:attr="data-bs-target=|#r${reply.id}"
+                                th:if="${reply.userAccountDto.userId != null and reply.userAccountDto.userId.equals(#authentication.getName())}"
+                                style="display:inline" class="btn btn-light">수정
+                        </button>
+                        <div class="collapse" th:id="r + ${reply.id}">
+                            <form sec:authorize="isAuthenticated()"
+                                  th:if="${reply.userAccountDto.userId != null and reply.userAccountDto.userId.equals(#authentication.getName()) || #authorization.expression('hasRole(''ADMIN'')')}"
+                                  th:action="@{|/articles/comments/put/${article.id}/${reply.id}|}"
+                                  th:object="${dto}" method="post">
+                                <div class="input-group" style="width:auto">
+                                    <label for="content" class="form-label mt-4" hidden>댓글 작성</label>
+                                    <input type="text" th:field="*{content}" class="form-control" id="replyUpdate" name="update"
+                                           th:attr="placeholder=${reply.content}">
+                                    <div class="field-error" th:errors="*{content}">
+                                        오류2
+                                    </div>
+                                    <button href="javascript:void(0);"
+                                            th:data-uri="@{|/articles/comments/update/${articleId}/${reply.id}|}"
+                                            type="submit" class="update btn btn-outline-dark">수정
+                                    </button>
+                                    <br>
+                                </div>
+                                <br>
+                            </form>
+                        </div>
+
+
+                        <p th:text="${reply.content}">
+                            Lorem ipsum dolor sit amet, consectetur aidpiscino
+                            Lorem ipsum dolor sit amet
+                        <p>
+                    <hr>
+                    </div>
+                    <div class="children" th:if="${reply.deleted == 'Y'}">
+                    <p >
+                        <img src="/img/reply-ico.png" alt="답글" style="display:inline" class="replyicon">
+                        <span class="comment3">삭제된 답글입니다.</span>
+                    </p>
+                        <hr>
+                </div>
+                    <div class="children"  th:if="${reply.deleted == 'Y' && #authorization.expression('hasRole(''ADMIN'')')}" sec:authorize="hasRole('ADMIN')">
+                        <div>
+                            <time class="comment4" th:datetime="${reply.createdAt}"
+                                  th:text="${#temporals.format(reply.createdAt, 'yyyy-MM-dd HH:mm')}"
+                                  style="display:inline"><small>2022-10-01</small></time>
+                            <strong class="writer" th:text="${reply.userAccountDto.nickname}">brince</strong>
+                        </div>
+
+                        <img src="/img/reply-ico.png" alt="답글" style="display:inline" class="replyicon">
+                        <p  th:text="${reply.content}+'//삭제된 답글입니다.'">
+                            Lorem ipsum dolor sit amet, consectetur aidpiscino
+                            Lorem ipsum dolor sit amet
+                        <p>
+
+                    </div>
+                </div>
+                <div th:if="${articleComment.deleted == 'Y' && articleComment.isParent.equals('Y')}" >
+                    <p>
                         <span class="comment3">삭제된 댓글입니다.</span>
                     </p>
+                    <hr>
                 </div>
-                <div th:if="${articleComment.deleted == 'Y' && #authorization.expression('hasRole(''ADMIN'')')}" sec:authorize="hasRole('ADMIN')">
+                <div th:if="${articleComment.deleted == 'Y' && articleComment.isParent.equals('Y') && #authorization.expression('hasRole(''ADMIN'')')}" sec:authorize="hasRole('ADMIN')">
                     <div>
                         <time class="comment4" th:datetime="${articleComment.createdAt}"
                               th:text="${#temporals.format(articleComment.createdAt, 'yyyy-MM-dd HH:mm')}"
@@ -274,15 +375,11 @@
                         <p th:text="${articleComment.content}+'//삭제된 댓글입니다.'">
                             Lorem ipsum dolor sit amet, consectetur aidpiscino
                             Lorem ipsum dolor sit amet
-                        <hr>
                         <p>
 
                     </div>
                     </div>
                 </div>
-
-
-            </div>
     </section>
 
 
