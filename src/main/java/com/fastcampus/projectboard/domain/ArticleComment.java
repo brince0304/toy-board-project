@@ -11,6 +11,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -43,7 +44,7 @@ public class ArticleComment extends AuditingFields{
     @Setter
     @OneToMany(mappedBy = "parent")
     @ToString.Exclude
-    private Set<ArticleComment> children = new HashSet<>();
+    private Set<ArticleComment> children = new LinkedHashSet<>();
 
     @Setter
     private String isParent;

@@ -76,7 +76,6 @@ public class ArticleCommentService {
             Set<ArticleComment> set = parent.getChildren();
             set.add(articleComment);
             parent.setChildren(set);
-
         } catch (EntityNotFoundException e) {
             log.warn("댓글 저장 실패. 댓글 작성에 필요한 정보를 찾을 수 없습니다 - {}", e.getLocalizedMessage());
         }
