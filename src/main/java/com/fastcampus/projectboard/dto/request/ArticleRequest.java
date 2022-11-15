@@ -36,11 +36,13 @@ public class ArticleRequest{
 
     public ArticleRequest(String title, String content,String hashtag) {
         Set<HashtagDto> hashtags = new HashSet<>();
-        if (hashtag.contains("#")) {
-            String newHashtag = hashtag.replaceAll(" ", "");
-            StringTokenizer st = new StringTokenizer(newHashtag, "#");
-            while (st.hasMoreTokens()) {
-                hashtags.add(HashtagDto.of(st.nextToken()));
+        if(hashtag!=null) {
+            if (hashtag.contains("#")) {
+                String newHashtag = hashtag.replaceAll(" ", "");
+                StringTokenizer st = new StringTokenizer(newHashtag, "#");
+                while (st.hasMoreTokens()) {
+                    hashtags.add(HashtagDto.of(st.nextToken()));
+                }
             }
         }
         this.title = title;

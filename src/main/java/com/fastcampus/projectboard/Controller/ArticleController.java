@@ -27,6 +27,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -90,15 +91,15 @@ public class ArticleController {
         map.addAttribute("hashtag",dto);
         return "articles/tag/result";
     }
-
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/post")
-    public String articleCreate(ArticleForm articleForm){
+    public String articleCreate(Model model, ArticleRequest dto){
+        model.addAttribute("dto",dto);
         return "articles/post/article_form";
     }
 
     @PostMapping("/post")
-    public String articleSave(@Valid ArticleForm articleForm,BindingResult bindingResult,
-        ArticleRequest dto,
+    public String articleSave(@ModelAttribute ("dto") @Valid ArticleRequest dto,BindingResult bindingResult,
         @AuthenticationPrincipal BoardPrincipal boardPrincipal) {
             if(bindingResult.hasErrors()){
                 return "articles/post/article_form";
@@ -109,19 +110,22 @@ public class ArticleController {
 
 
     @GetMapping("/put/{articleId}")
-    public String articleUpdate(@PathVariable Long articleId, ModelMap map, ArticleForm articleForm,
+    public String articleUpdate(@PathVariable Long articleId, ModelMap map,
+                                ArticleRequest dto,
                                 @AuthenticationPrincipal BoardPrincipal boardPrincipal){
          ArticleWithCommentDto articleDto = articleService.getArticle(articleId);
+         dto.setContent(articleDto.getContent());
+         dto.setTitle(articleDto.getTitle());
          if(!articleDto.getUserAccountDto().userId().equals(boardPrincipal.username())){
              return "redirect:/articles";}
          else{
             Set<HashtagDto> hashtagDto = articleDto.getHashtags();
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             for(int i=0; i<hashtagDto.size(); i++){
                 if(i != hashtagDto.size()-1){sb.append("#").append(hashtagDto.stream().toList().get(i).hashtag()).append(" ");}
                 else{sb.append("#").append(hashtagDto.stream().toList().get(i).hashtag());}}
-            map.addAttribute("hashtag",sb);
-            map.addAttribute("dto",articleDto);
+            dto.setHashtag(String.valueOf(sb));
+            map.addAttribute("dto",dto);
         }
         return "articles/put/article_form";
     }
@@ -129,8 +133,7 @@ public class ArticleController {
 
     @PostMapping("/put/{articleId}")
     public String updateArticle(
-            @PathVariable Long articleId,ArticleRequest dto,
-            @Valid ArticleForm articleForm,
+            @PathVariable Long articleId,@ModelAttribute ("dto") @Valid ArticleRequest dto,
             BindingResult bindingResult,
             @AuthenticationPrincipal BoardPrincipal boardPrincipal){
         if (bindingResult.hasErrors()) {
