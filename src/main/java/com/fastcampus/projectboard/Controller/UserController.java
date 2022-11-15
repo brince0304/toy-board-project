@@ -18,6 +18,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -78,14 +79,16 @@ public class UserController {
     }
 
     @GetMapping("/login")
-    public String login() {
+    public String login( ModelMap modelMap) {
+        modelMap.addAttribute("error","");
         return "/user/login_form";
     }
 
     @PostMapping("/login")
     public String login(LoginDto user,
                         HttpServletRequest req,
-                        HttpServletResponse res) {
+                        HttpServletResponse res,
+                        ModelMap map) {
         try {
             final BoardPrincipal principal = userService.loginUser(user.getUsername(), user.getPassword());
             Cookie accessToken = cookieUtil.createCookie(TokenProvider.ACCESS_TOKEN_NAME, tokenProvider.generateToken(principal));
@@ -97,7 +100,7 @@ public class UserController {
             res.addCookie(refreshToken);
             return "redirect:/";
         } catch (Exception e) {
-            log.error("login error", e);
+            map.addAttribute("error", "아이디 또는 비밀번호가 일치하지 않습니다.");
             return "redirect:/login";
         }
     }

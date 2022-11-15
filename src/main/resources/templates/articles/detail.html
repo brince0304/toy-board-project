@@ -199,11 +199,11 @@
         </div>
         <div>
             <form sec:authorize="isAuthenticated()"
-                  th:action="@{|/articles/comments/${article.id}|}" th:object="${dto}" method="post">
+                  th:action="@{|/articles/comments/${article.id}|}" method="post">
                 <div class="input-group" style="width:auto">
 
                     <label for="content" class="form-label mt-4" hidden>댓글 작성</label>
-                    <input type="text" th:field="*{content}" class="form-control" id="content" name="content"
+                    <input type="text"  class="form-control" id="content" name="content"
                            placeholder="1자에서 100자 이내로 입력해주세요.">
                     <div class="field-error" th:errors="*{content}">
                         오류2
