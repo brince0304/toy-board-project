@@ -36,23 +36,17 @@ public class ArticleCommentControllerTest {
     private final MockMvc mvc;
 
 
-    @MockBean
-    private final ArticleService articleService;
 
     @MockBean
     private final UserService userService;
 
-    @MockBean
-    private final ArticleCommentService articleCommentService;
 
 
 
 
-    public ArticleCommentControllerTest(@Autowired MockMvc mvc, @Autowired ArticleService articleService, @Autowired UserService userService, @Autowired ArticleCommentService articleCommentService) {
+    public ArticleCommentControllerTest(@Autowired MockMvc mvc, @Autowired UserService userService) {
         this.mvc = mvc;
-        this.articleService = articleService;
         this.userService = userService;
-        this.articleCommentService = articleCommentService;
     }
 
     @BeforeEach
