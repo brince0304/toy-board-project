@@ -4,18 +4,19 @@ import com.fastcampus.projectboard.dto.ArticleCommentDto;
 import com.fastcampus.projectboard.dto.ArticleDto;
 import com.fastcampus.projectboard.dto.HashtagDto;
 import com.fastcampus.projectboard.dto.UserAccountDto;
+import io.micrometer.core.lang.Nullable;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.regex.Pattern;
 
 /**
  * A DTO for the {@link com.fastcampus.projectboard.domain.Article} entity
@@ -23,13 +24,12 @@ import java.util.regex.Pattern;
 
 @Getter
 @Setter
-public class ArticleRequest{
+public class ArticleRequest implements Serializable {
     @Size(min = 5, message = "* 제목은 5자 이상 입력해주세요.")
     private String title;
     @Size(min = 5, message = "* 내용은 5자 이상 입력해주세요.")
       private String content;
-
-
+    @Nullable
       private String hashtag;
       private Set<HashtagDto> hashtags = new HashSet<>();
 

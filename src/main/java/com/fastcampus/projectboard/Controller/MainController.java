@@ -12,4 +12,9 @@ public class MainController {
         return "forward:/articles";
     }
 
+    @GetMapping("/null")
+    public String nullPage(){
+        return "redirect:/";
+    }
+
 }
