@@ -2,7 +2,7 @@
 <head>
   <link href="/css/bootstrap.min.css" rel="stylesheet">
   <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
   <title>회원가입</title>
   <style>
 
@@ -110,123 +110,58 @@
   헤더
   <hr>
 </header>
-<form th:action="@{/signup}" th:object="${userCreateForm}" method="post" style="width:700px">
+<form method="post" style="width:700px">
   <p class="register">회원가입</p>
   <label for="userId" class="form-label"> 아이디 </label>
-    <input id="userId" th:classappend="${#fields.hasErrors('userId')} ? 'is-invalid'" type="text" class="input" th:field="*{userId}">
-  <div class="line-box" th:if="${!#fields.hasErrors('userId')}">
+    <input id="userId"  type="text" class="input" >
+  <div class="line-box" >
     <div class="line" ></div>
+    <span class="field-error idCheck">아이디는 6자 이상 25자 이하로 입력해주세요.</span>
   </div>
-  <div class="line-box2" th:if="${#fields.hasErrors('userId')}">
-    <div class="line" ></div>
-  </div>
-  <div class="field-error" th:errors="*{userId}">
-    오류2
-  </div>
+  <input type="hidden" id="idDoubleChk"/>
+
   <label for="email" class="form-label"> 이메일 </label>
-    <input id="email" th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'" type="email" class="input" th:field="*{email}">
-  <div class="line-box" th:if="${!#fields.hasErrors('email')}">
+    <input id="email" type="email" class="input" >
+  <div class="line-box" >
     <div class="line" ></div>
-  </div>
-  <div class="line-box2" th:if="${#fields.hasErrors('email')}">
-    <div class="line" ></div>
-  </div>
-  <div class="field-error" th:errors="*{email}">
-    오류2
+    <span class="field-error emailCheck"></span>
+    <input type="hidden" id="emailDoubleChk"/>
   </div>
   <label for="nickname" class="form-label "> 닉네임 </label>
-    <input id="nickname" type="text" th:classappend="${#fields.hasErrors('nickname')} ? 'is-invalid'" class="input" th:field="*{nickname}">
-    <div class="line-box" th:if="${!#fields.hasErrors('nickname')}">
+    <input id="nickname" type="text"  class="input" >
+  <div class="line-box" >
       <div class="line" ></div>
-    </div>
-  <div class="line-box2" th:if="${#fields.hasErrors('nickname')}">
-    <div class="line" ></div>
+    <span class="field-error nicknameCheck">닉네임은 2자 이상 10자 이하로 입력해주세요.</span>
+    <input type="hidden" id="nicknameDoubleChk"/>
   </div>
-  <div class="field-error" th:errors="*{nickname}">
-  오류2
-</div>
   <label for="password1" class="form-label"> 비밀번호 </label>
-    <input id="password1" th:classappend="${#fields.hasErrors('password1')} ? 'is-invalid'" type="password" class="input" th:field="*{password1}">
-  <div class="line-box" th:if="${!#fields.hasErrors('password1')}">
+    <input id="password1"  type="password" class="input" >
+  <div class="line-box" >
     <div class="line" ></div>
-  </div>
-  <div class="line-box2" th:if="${#fields.hasErrors('password1')}">
-    <div class="line" ></div>
-  </div>
-  <div class="field-error" th:errors="*{password1}">
-    오류2
+    <span class="field-error passwordCheck">비밀번호는 특수문자,대소문,숫자 포함 8자 이상 25자 이하로 입력해주세요.</span>
   </div>
   <label for="password2" class="form-label"> 비밀번호 재입력 </label>
-    <input id="password2" th:classappend="${#fields.hasErrors('password2')} ? 'is-invalid'" type="password" class="input" th:field="*{password2}">
-  <div class="line-box" th:if="${!#fields.hasErrors('password2')}">
+    <input id="password2" type="password" class="input" >
+  <div class="line-box" >
     <div class="line" ></div>
-  </div>
-  <div class="line-box2" th:if="${#fields.hasErrors('password2')}">
-    <div class="line" ></div>
-  </div>
-  <div class="field-error" th:errors="*{password2}">
-    오류2
+    <span class="field-error passwordInvalidCheck"></span>
   </div>
   <label for="memo" class="form-label"> 메모 </label>
-    <input id="memo" th:classappend="${#fields.hasErrors('memo')} ? 'is-invalid'" type="text" class="input" th:field="*{memo}">
-  <div class="line-box" th:if="${!#fields.hasErrors('memo')}">
+    <input id="memo" type="text" class="input" >
+  <div class="line-box" >
     <div class="line" ></div>
   </div>
-  <div class="line-box2" th:if="${#fields.hasErrors('memo')}">
-    <div class="line" ></div>
-  </div>
-  <div class="field-error" th:errors="*{memo}">
-    오류2
-  </div>
+
   <br>
-  <button type="submit">가입</button>
+  <button id="signupBtn" type="button">가입 </button>
   &nbsp;
   &nbsp;
   <button th:action="@{/articles}" type="button">취소</button>
 </form>
-<!--<div layout:fragment="content" class="container my-3">-->
-<!--  <div class="my-3 border-bottom">-->
-<!--    <div>-->
-<!--      <h4>회원가입</h4>-->
-<!--    </div>-->
-<!--  </div>-->
-<!--  <main class="justify-content-center">-->
-<!--  <form th:action="@{/signup}" th:object="${userCreateForm}" method="post">-->
-<!--    <div class="alert alert-danger" role="alert" th:if="${#fields.hasAnyErrors()}">-->
-<!--      <div th:each="err : ${#fields.allErrors()}" th:text="${err}" />-->
-<!--    </div>-->
-<!--    <div class="mb-3">-->
-<!--      <label for="userId" class="form-label">사용자ID</label>-->
-<!--      <input id="userId" type="text" th:field="*{userId}" class="form-control">-->
-<!--    </div>-->
-<!--    <div class="mb-3">-->
-<!--      <label for="password1" class="form-label">비밀번호</label>-->
-<!--      <input id="password1" type="password" th:field="*{password1}" class="form-control">-->
-<!--    </div>-->
-<!--    <div class="mb-3">-->
-<!--      <label for="password2" class="form-label">비밀번호 확인</label>-->
-<!--      <input id="password2" type="password" th:field="*{password2}" class="form-control">-->
-<!--    </div>-->
-<!--    <div class="mb-3">-->
-<!--      <label for="nickname" class="form-label">닉네임</label>-->
-<!--      <input id="nickname" type="text" th:field="*{nickname}" class="form-control">-->
-<!--    </div>-->
-<!--    <div class="mb-3">-->
-<!--      <label for="email" class="form-label">이메일</label>-->
-<!--      <input id="email" type="email" th:field="*{email}" class="form-control">-->
-<!--    </div>-->
-<!--    <div class="mb-3">-->
-<!--      <label for="memo" class="form-label">메모</label>-->
-<!--      <input id="memo" type="text" th:field="*{memo}" class="form-control">-->
-<!--    </div>-->
-<!--    <button type="submit" class="btn btn-primary">회원가입</button>-->
-<!--  </form>-->
-<!--  </main>-->
-<!--</div>-->
-
 <footer id="footer">
 푸터
 </footer>
+<script src="/js/jquery.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
 
 </html>

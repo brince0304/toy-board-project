@@ -34,16 +34,13 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
 
-    private final TokenProvider tokenProvider;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
-    private final RedisUtil redisUtil;
     private final UserAccountRepository userAccountRepository;
 
 
     private final SaltUtil saltUtil;
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Transactional
     public void saveUserAccount(UserAccountDto user) {
         if(userAccountRepository.findById(user.userId()).isPresent()){
             throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
@@ -57,6 +54,13 @@ public class UserService {
         String password = user.userPassword();
         UserAccount account = userAccountRepository.save(user.toEntity());
         account.setUserPassword(new BCryptPasswordEncoder().encode(password));
+    }
+
+    public boolean isUserExists(String userId){
+        if(userAccountRepository.findById(userId).isPresent()){
+            return true;
+        }
+        return false;
     }
 
 
