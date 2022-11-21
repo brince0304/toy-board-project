@@ -2,6 +2,7 @@ package com.fastcampus.projectboard.config;
 
 import com.fastcampus.projectboard.Jwt.JwtRequestFilter;
 import com.fastcampus.projectboard.Service.UserSecurityService;
+import com.fastcampus.projectboard.Util.CookieUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -15,7 +16,9 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -25,19 +28,22 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.transaction.Transactional;
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    @Autowired
     private final UserSecurityService userSecurityService;
     private final JwtRequestFilter jwtRequestFilter;
 
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final  JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+
 
 
 
@@ -49,20 +55,22 @@ public class SecurityConfig {
                 .accessDeniedHandler(jwtAccessDeniedHandler)
                 .and()
                 .cors().configurationSource(corsConfigurationSource())
-                // 세션을 사용하지 않기 때문에 STATELESS로 설정
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .formLogin().disable().logout().disable()
+                .formLogin().disable()
+                .logout().disable()
                 .authorizeRequests()
-                .antMatchers("/login").permitAll()
-                .antMatchers("/reissue").permitAll()
-                .antMatchers("/articles").permitAll()
+                .antMatchers((Constants.ResourceArray)).permitAll()
+                .antMatchers(Constants.PermitAllUrl).permitAll()
                 .and()
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
+
+
+
 
         public BCryptPasswordEncoder passwordEncoder() {
             return new BCryptPasswordEncoder();

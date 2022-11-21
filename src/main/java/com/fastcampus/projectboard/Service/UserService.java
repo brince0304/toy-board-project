@@ -34,16 +34,12 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
 
-    private final TokenProvider tokenProvider;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
-    private final RedisUtil redisUtil;
     private final UserAccountRepository userAccountRepository;
 
 
-    private final SaltUtil saltUtil;
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Transactional
     public void saveUserAccount(UserAccountDto user) {
         if(userAccountRepository.findById(user.userId()).isPresent()){
             throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
@@ -59,12 +55,21 @@ public class UserService {
         account.setUserPassword(new BCryptPasswordEncoder().encode(password));
     }
 
+    @Transactional(readOnly = true)
+    public boolean isUserExists(String userId){
+        if(userAccountRepository.findById(userId).isPresent()){
+            return true;
+        }
+        return false;
+    }
+
 
 
     // 토큰 재발급 관련 메서드
 
 
     // 권한 가져오기
+    @Transactional(readOnly = true)
     public String getAuthorities(Authentication authentication) {
         return authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
@@ -92,6 +97,7 @@ public class UserService {
         }
     }
 
+    @Transactional(readOnly = true)
     public UserAccountDto getUserAccount(String userId) {
         UserAccount userAccount = userAccountRepository.findById(userId).orElseThrow();
         return UserAccountDto.from(userAccount);
@@ -104,15 +110,16 @@ public class UserService {
             throw new IllegalArgumentException("회원정보 삭제에 실패했습니다");
         }
     }
-
+    @Transactional(readOnly = true)
     public boolean isExistUser(String userId) {
         return userAccountRepository.findById(userId).isPresent();
     }
 
+    @Transactional(readOnly = true)
     public boolean isExistNickname(String nickname) {
         return userAccountRepository.findByNickname(nickname).isPresent();
     }
-
+    @Transactional(readOnly = true)
     public boolean isExistEmail(String email) {
         return userAccountRepository.findByEmail(email).isPresent();
     }

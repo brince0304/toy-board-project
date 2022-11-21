@@ -1,0 +1,112 @@
+.replyicon {
+    width: 20px;
+    height: 20px;
+}
+.children{
+    margin-left: 5px;
+}
+.return{
+    float: right;
+}
+.field-error {
+    color: red;
+    font-weight: normal;
+    font-size: 0.875rem;
+}
+
+.comment {
+    color: #212529;
+    font-weight: normal;
+    font-size: 1.2rem;
+}
+
+.comment2 {
+    color: silver;
+    font-weight: bold;
+    font-size: 0.875rem;
+}
+
+.writer2 {
+    font-size: 1.5rem;
+    font-weight: normal;
+    text-align: right;
+}
+
+.writer {
+    font-size: x-large;
+    font-weight: bold;
+}
+
+.comment-img{
+    width: 1%;
+    height: 1%;
+}
+
+.writer3 {
+    font-weight: bold;
+    text-align: right;
+}
+
+.hashtag {
+    color: silver;
+
+}
+
+.buttons {
+    float: right;
+}
+
+.likebutton{
+    float: left;
+
+}
+
+.comment4 {
+    text-align: right;
+    float: right;
+}
+
+.field-error {
+    color: #212529;
+    font-weight: normal;
+    font-size: 0.875rem;
+
+}
+.childrenComment{
+    margin-left: 25px;
+}
+
+.hover:hover {
+    background: #e6e6e6;
+}
+
+a {
+    text-decoration: none;
+}
+
+.sir_singo_msg {
+    color: #934545;
+    margin-bottom: 30px
+}
+
+.sir_singo_msg button {
+    cursor: pointer;
+    font-family: Arial, '돋움', Dotum;
+    border: none;
+    padding: 0;
+    background: #fff;
+    outline: 0
+}
+
+.sir_singo_msg .blind_view {
+    font-size: 1.14em;
+    font-weight: bold;
+    color: #ff4343;
+    margin-top: -3px;
+    text-decoration: underline
+}
+
+.singo_view {
+    display: none;
+}
+

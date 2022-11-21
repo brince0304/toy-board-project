@@ -203,7 +203,7 @@ class ArticleControllerTest {
         articleService.saveArticle(ArticleDto.from(article),dto);
 
         //when & then
-        mvc.perform(get("/articles/search-hashtag/"+"test"))
+        mvc.perform(get("/articles/search-hashtag/"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.TEXT_HTML))
                 .andExpect(model().attributeExists("articles"))

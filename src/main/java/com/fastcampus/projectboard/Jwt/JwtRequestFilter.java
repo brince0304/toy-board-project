@@ -7,6 +7,7 @@ import com.fastcampus.projectboard.Util.TokenProvider;
 import com.fastcampus.projectboard.dto.security.BoardPrincipal;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.io.IOException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -32,15 +34,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @Service
+@RequiredArgsConstructor
 public class JwtRequestFilter extends OncePerRequestFilter {
-    @Autowired
-    private UserSecurityService userDetailsService;
-    @Autowired
-    private TokenProvider tokenProvider;
-    @Autowired
-    private CookieUtil cookieUtil;
-    @Autowired
-    private RedisUtil redisUtil;
+    private final UserSecurityService userDetailsService;
+    private final TokenProvider tokenProvider;
+    private final CookieUtil cookieUtil;
+    private final RedisUtil redisUtil;
+
+
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException, java.io.IOException {
