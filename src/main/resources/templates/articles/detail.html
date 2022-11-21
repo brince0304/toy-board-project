@@ -1,128 +1,17 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:sec="http://www.w3.org/1999/xhtml" xmlns:layout="http://www.w3.org/1999/xhtml">
 <head>
-    <script src="https://cdn.ckeditor.com/ckeditor5/35.2.0/classic/ckeditor.js"></script>
-
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
     <meta charset="UTF-8">
     <title>게시글 페이지</title>
     <link href="/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-            crossorigin="anonymous"></script>
+    <link href="/css/board.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"
             integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
             crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"
             integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
             crossorigin="anonymous"></script>
-    <style>
-        .replyicon {
-            width: 20px;
-            height: 20px;
-        }
-        .children{
-            margin-left: 5px;
-        }
-        .return{
-            float: right;
-        }
-        .field-error {
-            color: red;
-            font-weight: normal;
-            font-size: 0.875rem;
-        }
-
-        .comment {
-            color: #212529;
-            font-weight: normal;
-            font-size: 1.2rem;
-        }
-
-        .comment2 {
-            color: silver;
-            font-weight: bold;
-            font-size: 0.875rem;
-        }
-
-        .writer2 {
-            font-size: 1.5rem;
-            font-weight: normal;
-            text-align: right;
-        }
-
-        .writer {
-            font-size: x-large;
-            font-weight: bold;
-        }
-
-        .writer3 {
-            font-weight: bold;
-            text-align: right;
-        }
-
-        .hashtag {
-            color: silver;
-
-        }
-
-        .buttons {
-            float: right;
-        }
-
-        .likebutton{
-            float: left;
-
-        }
-
-        .comment4 {
-            text-align: right;
-            float: right;
-        }
-
-        .field-error {
-            color: #212529;
-            font-weight: normal;
-            font-size: 0.875rem;
-
-        }
-        .childrenComment{
-            margin-left: 25px;
-        }
-
-        .hover:hover {
-            background: #e6e6e6;
-        }
-
-        a {
-            text-decoration: none;
-        }
-
-        .sir_singo_msg {
-            color: #934545;
-            margin-bottom: 30px
-        }
-
-        .sir_singo_msg button {
-            cursor: pointer;
-            font-family: Arial, '돋움', Dotum;
-            border: none;
-            padding: 0;
-            background: #fff;
-            outline: 0
-        }
-
-        .sir_singo_msg .blind_view {
-            font-size: 1.14em;
-            font-weight: bold;
-            color: #ff4343;
-            margin-top: -3px;
-            text-decoration: underline
-        }
-
-        .singo_view {
-            display: none;
-        }
-    </style>
 </head>
 <body>
 <header id="header">
@@ -143,20 +32,19 @@
                     </a>
                 </div>
                 <div class="buttons">
-                    <a th:href="@{|/articles/${articleId}/like|}" sec:authorize="isAuthenticated()">
-                        <button type="button" style="display:inline" class="btn btn-light">추천</button>
-                    </a>
+                        <button type="button" onclick="likeBtn()" id="likeBtn" style="display:inline" th:text="${'추천: '+article.likeCount()}" class="likeBtn btn btn-light"></button>
+                        <input type="hidden" th:value="${article.id}" id="articleId">
                 </div>
                 <div style="display:inline" class="buttons">
-                    <a th:href="@{|/articles/put/${articleId}|}"
-                     sec:authorize="isAuthenticated()" th:if="${article.userId() != null && #authentication.getName() == article.userId()}">
-                        <button type="button" class="btn btn-light">글 수정</button>
+                    <a sec:authorize="isAuthenticated()" th:if="${article.userId() != null && #authentication.getName() == article.userId()}"
+                    th:href="@{|/articles/post/${articleId}|}">
+                        <button type="button"  class="btn btn-light">글 수정</button>
                     </a>
-
-                    <a href="javascript:void(0);" th:data-uri="@{|/articles/delete/${article.id()}|}"
+                    <a href="javascript:void(0);" th:data-uri="@{/articles}"
                        sec:authorize="isAuthenticated()"
                        th:if="${article.userId() != null && #authentication.getName() == article.userId() || #authorization.expression('hasRole(''ADMIN'')')}"
                        class="delete">
+                        <input type="text" th:value="${articleId}"  hidden style="display:none">
                         <button type="button" class="btn btn-light">글 삭제</button>
                     </a> &nbsp;
                 </div>
@@ -180,187 +68,24 @@
             <p class="comment2" sec:authorize="isAnonymous()">로그인 후 댓글을 작성할 수 있습니다.</p>
         </div>
         <div sec:authorize="isAuthenticated()">
-            <form th:object="${dto}"
-                  th:action="@{|/articles/comments/${article.id}|}" method="post" >
+            <form method="post" >
                 <div class="input-group" style="width:auto">
                     <label class="form-label mt-4" hidden>댓글 작성</label>
-                    <input type="text"  class="form-control" th:field="*{content}"  placeholder="댓글을 입력해주세요">
-                    <button type="submit" class="btn btn-outline-dark">작성</button>
+                    <input type="text"  class="form-control" id="commentContent" name="commentContent" placeholder="댓글을 입력해주세요">
+                    <input type="text" hidden th:value="${articleId}" id="articleId">
+                    <button type="button" id="commentBtn"  onclick="commentCheck()" class="btn btn-light">작성</button>
                     <div>
-                        <p th:errors="*{content}">오류</p>
                     </div>
                     <br>
                 </div>
             </form>
+            <p class="field-error commentContentCheck"></p>
             <br>
         </div>
-            <div th:each="articleComment : ${articleComments}">
-                <div th:if="${articleComment.deleted != 'Y' && articleComment.isParent.equals('Y')}">
-                    &nbsp
-                    <time class="comment4" th:datetime="${articleComment.createdAt}"
-                          th:text="${#temporals.format(articleComment.createdAt, 'yyyy-MM-dd HH:mm')}"
-                          style="display:inline"><small>2022-10-01</small></time>
-                    <strong class="writer" th:text="${articleComment.nickname}">brince</strong>
-                    &nbsp;
-                    <a sec:authorize="isAuthenticated()" class="delete"
-                       th:if="${articleComment.userId != null && articleComment.userId == #authentication.getName()|| #authorization.expression('hasRole(''ADMIN'')')}"
-                       href="javascript:void(0);"
-                       th:data-uri="@{|/articles/comments/delete/${articleId}/${articleComment.id}|}">
-                        <button class="btn btn-light">삭제</button>
-                    </a>
-                    <button type="button"
-                            data-bs-toggle="collapse"
-                            sec:authorize="isAuthenticated()"
-                            th:attr="data-bs-target=|#r${articleComment.id}"
-                            th:if="${articleComment.userId != null and articleComment.userId.equals(#authentication.getName())}"
-                            style="display:inline" class="btn btn-light">답글달기
-                    </button>
-                    <button type="button"
-                            data-bs-toggle="collapse"
-                            sec:authorize="isAuthenticated()"
-                            th:attr="data-bs-target=|#c${articleComment.id}"
-                            th:if="${articleComment.userId != null and articleComment.userId.equals(#authentication.getName())}"
-                            style="display:inline" class="btn btn-light">수정
-                    </button>
-                    <div class="collapse" th:id="c + ${articleComment.id}">
-                        <form sec:authorize="isAuthenticated()"
-                              th:if="${articleComment.userId != null and articleComment.userId.equals(#authentication.getName()) || #authorization.expression('hasRole(''ADMIN'')')}"
-                              th:action="@{|/articles/comments/put/${article.id}/${articleComment.id}|}"
-                              th:object="${dto}" method="post">
-                            <div class="input-group" style="width:auto">
-                                <label class="form-label mt-4" hidden>댓글 작성</label>
-                                <input type="text" th:field="*{content}" class="form-control"
-                                       th:attr="placeholder=${articleComment.content}">
-                                <div class="field-error" th:errors="*{content}">
-                                    오류2
-                                </div>
-                                <button href="javascript:void(0);"
-                                        th:data-uri="@{|/articles/comments/update/${articleId}/${articleComment.id}|}"
-                                        type="submit" class="update btn btn-outline-dark">수정
-                                </button>
-                                <br>
-                            </div>
-                            <br>
-                        </form>
-                    </div>
-
-
-                    <p th:text="${articleComment.content}">
-                        Lorem ipsum dolor sit amet, consectetur aidpiscino
-                        Lorem ipsum dolor sit amet
-                    <hr>
-                    <p>
-
-                    <div class="collapse" th:id="r + ${articleComment.id}">
-                        <form sec:authorize="isAuthenticated()"  th:action="@{|/articles/comments/${article.id}/reply|}" method="post">
-                            <div class="input-group" style="width:auto">
-                                <label class="form-label mt-4" hidden>댓글 작성</label>
-                                <input type="text"  th:name="content" class="form-control">
-                                <input type="hidden" th:name="parentId" th:value="${articleComment.id}"/>
-                                <button type="submit" class="btn btn-outline-dark">답글작성</button>
-                                <br>
-                            </div>
-                            <br>
-                        </form>
-                    </div>
-                </div>
-                <div th:if="${articleComment.deleted == 'Y' && articleComment.isParent.equals('Y')}" >
-                    <p>
-                        <span class="comment3">삭제된 댓글입니다.</span>
-                    </p>
-                    <hr>
-                </div>
-                <div th:if="${articleComment.deleted == 'Y' && articleComment.isParent.equals('Y') && #authorization.expression('hasRole(''ADMIN'')')}" sec:authorize="hasRole('ADMIN')">
-                    <div>
-                        <time class="comment4" th:datetime="${articleComment.createdAt}"
-                              th:text="${#temporals.format(articleComment.createdAt, 'yyyy-MM-dd HH:mm')}"
-                              style="display:inline"><small>2022-10-01</small></time>
-                        <strong class="writer" th:text="${articleComment.nickname}">brince</strong>
-                    </div>
-
-
-                    <p th:text="${articleComment.content}+'//삭제된 댓글입니다.'">
-                        Lorem ipsum dolor sit amet, consectetur aidpiscino
-                        Lorem ipsum dolor sit amet
-                    <p>
-
-                </div>
-                <div th:each="reply : ${articleComment.children}">
-                    <div class="children" th:if="${reply.deleted != 'Y' }">
-                        <time class="comment4" th:datetime="${reply.createdAt}"
-                              th:text="${#temporals.format(reply.createdAt, 'yyyy-MM-dd HH:mm')}"
-                              style="display:inline"><small>2022-10-01</small></time>
-                        <img src="/img/reply-ico.png" alt="답글" style="display:inline" class="replyicon">
-                        <strong class="writer" th:text="${reply.userAccountDto.nickname}">brince</strong>
-                        &nbsp;
-                        <a sec:authorize="isAuthenticated()" class="delete"
-                           th:if="${reply.userAccountDto.userId != null && reply.userAccountDto.userId == #authentication.getName()|| #authorization.expression('hasRole(''ADMIN'')')}"
-                           href="javascript:void(0);"
-                           th:data-uri="@{|/articles/comments/delete/${articleId}/${reply.id}|}">
-                            <button class="btn btn-light">삭제</button>
-                        </a>
-                        <button type="button"
-                                data-bs-toggle="collapse"
-                                sec:authorize="isAuthenticated()"
-                                th:attr="data-bs-target=|#r${reply.id}"
-                                th:if="${reply.userAccountDto.userId != null and reply.userAccountDto.userId.equals(#authentication.getName())}"
-                                style="display:inline" class="btn btn-light">수정
-                        </button>
-                        <div class="collapse" th:id="r + ${reply.id}">
-                            <form sec:authorize="isAuthenticated()"
-                                  th:if="${reply.userAccountDto.userId != null and reply.userAccountDto.userId.equals(#authentication.getName()) || #authorization.expression('hasRole(''ADMIN'')')}"
-                                  th:action="@{|/articles/comments/put/${article.id}/${reply.id}|}"
-                                  th:object="${dto}" method="post">
-                                <div class="input-group" style="width:auto">
-                                    <label for="content" class="form-label mt-4" hidden>댓글 작성</label>
-                                    <input type="text" th:field="*{content}" class="form-control" id="replyUpdate" name="update"
-                                           th:attr="placeholder=${reply.content}">
-                                    <div class="field-error" th:errors="*{content}">
-                                        오류2
-                                    </div>
-                                    <button href="javascript:void(0);"
-                                            th:data-uri="@{|/articles/comments/update/${articleId}/${reply.id}|}"
-                                            type="submit" class="update btn btn-outline-dark">수정
-                                    </button>
-                                    <br>
-                                </div>
-                                <br>
-                            </form>
-                        </div>
-
-
-                        <p class="childrenComment" th:text="${reply.content}">
-                            Lorem ipsum dolor sit amet, consectetur aidpiscino
-                            Lorem ipsum dolor sit amet
-                        <p>
-                    <hr>
-                    </div>
-                    <div class="children" th:if="${reply.deleted == 'Y'}">
-                    <p >
-                        <img src="/img/reply-ico.png" alt="답글" style="display:inline" class="replyicon">
-                        <span class="comment3">삭제된 답글입니다.</span>
-                    </p>
-                        <hr>
-                </div>
-                    <div class="children"  th:if="${reply.deleted == 'Y' && #authorization.expression('hasRole(''ADMIN'')')}" sec:authorize="hasRole('ADMIN')">
-                        <div>
-                            <time class="comment4" th:datetime="${reply.createdAt}"
-                                  th:text="${#temporals.format(reply.createdAt, 'yyyy-MM-dd HH:mm')}"
-                                  style="display:inline"><small>2022-10-01</small></time>
-                            <strong class="writer" th:text="${reply.userAccountDto.nickname}">brince</strong>
-                        </div>
-
-                        <img src="/img/reply-ico.png" alt="답글" style="display:inline" class="replyicon">
-                        <p  th:text="${reply.content}+'//삭제된 답글입니다.'">
-                            Lorem ipsum dolor sit amet, consectetur aidpiscino
-                            Lorem ipsum dolor sit amet
-                        <p>
-
-                    </div>
-                </div>
-                    </div>
+        <div id="commentList"> 댓글</div>
 
     </section>
+
 
 
 </main>
@@ -369,38 +94,9 @@
     <hr>
     푸터 삽입부
 </footer>
-<th:block layout:fragment="script"></th:block>
+<script src="/js/board.js"></script>
+
 </body>
-<script layout:fragment="script" type='text/javascript'>
-    const delete_elements = document.getElementsByClassName("delete");
-    const update_elements = document.getElementsByClassName("update");
-    Array.from(delete_elements).forEach(function (element) {
-        element.addEventListener('click', function () {
-            if (confirm("삭제하시겠습니까?")) {
-                location.href = this.dataset.uri;
-            }
-            ;
-        });
-    });
-    Array.from(update_elements).forEach(function (element) {
-        element.addEventListener('click', function () {
-            if (confirm("수정하시겠습니까?")) {
-                location.href = this.dataset.uri;
-            }
-            ;
-        });
-    });
-</script>
-<script>
-    function SirenFunction(idMyDiv) {
-        var objDiv = document.getElementById(idMyDiv);
-        if (objDiv.style.display == "block") {
-            objDiv.style.display = "none";
-        } else {
-            objDiv.style.display = "block";
-        }
-    }
-</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
