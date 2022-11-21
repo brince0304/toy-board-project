@@ -1,34 +1,7 @@
-$("#username").blur(function(){
-    var username = $("#username").val();
-    if(username== ""){
-        $(".usernameCheck").text("아이디를 입력해주세요.");
-        $(".usernameCheck").css("color", "red");
-    }else{
-        $(".usernameCheck").text("");
-        $(".usernameCheck").css("color", "green");
-    }
-});
-$("#password").blur(function(){
-    var password = $("#password").val();
-    if(password== ""){
-        $(".passwordCheck").text("비밀번호를 입력해주세요.");
-        $(".passwordCheck").css("color", "red");
-    }else{
-        $(".passwordCheck").text("");
-        $(".passwordCheck").css("color", "green");
-    }
-});
-$(function() {
-    $('#submitBtn').mouseenter(function() {
-        $(this).css('cursor','pointer') ;
-    }).mouseout(function() {
-        $(this).css('cursor','normal') ;
-    }).click(function() {
-        submitCheck() ;
-    }) ;
-}) ;
 
-function submitCheck() {
+
+
+function loginCheck() {
     $.ajax({
         type : "POST",
         url: '/login',
@@ -36,12 +9,23 @@ function submitCheck() {
             username: $('#username').val(),
             password: $('#password').val()
         },
-        success: function() {
+        success: function(data) {
             alert('안녕하세요 ' + $('#username').val() + '님') ;
-            location.href="/articles";
+            location.href=data;
         },
-        error: function() {
-            alert('아이디 또는 비밀번호가 일치하지 않습니다.') ;
+        error: function(status) {
+           $(status).each(function(){
+               let message = this.responseJSON;
+               if(message.hasOwnProperty('username')){
+                   $('.usernameCheck').text(message.username);
+                   $('.usernameCheck').css('display', 'block');
+               }
+                if(message.hasOwnProperty('password')){
+                    $('.passwordCheck').text(message.password);
+                    $('.passwordCheck').css('display', 'block');
+                }
+           }
+              )
         }
     }) ;
 }
@@ -140,15 +124,7 @@ $("#email").blur(function(){
         });
     }
 });
-$(function() {
-    $('#signupBtn').mouseenter(function() {
-        $(this).css('cursor','pointer') ;
-    }).mouseout(function() {
-        $(this).css('cursor','normal') ;
-    }).click(function() {
-        signupCheck() ;
-    }) ;
-}) ;
+
 
 function signupCheck() {
     const data = {
@@ -168,12 +144,39 @@ function signupCheck() {
         url : '/signup',
         data : json,
         contentType : "application/json; charset=utf-8",
-        success: function () {
+        success: function ( ){
             alert('가입이 완료되었습니다.');
             location.href = '/articles';
         },
-        error: function () {
-            alert('가입에 실패했습니다.');
+        error: function (status) {
+            $(status).each(function(){
+                let message = this.responseJSON;
+                if(message.hasOwnProperty('userId')){
+                    $(".idCheck").text(message.userId);
+                    $(".idCheck").css("color", "red");
+                }
+                if(message.hasOwnProperty('password1')){
+                    $(".passwordCheck").text(message.password1);
+                    $(".passwordCheck").css("color", "red");
+                }
+                if(message.hasOwnProperty('password2')){
+                    $(".passwordInvalidCheck").text(message.password2);
+                    $(".passwordInvalidCheck").css("color", "red");
+                }
+                if(message.hasOwnProperty('nickname')){
+                    $(".nicknameCheck").text(message.nickname);
+                    $(".nicknameCheck").css("color", "red");
+                }
+                if(message.hasOwnProperty('email')){
+                    $(".emailCheck").text(message.email);
+                    $(".emailCheck").css("color", "red");
+                }
+                if(message.hasOwnProperty('memo')){
+                    $(".memoCheck").text(message.memo);
+                    $(".memoCheck").css("color", "red");
+                }
+            });
+
         }
     });
 }
