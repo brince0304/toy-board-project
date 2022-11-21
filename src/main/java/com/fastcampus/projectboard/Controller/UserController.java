@@ -2,6 +2,7 @@ package com.fastcampus.projectboard.Controller;
 
 import com.fastcampus.projectboard.Service.UserSecurityService;
 import com.fastcampus.projectboard.Service.UserService;
+import com.fastcampus.projectboard.Util.ControllerUtil;
 import com.fastcampus.projectboard.Util.CookieUtil;
 import com.fastcampus.projectboard.Util.RedisUtil;
 import com.fastcampus.projectboard.Util.TokenProvider;
@@ -26,6 +27,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -45,6 +47,7 @@ public class UserController {
     private final TokenProvider tokenProvider;
     private final CookieUtil cookieUtil;
     private final RedisUtil redisUtil;
+    private final ControllerUtil controllerUtil;
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     @GetMapping("/signup")
@@ -82,9 +85,9 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody @Valid UserCreateForm userCreateForm, BindingResult bindingResult) {
+    public ResponseEntity<?> signup(@RequestBody @Valid UserCreateForm userCreateForm, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return new ResponseEntity<>("fail", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(controllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
         }
         Set<UserAccountRole> roles= new HashSet<>();
         roles.add(UserAccountRole.ROLE_USER);
@@ -105,8 +108,8 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@ModelAttribute("dto") @RequestBody @Valid LoginDto user, BindingResult bindingResult,
-                                HttpServletResponse res) throws IOException {
+    public ResponseEntity<?> login(@ModelAttribute("dto") @RequestBody @Valid LoginDto user, BindingResult bindingResult,
+                                HttpServletResponse res, HttpServletRequest req) throws IOException {
 
         try {
             if (!bindingResult.hasErrors()) {
@@ -118,20 +121,23 @@ public class UserController {
                 redisUtil.setDataExpire(refreshToken.getValue(), principal.getUsername(), TokenProvider.REFRESH_TOKEN_VALIDATION_SECOND);
                 res.addCookie(accessToken);
                 res.addCookie(refreshToken);
-                return new ResponseEntity<>("success", HttpStatus.OK);
+                return new ResponseEntity<>(req.getSession().getAttribute("prevPage").toString(), HttpStatus.OK);
+            }
+            else{
+                return new ResponseEntity<>(controllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return new ResponseEntity<>("fail", HttpStatus.BAD_REQUEST);
+            bindingResult.addError(new FieldError("dto", "username", "아이디 또는 비밀번호가 일치하지 않습니다."));
+
+            return new ResponseEntity<>(controllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>("fail", HttpStatus.BAD_REQUEST);
     }
 
     @GetMapping("/logout")
-    public ModelAndView logout(
+    public ResponseEntity<String> logout(
              HttpServletRequest req,
             HttpServletResponse res) {
-        ModelAndView mav = new ModelAndView();
         SecurityContextHolder.clearContext();
         Cookie accessToken = cookieUtil.getCookie(req, TokenProvider.ACCESS_TOKEN_NAME);
         Cookie refreshToken = cookieUtil.getCookie(req, TokenProvider.REFRESH_TOKEN_NAME);
@@ -141,12 +147,14 @@ public class UserController {
             accessToken.setMaxAge(0);
             res.addCookie(accessToken);
         }
+        else{
+            return new ResponseEntity<>("로그아웃에 실패했습니다.", HttpStatus.BAD_REQUEST);
+        }
         if (refreshToken != null) {
             refreshToken.setMaxAge(0);
             res.addCookie(refreshToken);
             redisUtil.deleteData(refreshToken.getValue());
         }
-        mav.setViewName("redirect:"+req.getSession().getAttribute("prevPage"));
-        return mav;
+        return new ResponseEntity<>("로그아웃 되었습니다.", HttpStatus.OK);
     }
 }

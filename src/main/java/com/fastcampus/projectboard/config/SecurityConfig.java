@@ -55,7 +55,6 @@ public class SecurityConfig {
                 .accessDeniedHandler(jwtAccessDeniedHandler)
                 .and()
                 .cors().configurationSource(corsConfigurationSource())
-                // 세션을 사용하지 않기 때문에 STATELESS로 설정
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

@@ -72,23 +72,27 @@ public class ArticleService {
         }
     }
 
-    public void updateLike(String clientIp,Long articleId) {
+    public Integer updateLike(String clientIp,Long articleId) {
+        Article article = articleRepository.findById(articleId).orElseThrow(EntityNotFoundException::new);
+
         if(redisUtil.isFirstIpRequest2(clientIp, articleId)) {
             redisUtil.writeClientRequest2(clientIp, articleId);
-            Article article = articleRepository.findById(articleId).orElseThrow(EntityNotFoundException::new);
             article.setLikeCount(article.getLikeCount() + 1);
+            return article.getLikeCount();
         }
+        return article.getLikeCount();
     }
 
 
 
 
-    public void saveArticle(ArticleDto dto, Set<HashtagDto> hashtagDto) {
+    public ArticleDto saveArticle(ArticleDto dto, Set<HashtagDto> hashtagDto) {
         Article article =articleRepository.save(dto.toEntity());
         for (HashtagDto hashtag : hashtagDto) {
                 Hashtag hashtag1= hashtagRepository.findByHashtag(hashtag.hashtag()).orElseGet(()-> hashtagRepository.save(hashtag.toEntity()));
                 articlehashtagrepository.save(ArticleHashtag.of(article,hashtag1));
         }
+        return ArticleDto.from(article);
     }
         public void updateArticle (Long articleId, ArticleRequest dto){
             Article article = articleRepository.findById(articleId)
@@ -103,6 +107,7 @@ public class ArticleService {
             }
             if(dto.getTitle() != null) article.setTitle(dto.getTitle());
             if(dto.getContent() != null) article.setContent(dto.getContent());
+
         }
 
 

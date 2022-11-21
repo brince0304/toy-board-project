@@ -5,9 +5,11 @@ import com.fastcampus.projectboard.Util.CookieUtil;
 import com.fastcampus.projectboard.Util.TokenProvider;
 import com.fastcampus.projectboard.domain.forms.CommentForm;
 import com.fastcampus.projectboard.domain.type.SearchType;
+import com.fastcampus.projectboard.domain.type.StatusEnum;
 import com.fastcampus.projectboard.dto.ArticleDto;
 import com.fastcampus.projectboard.dto.ArticleWithCommentDto;
 import com.fastcampus.projectboard.dto.HashtagDto;
+import com.fastcampus.projectboard.dto.MessageDto;
 import com.fastcampus.projectboard.dto.request.ArticleCommentRequest;
 import com.fastcampus.projectboard.dto.request.ArticleRequest;
 import com.fastcampus.projectboard.dto.response.ArticleResponse;
@@ -19,6 +21,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -31,6 +35,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -62,15 +67,12 @@ public class ArticleController {
         map.addAttribute("dto", dto);
         return "articles/detail";
     }
-
-    @GetMapping("/{articleId}/like")
-    public String likeArticle(@PathVariable Long articleId, HttpServletRequest req, HttpServletResponse res,
-                              @AuthenticationPrincipal BoardPrincipal principal) {
-        if (principal == null) {
-            return "redirect:/login";
-        }
-        articleService.updateLike(req.getRemoteAddr(), articleId);
-        return "redirect:/articles/" + articleId;
+    @ResponseBody
+    @PostMapping("/{articleId}")
+    public ResponseEntity<String> likeArticle(@PathVariable String articleId, HttpServletRequest req) {
+        Long id = Long.parseLong(articleId);
+        Integer count = articleService.updateLike(req.getRemoteAddr(), id);
+        return new ResponseEntity<>(String.valueOf(count), HttpStatus.OK);
     }
 
 
@@ -92,22 +94,22 @@ public class ArticleController {
         model.addAttribute("dto", dto);
         return "articles/post/article_form";
     }
-
-    @PostMapping("/post")
-    public String articleSave(@ModelAttribute("dto") @Valid ArticleRequest dto, BindingResult bindingResult,
+    @ResponseBody
+    @PostMapping
+    public ResponseEntity<String> articleSave(@RequestBody @Valid ArticleRequest dto, BindingResult bindingResult,
                               @AuthenticationPrincipal BoardPrincipal boardPrincipal) {
         if (bindingResult.hasErrors()) {
-            return "articles/post/article_form";
+            return new ResponseEntity<>("내용을 확인해주세요.", HttpStatus.BAD_REQUEST);
         }
         if (boardPrincipal == null) {
-            return "redirect:/login";
+            return new ResponseEntity<>("로그인이 필요합니다.", HttpStatus.BAD_REQUEST);
         }
-        articleService.saveArticle(dto.toDto(boardPrincipal.toDto()), dto.getHashtags());
-        return "redirect:/articles";
+        ArticleDto dto1 = articleService.saveArticle(dto.toDto(boardPrincipal.toDto()),dto.getHashtags());
+        Long articleId = dto1.id();
+        return new ResponseEntity<>(articleId.toString(), HttpStatus.OK);
     }
-
-
-    @GetMapping("/put/{articleId}")
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/post/{articleId}")
     public String articleUpdate(@PathVariable Long articleId, ModelMap map,
                                 ArticleRequest dto,
                                 @AuthenticationPrincipal BoardPrincipal boardPrincipal) {
@@ -115,7 +117,7 @@ public class ArticleController {
         dto.setContent(articleDto.getContent());
         dto.setTitle(articleDto.getTitle());
         if (!articleDto.getUserAccountDto().userId().equals(boardPrincipal.username())) {
-            return "redirect:/articles/" + articleId;
+            return "redirect:/articles";
         } else {
             Set<HashtagDto> hashtagDto = articleDto.getHashtags();
             StringBuilder sb = new StringBuilder();
@@ -129,38 +131,52 @@ public class ArticleController {
             dto.setHashtag(String.valueOf(sb));
             map.addAttribute("dto", dto);
         }
+        map.addAttribute("articleId", articleId);
         return "articles/put/article_form";
     }
 
-
-    @PostMapping("/put/{articleId}")
-    public String updateArticle(
-            @PathVariable Long articleId, @ModelAttribute("dto") @Valid ArticleRequest dto,
+    @ResponseBody
+    @PutMapping
+    public ResponseEntity<Object> updateArticle(
+            @RequestBody @Valid ArticleRequest dto,
             BindingResult bindingResult,
             @AuthenticationPrincipal BoardPrincipal boardPrincipal) {
         if (boardPrincipal == null) {
-            return "redirect:/login";
+          MessageDto mDto = new MessageDto();
+            mDto.setMessage("로그인이 필요합니다.");
+            return new ResponseEntity<>(mDto, HttpStatus.BAD_REQUEST);
         }
         if (bindingResult.hasErrors()) {
-            return "articles/put/article_form";
+            MessageDto mDto = new MessageDto();
+            mDto.setData(bindingResult.getAllErrors());
+            mDto.setMessage("내용을 확인해주세요.");
+            return new ResponseEntity<>(mDto, HttpStatus.BAD_REQUEST);
         }
-        articleService.updateArticle(articleId, dto);
-        return "redirect:/articles/" + articleId;
+        articleService.updateArticle(dto.getArticleId(), dto);
+        MessageDto mDto = new MessageDto();
+        mDto.setMessage("articleUpdating Success");
+        mDto.setStatus(StatusEnum.OK);
+        return new ResponseEntity<>(mDto, HttpStatus.OK);
     }
 
-
+    @ResponseBody
     @PreAuthorize("isAuthenticated()")
-    @GetMapping("/delete/{articleId}")
-    public String articleDelete(@PathVariable Long articleId, @AuthenticationPrincipal BoardPrincipal boardPrincipal) {
+    @DeleteMapping
+    public ResponseEntity<String> articleDelete(@RequestBody Map<String,String> articleId, @AuthenticationPrincipal BoardPrincipal boardPrincipal) {
         String id = boardPrincipal.getUsername();
-        if (articleService.getArticle(articleId).getUserAccountDto().userId().equals(id)) {
-            articleService.deleteArticle(articleId);
+        Long aId = Long.parseLong(articleId.get("articleId"));
+        if (articleService.getArticle(aId).getUserAccountDto().userId().equals(id)) {
+            articleService.deleteArticle(aId);
         } else if (boardPrincipal.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
-            articleService.deleteArticleByAdmin(articleId);
+            articleService.deleteArticleByAdmin(aId);
         } else {
-            return "redirect:/articles/" + articleId;
+            return new ResponseEntity<>("게시글 삭제에 실패하였습니다.", HttpStatus.BAD_REQUEST);
         }
-        return "redirect:/articles";
+        return new ResponseEntity<>("articleDeleting Success", HttpStatus.OK);
+    }
+
+    public boolean isLoginUser(BoardPrincipal boardPrincipal) {
+        return boardPrincipal.isEnabled();
     }
 
 }
