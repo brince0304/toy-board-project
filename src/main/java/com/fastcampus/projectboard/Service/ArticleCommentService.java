@@ -59,6 +59,8 @@ public class ArticleCommentService {
         articleCommentRepository.getReferenceById(Id).setDeleted("Y");
     }
 
+
+    @Transactional(readOnly = true)
     public ArticleCommentDto getArticleComment(Long articleCommentId) {
         ArticleComment articleComment = articleCommentRepository.findById(articleCommentId).orElseThrow();
         return ArticleCommentDto.from(articleComment);
@@ -79,4 +81,6 @@ public class ArticleCommentService {
             log.warn("댓글 저장 실패. 댓글 작성에 필요한 정보를 찾을 수 없습니다 - {}", e.getLocalizedMessage());
         }
     }
+
+
 }

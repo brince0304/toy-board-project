@@ -38,7 +38,6 @@ public class UserService {
     private final UserAccountRepository userAccountRepository;
 
 
-    private final SaltUtil saltUtil;
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public void saveUserAccount(UserAccountDto user) {
@@ -56,6 +55,7 @@ public class UserService {
         account.setUserPassword(new BCryptPasswordEncoder().encode(password));
     }
 
+    @Transactional(readOnly = true)
     public boolean isUserExists(String userId){
         if(userAccountRepository.findById(userId).isPresent()){
             return true;
@@ -69,6 +69,7 @@ public class UserService {
 
 
     // 권한 가져오기
+    @Transactional(readOnly = true)
     public String getAuthorities(Authentication authentication) {
         return authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
@@ -96,6 +97,7 @@ public class UserService {
         }
     }
 
+    @Transactional(readOnly = true)
     public UserAccountDto getUserAccount(String userId) {
         UserAccount userAccount = userAccountRepository.findById(userId).orElseThrow();
         return UserAccountDto.from(userAccount);
@@ -108,15 +110,16 @@ public class UserService {
             throw new IllegalArgumentException("회원정보 삭제에 실패했습니다");
         }
     }
-
+    @Transactional(readOnly = true)
     public boolean isExistUser(String userId) {
         return userAccountRepository.findById(userId).isPresent();
     }
 
+    @Transactional(readOnly = true)
     public boolean isExistNickname(String nickname) {
         return userAccountRepository.findByNickname(nickname).isPresent();
     }
-
+    @Transactional(readOnly = true)
     public boolean isExistEmail(String email) {
         return userAccountRepository.findByEmail(email).isPresent();
     }
