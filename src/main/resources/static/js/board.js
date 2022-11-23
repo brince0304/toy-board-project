@@ -43,10 +43,15 @@ function replyPut() {
                 location.reload();
             }
         },
-        error: function (xhr, status, error) {
-            alert(status);
-        }
-    })}}
+        error: function (status) {
+            status.responseJSON.forEach(function () {
+                $('.'+id+'ucommentContentCheck').text(this.message);
+                $('.'+id+'ucommentContentCheck').css('display', 'block');
+            } )
+           }
+    });
+}
+}
 
 function replyDelete(id) {
     if (confirm("삭제하시겠습니까?")) {
@@ -88,9 +93,8 @@ function commentUpdate (id) {
                     $('.'+id+'ucommentContentCheck').css('display', 'none');
                 },
                 error: function (status) {
-                    $(status).each(function(){
-                        let message = this.responseJSON.content;
-                        $('.'+id+'ucommentContentCheck').text(message);
+                    $(status.responseJSON).each(function(){
+                        $('.'+id+'ucommentContentCheck').text(this.message);
                         $('.'+id+'ucommentContentCheck').css('display', 'block');
                     })
                 }
@@ -389,9 +393,8 @@ function commentCheck() {
             $('.commentContentCheck').css('display', 'none');
         },
         error: function (status) {
-            $(status).each(function(){
-                let message = this.responseJSON.content;
-                $('.commentContentCheck').text(message);
+            $(status.responseJSON).each(function(){
+                $('.commentContentCheck').text(this.message);
                 $('.commentContentCheck').css('display', 'block');
             })
         }
@@ -416,9 +419,8 @@ function replyCheck(parentId) {
             getChildrenComment((parentId))
         },
         error: function (status) {
-            $(status).each(function(){
-                let message = this.responseJSON.content;
-                $('.'+parentId+'replyContentCheck').text(message);
+            $(status.responseJSON).each(function(){
+                $('.'+parentId+'replyContentCheck').text(this.message);
                 $('.'+parentId+'replyContentCheck').css('display', 'block');
             })
 

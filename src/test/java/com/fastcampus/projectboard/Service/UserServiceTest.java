@@ -3,8 +3,7 @@ package com.fastcampus.projectboard.Service;
 
 import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.UserAccount;
-import com.fastcampus.projectboard.dto.ArticleDto;
-import com.fastcampus.projectboard.dto.UserAccountDto;
+
 import com.fastcampus.projectboard.repository.ArticleRepository;
 import com.fastcampus.projectboard.repository.UserAccountRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -39,7 +38,7 @@ public class UserServiceTest {
     @Test
     void givenUserId_whenGettingUserAccount_thenGetsUserAccount() {
         //given
-        UserAccountDto userAccountDto = createUserAccountDto();
+        UserAccount.UserAccountDto userAccountDto = createUserAccountDto();
         given(userAccountRepository.findById(userAccountDto.userId())).willReturn(Optional.of(userAccountDto.toEntity()));
 
         //when
@@ -53,7 +52,7 @@ public class UserServiceTest {
     @Test
     void givenInfo_whenRegistering_thenSavesAccount() {
         //Given
-        UserAccountDto userAccountDto = createUserAccountDto();
+        UserAccount.UserAccountDto userAccountDto = createUserAccountDto();
         given(userAccountRepository.save(userAccountDto.toEntity())).willReturn(userAccountDto.toEntity());
 
         //when
@@ -67,7 +66,7 @@ public class UserServiceTest {
     @Test
     void givenUpdatedInfo_whenUpdatingUserAccount_thenSavingUpdatedInfo() {
         //given
-        UserAccountDto userDto = createUserAccountDto();
+        UserAccount.UserAccountDto userDto = createUserAccountDto();
         UserAccount account = userDto.toEntity();
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         UserAccount updatedAccount = UserAccount.of(userDto.userId()
@@ -79,7 +78,7 @@ public class UserServiceTest {
         given(userAccountRepository.findById(account.getUserId())).willReturn(Optional.of(account));
         String encodedPassword = passwordEncoder.encode(updatedAccount.getUserPassword());
         //when
-        sut.updateUserAccount(UserAccountDto.from(updatedAccount));
+        sut.updateUserAccount(UserAccount.UserAccountDto.from(updatedAccount));
 
         //then
         assertThat(account)
@@ -91,7 +90,7 @@ public class UserServiceTest {
     @Test
     void givenUserId_whenDeletingUserAccount_thenDeletesUserAccount() {
         //given
-        UserAccountDto userAccountDto = createUserAccountDto();
+        UserAccount.UserAccountDto userAccountDto = createUserAccountDto();
         UserAccount account = userAccountDto.toEntity();
         //when
         sut.deleteUserAccount(account.getUserId());
@@ -99,6 +98,23 @@ public class UserServiceTest {
         //then
         then(userAccountRepository).should().deleteById(account.getUserId());
     }
+
+    @DisplayName("계정 ID를 입력하면 해당 ID로 등록된 게시글 목록을 반환한다.")
+    @Test
+    void givenUserId_whenGettingArticlesByUserId_thenReturnsArticles() {
+        //given
+        UserAccount.UserAccountDto userAccountDto = createUserAccountDto();
+        UserAccount account = userAccountDto.toEntity();
+        Article article = createArticle();
+        //when
+        sut.getMyArticles(account.getUserId());
+
+        //then
+        then(articleRepository).should().findAllByUserAccountUserId(account.getUserId());
+    }
+
+
+
 
 
 
@@ -121,12 +137,12 @@ public class UserServiceTest {
         );
     }
 
-    private ArticleDto createArticleDto() {
+    private Article.ArticleDto createArticleDto() {
         return createArticleDto("title", "content", "#java");
     }
 
-    private ArticleDto createArticleDto(String title, String content, String hashtag) {
-        return ArticleDto.of(1L,
+    private Article.ArticleDto createArticleDto(String title, String content, String hashtag) {
+        return Article.ArticleDto.of(1L,
                 createUserAccountDto(),
                 title,
                 content,
@@ -140,8 +156,8 @@ public class UserServiceTest {
         );
     }
 
-    private UserAccountDto createUserAccountDto() {
-        return UserAccountDto.of(
+    private UserAccount.UserAccountDto createUserAccountDto() {
+        return UserAccount.UserAccountDto.of(
                 "uno",
                 "password",
                 "uno@mail.com",

@@ -53,4 +53,30 @@ public class Hashtag{
     public int hashCode() {
         return Objects.hash(id);
     }
+
+    public record HashtagDto(Long id, String hashtag) {
+
+        public static HashtagDto of(String hashtag) {
+            return new HashtagDto(null, hashtag);
+        }
+
+        public static HashtagDto of(Long id, String hashtag) {
+            return new HashtagDto(id, hashtag);
+        }
+
+        public static HashtagDto from(Hashtag entity) {
+            return new HashtagDto(
+                    entity.getId(),
+                    entity.getHashtag()
+            );
+        }
+
+
+        public Hashtag toEntity() {
+            return Hashtag.of(
+                    id,
+                    hashtag
+            );
+        }
+    }
 }

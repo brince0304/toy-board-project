@@ -4,7 +4,6 @@ import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.ArticleComment;
 import com.fastcampus.projectboard.repository.ArticleCommentRepository;
 import com.fastcampus.projectboard.repository.ArticleRepository;
-import com.fastcampus.projectboard.dto.ArticleCommentDto;
 
 import com.fastcampus.projectboard.repository.UserAccountRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,14 +26,14 @@ public class ArticleCommentService {
     private final ArticleCommentRepository articleCommentRepository;
 
     @Transactional(readOnly = true)
-    public List<ArticleCommentDto> searchArticleComments(Long articleId) {
-        List<ArticleCommentDto> articleCommentDtos = new ArrayList<>();
-        articleCommentDtos = articleCommentRepository.findByArticle_Id(articleId).stream().map(ArticleCommentDto::from).toList();
+    public List<ArticleComment.ArticleCommentDto> searchArticleComments(Long articleId) {
+        List<ArticleComment.ArticleCommentDto> articleCommentDtos = new ArrayList<>();
+        articleCommentDtos = articleCommentRepository.findByArticle_Id(articleId).stream().map(ArticleComment.ArticleCommentDto::from).toList();
         return articleCommentDtos;
     }
 
 
-    public void saveArticleComment(ArticleCommentDto dto) {
+    public void saveArticleComment(ArticleComment.ArticleCommentDto dto) {
         try {
             Article article = articleRepository.getReferenceById(dto.articleId());
                 ArticleComment comment = articleCommentRepository.save( dto.toEntity(article,dto.userAccountDto().toEntity()));
@@ -61,13 +60,13 @@ public class ArticleCommentService {
 
 
     @Transactional(readOnly = true)
-    public ArticleCommentDto getArticleComment(Long articleCommentId) {
-        ArticleComment articleComment = articleCommentRepository.findById(articleCommentId).orElseThrow();
-        return ArticleCommentDto.from(articleComment);
+    public ArticleComment.ArticleCommentDto getArticleComment(Long articleCommentId) {
+        ArticleComment articleComment = articleCommentRepository.findByIdAndDeleted(articleCommentId,"N");
+        return ArticleComment.ArticleCommentDto.from(articleComment);
     }
 
 
-    public void saveChildrenComment(Long parentId, ArticleCommentDto children) {
+    public void saveChildrenComment(Long parentId, ArticleComment.ArticleCommentDto children) {
         try {
             ArticleComment parent = articleCommentRepository.getReferenceById(parentId);
             ArticleComment articleComment = children.toEntity(parent.getArticle(),children.userAccountDto().toEntity());

@@ -1,6 +1,6 @@
 package com.fastcampus.projectboard.Util;
 
-import com.fastcampus.projectboard.dto.security.BoardPrincipal;
+import com.fastcampus.projectboard.domain.UserAccount;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
@@ -58,11 +58,11 @@ public class TokenProvider  {
         return expiration.before(new Date());
     }
 
-    public String generateToken(BoardPrincipal member) {
+    public String generateToken(UserAccount.BoardPrincipal member) {
         return doGenerateToken(member.getUsername(), TOKEN_VALIDATION_SECOND);
     }
 
-    public String generateRefreshToken(BoardPrincipal member) {
+    public String generateRefreshToken(UserAccount.BoardPrincipal member) {
         return doGenerateToken(member.getUsername(), REFRESH_TOKEN_VALIDATION_SECOND);
     }
 
@@ -93,7 +93,7 @@ public class TokenProvider  {
     }
 
     public Authentication getAuthentication(String requestAccessToken) {
-        UserDetails userDetails = new BoardPrincipal(getUsername(requestAccessToken), null, null, null,null,null);
+        UserDetails userDetails = new UserAccount.BoardPrincipal(getUsername(requestAccessToken), null, null, null,null,null);
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 }

@@ -3,8 +3,6 @@ package com.fastcampus.projectboard.Service;
 import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.ArticleHashtag;
 import com.fastcampus.projectboard.domain.Hashtag;
-import com.fastcampus.projectboard.dto.ArticleDto;
-import com.fastcampus.projectboard.dto.HashtagDto;
 import com.fastcampus.projectboard.repository.ArticleHashtagRepository;
 import com.fastcampus.projectboard.repository.HashtagRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,9 +22,9 @@ public class HashtagService {
     private final HashtagRepository hashtagRepository;
     private final ArticleHashtagRepository articleHashtagRepository;
 
-    public void saveHashtags(Set<HashtagDto> hashtags) {
+    public void saveHashtags(Set<Hashtag.HashtagDto> hashtags) {
         hashtags.stream()
-                .map(HashtagDto::hashtag)
+                .map(Hashtag.HashtagDto::hashtag)
                 .map(Hashtag::of)
                 .forEach(t -> {
                     if (hashtagRepository.findByHashtag(t.getHashtag()).isEmpty()) {
@@ -34,16 +32,16 @@ public class HashtagService {
                     }
                 });
     }
-    public HashtagDto getHashtag(String hashtag) {
-        return HashtagDto.from(hashtagRepository.findByHashtag(hashtag).orElseThrow());
+    public Hashtag.HashtagDto getHashtag(String hashtag) {
+        return Hashtag.HashtagDto.from(hashtagRepository.findByHashtag(hashtag).orElseThrow());
     }
 
     public void saveHashtag(Hashtag hashtag) {
         hashtagRepository.save(hashtag);
     }
 
-    public Set<ArticleDto> getArticlesByHashtag(String hashtag) {
-        return hashtagRepository.findByHashtag(hashtag).get().getArticles().stream().map(t-> ArticleDto.from(t.getArticle())
+    public Set<Article.ArticleDto> getArticlesByHashtag(String hashtag) {
+        return hashtagRepository.findByHashtag(hashtag).get().getArticles().stream().map(t-> Article.ArticleDto.from(t.getArticle())
         ).collect(Collectors.toSet());
     }
 }

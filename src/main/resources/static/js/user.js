@@ -14,14 +14,13 @@ function loginCheck() {
             location.href=data;
         },
         error: function(status) {
-           $(status).each(function(){
-               let message = this.responseJSON;
-               if(message.hasOwnProperty('username')){
-                   $('.usernameCheck').text(message.username);
+           $(status.responseJSON).each(function(){
+               if(this.field===('username')){
+                   $('.usernameCheck').text(this.message);
                    $('.usernameCheck').css('display', 'block');
                }
-                if(message.hasOwnProperty('password')){
-                    $('.passwordCheck').text(message.password);
+                if(this.field===('password')){
+                    $('.passwordCheck').text(this.message);
                     $('.passwordCheck').css('display', 'block');
                 }
            }
@@ -149,30 +148,30 @@ function signupCheck() {
             location.href = '/articles';
         },
         error: function (status) {
-            $(status).each(function(){
-                let message = this.responseJSON;
-                if(message.hasOwnProperty('userId')){
-                    $(".idCheck").text(message.userId);
+            console.log(status);
+            $(status.responseJSON).each(function(){
+                if(this.field===('userId')){
+                    $(".idCheck").text(this.message);
                     $(".idCheck").css("color", "red");
                 }
-                if(message.hasOwnProperty('password1')){
-                    $(".passwordCheck").text(message.password1);
+                if(this.field===('password1')){
+                    $(".passwordCheck").text(this.message);
                     $(".passwordCheck").css("color", "red");
                 }
-                if(message.hasOwnProperty('password2')){
-                    $(".passwordInvalidCheck").text(message.password2);
+                if(this.field===('password2')){
+                    $(".passwordInvalidCheck").text(this.message);
                     $(".passwordInvalidCheck").css("color", "red");
                 }
-                if(message.hasOwnProperty('nickname')){
-                    $(".nicknameCheck").text(message.nickname);
+                if(this.field===('nickname')){
+                    $(".nicknameCheck").text(this.message);
                     $(".nicknameCheck").css("color", "red");
                 }
-                if(message.hasOwnProperty('email')){
-                    $(".emailCheck").text(message.email);
+                if(this.field===('email')){
+                    $(".emailCheck").text(this.message);
                     $(".emailCheck").css("color", "red");
                 }
-                if(message.hasOwnProperty('memo')){
-                    $(".memoCheck").text(message.memo);
+                if(this.field===('memo')){
+                    $(".memoCheck").text(this.message);
                     $(".memoCheck").css("color", "red");
                 }
             });

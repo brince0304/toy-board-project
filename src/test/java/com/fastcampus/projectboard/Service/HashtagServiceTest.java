@@ -3,7 +3,6 @@ package com.fastcampus.projectboard.Service;
 import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.ArticleHashtag;
 import com.fastcampus.projectboard.domain.Hashtag;
-import com.fastcampus.projectboard.dto.HashtagDto;
 import com.fastcampus.projectboard.repository.ArticleHashtagRepository;
 import com.fastcampus.projectboard.repository.HashtagRepository;
 import org.junit.jupiter.api.Test;
@@ -38,13 +37,13 @@ public class HashtagServiceTest {
         //given
         String hashtagName = "test1, test2, test3";
         StringTokenizer st = new StringTokenizer(hashtagName, ",");
-        Set<HashtagDto> hashtags2 = new HashSet<>();
+        Set<Hashtag.HashtagDto> hashtags2 = new HashSet<>();
         while (st.hasMoreTokens()) {
             long id = 1L;
-            hashtags2.add(HashtagDto.from(Hashtag.of(id,st.nextToken().trim())));
+            hashtags2.add(Hashtag.HashtagDto.from(Hashtag.of(id,st.nextToken().trim())));
             id++;
         }
-        Set<Hashtag> hashtags = hashtags2.stream().map(HashtagDto::toEntity).collect(Collectors.toSet());
+        Set<Hashtag> hashtags = hashtags2.stream().map(Hashtag.HashtagDto::toEntity).collect(Collectors.toSet());
         given(hashtagRepository.saveAll(hashtags)).willReturn(hashtags.stream().collect(Collectors.toList()));
 
         //when

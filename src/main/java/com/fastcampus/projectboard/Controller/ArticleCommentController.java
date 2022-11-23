@@ -1,24 +1,15 @@
 package com.fastcampus.projectboard.Controller;
 
 import com.fastcampus.projectboard.Service.ArticleCommentService;
-import com.fastcampus.projectboard.Service.UserService;
 import com.fastcampus.projectboard.Util.ControllerUtil;
-import com.fastcampus.projectboard.Util.CookieUtil;
-import com.fastcampus.projectboard.Util.TokenProvider;
-import com.fastcampus.projectboard.domain.forms.CommentForm;
-import com.fastcampus.projectboard.dto.request.ArticleCommentRequest;
-import com.fastcampus.projectboard.dto.security.BoardPrincipal;
-import com.fastcampus.projectboard.repository.ArticleRepository;
+import com.fastcampus.projectboard.domain.ArticleComment;
+import com.fastcampus.projectboard.domain.UserAccount;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -47,15 +38,14 @@ public class ArticleCommentController {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/{articleId}")
-    public ResponseEntity<?> writeArticleComment(@PathVariable Long articleId, @RequestBody @Valid ArticleCommentRequest dto,
+    public ResponseEntity<?> writeArticleComment(@PathVariable Long articleId, @RequestBody @Valid ArticleComment.ArticleCommentRequest dto,
                                               BindingResult bindingResult,
-                                              @AuthenticationPrincipal BoardPrincipal principal) {
+                                              @AuthenticationPrincipal UserAccount.BoardPrincipal principal) {
         if (bindingResult.hasErrors()) {
             log.info("bindingResult.hasErrors()");
-            Map<String, String> errorMap = controllerUtil.getErrors(bindingResult);
-            System.out.println(new ResponseEntity<>(errorMap, HttpStatus.BAD_REQUEST));
+            System.out.println(new ResponseEntity<>(controllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST));
 
-            return new ResponseEntity<>(errorMap, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(controllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
         }
 
         if (principal == null) {
@@ -67,7 +57,7 @@ public class ArticleCommentController {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/reply")
-    public ResponseEntity<?> writeChildrenComment(@RequestBody @Valid ArticleCommentRequest dto,BindingResult bindingResult,  @AuthenticationPrincipal BoardPrincipal principal) {
+    public ResponseEntity<?> writeChildrenComment(@RequestBody @Valid ArticleComment.ArticleCommentRequest dto,BindingResult bindingResult,  @AuthenticationPrincipal UserAccount.BoardPrincipal principal) {
         if(bindingResult.hasErrors()) {
             return new ResponseEntity<>(controllerUtil.getErrors(bindingResult),HttpStatus.BAD_REQUEST);
         }
@@ -81,7 +71,7 @@ public class ArticleCommentController {
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping
     public ResponseEntity<String> deleteArticleComment(@RequestBody Map<String,String> articleCommentId,
-                                       @AuthenticationPrincipal BoardPrincipal principal) {
+                                       @AuthenticationPrincipal UserAccount.BoardPrincipal principal) {
         Long id = Long.parseLong(articleCommentId.get("articleCommentId"));
         if (principal == null) {
             return new ResponseEntity<>("로그인이 필요합니다.", HttpStatus.BAD_REQUEST);
@@ -100,8 +90,8 @@ public class ArticleCommentController {
 
     @PreAuthorize("isAuthenticated()")
     @PutMapping
-    public ResponseEntity<?> updateArticleComment(@RequestBody @Valid ArticleCommentRequest dto,BindingResult result,
-                                       @AuthenticationPrincipal BoardPrincipal principal) {
+    public ResponseEntity<?> updateArticleComment(@RequestBody @Valid ArticleComment.ArticleCommentRequest dto,BindingResult result,
+                                       @AuthenticationPrincipal UserAccount.BoardPrincipal principal) {
         Long articleCommentId = dto.articleCommentId();
         String content = dto.content();
         if (result.hasErrors()) {

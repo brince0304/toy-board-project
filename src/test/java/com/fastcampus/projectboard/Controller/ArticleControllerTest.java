@@ -9,10 +9,6 @@ import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.ArticleComment;
 import com.fastcampus.projectboard.domain.Hashtag;
 import com.fastcampus.projectboard.domain.UserAccount;
-import com.fastcampus.projectboard.dto.ArticleDto;
-import com.fastcampus.projectboard.dto.ArticleWithCommentDto;
-import com.fastcampus.projectboard.dto.HashtagDto;
-import com.fastcampus.projectboard.dto.UserAccountDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -85,7 +81,7 @@ class ArticleControllerTest {
         ArticleComment articleComment = ArticleComment.
                 of(article,userAccount,"haha");
 
-        userService.saveUserAccount(UserAccountDto.from(userAccount));
+        userService.saveUserAccount(UserAccount.UserAccountDto.from(userAccount));
     }
 
     @DisplayName("[view][GET] 게시글 페이지 ")
@@ -118,7 +114,7 @@ class ArticleControllerTest {
     @WithUserDetails("test")
     public void givenArticleInfo_whenSavingArticle_thenSavesArticle() throws Exception {
         //given
-       ArticleDto articleDto = ArticleDto.from(createArticle());
+       Article.ArticleDto articleDto = Article.ArticleDto.from(createArticle());
         //when & then
         mvc.perform(post("/articles/post")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -153,7 +149,7 @@ class ArticleControllerTest {
         //given
         Article article = createArticle();
         Article newArticle = createArticle();
-        ArticleDto articleDto = ArticleDto.from(newArticle);
+        Article.ArticleDto articleDto = Article.ArticleDto.from(newArticle);
         Long articleId = article.getId();
 
 
@@ -196,11 +192,11 @@ class ArticleControllerTest {
     void givenHashtag_whenSearchingArticlesByHashtag_thenGetsArticles() throws Exception {
         //given
         Hashtag hashtag = Hashtag.of(1L, "test");
-        Set<HashtagDto> dto = new HashSet<>();
-        dto.add(HashtagDto.from(hashtag));
+        Set<Hashtag.HashtagDto> dto = new HashSet<>();
+        dto.add(Hashtag.HashtagDto.from(hashtag));
         Article article = createArticle();
         userService.saveUserAccount(createUserAccountDto());
-        articleService.saveArticle(ArticleDto.from(article),dto);
+        articleService.saveArticle(Article.ArticleDto.from(article),dto);
 
         //when & then
         mvc.perform(get("/articles/search-hashtag/"))
@@ -212,8 +208,8 @@ class ArticleControllerTest {
     }
 
 
-    private ArticleWithCommentDto createArticleWithCommentsDto() {
-        return ArticleWithCommentDto.of(
+    private Article.ArticleWithCommentDto createArticleWithCommentsDto() {
+        return Article.ArticleWithCommentDto.of(
                 1L,
                 createUserAccountDto(),
                 Set.of(),
@@ -248,8 +244,8 @@ class ArticleControllerTest {
                 "content");
     }
 
-    private UserAccountDto createUserAccountDto() {
-        return UserAccountDto.of(
+    private UserAccount.UserAccountDto createUserAccountDto() {
+        return UserAccount.UserAccountDto.of(
                 "uno",
                 "pw",
                 "uno@mail.com",

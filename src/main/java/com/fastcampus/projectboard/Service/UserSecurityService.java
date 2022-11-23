@@ -2,9 +2,6 @@ package com.fastcampus.projectboard.Service;
 
 import com.fastcampus.projectboard.domain.UserAccount;
 import com.fastcampus.projectboard.domain.UserAccountRole;
-import com.fastcampus.projectboard.domain.forms.UserCreateForm;
-import com.fastcampus.projectboard.dto.UserAccountDto;
-import com.fastcampus.projectboard.dto.security.BoardPrincipal;
 import com.fastcampus.projectboard.repository.UserAccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -41,7 +38,7 @@ public class UserSecurityService implements UserDetailsService {
                 authorities.add(new SimpleGrantedAuthority(role.getValue()));
             }
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        return new BoardPrincipal(account.getUserId(), account.getUserPassword(), authorities, account.getEmail(), account.getNickname(), account.getMemo());
+        return new UserAccount.BoardPrincipal(account.getUserId(), account.getUserPassword(), authorities, account.getEmail(), account.getNickname(), account.getMemo());
         }
 
 

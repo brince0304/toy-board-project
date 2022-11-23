@@ -4,10 +4,11 @@ import com.fastcampus.projectboard.Jwt.TokenDto;
 import com.fastcampus.projectboard.Util.RedisUtil;
 import com.fastcampus.projectboard.Util.SaltUtil;
 import com.fastcampus.projectboard.Util.TokenProvider;
+import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.UserAccount;
 import com.fastcampus.projectboard.domain.UserAccountRole;
-import com.fastcampus.projectboard.dto.UserAccountDto;
-import com.fastcampus.projectboard.dto.security.BoardPrincipal;
+import com.fastcampus.projectboard.repository.ArticleCommentRepository;
+import com.fastcampus.projectboard.repository.ArticleRepository;
 import com.fastcampus.projectboard.repository.UserAccountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,10 +38,13 @@ public class UserService {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final UserAccountRepository userAccountRepository;
 
+    private final ArticleRepository articleRepository;
+    private final ArticleCommentRepository articleCommentRepository;
+
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public void saveUserAccount(UserAccountDto user) {
+    public void saveUserAccount(UserAccount.UserAccountDto user) {
         if(userAccountRepository.findById(user.userId()).isPresent()){
             throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
         }
@@ -84,7 +88,7 @@ public class UserService {
 
 
 
-    public void updateUserAccount(UserAccountDto userDto) {
+    public void updateUserAccount(UserAccount.UserAccountDto userDto) {
         try {
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
             UserAccount userAccount = userAccountRepository.findById(userDto.userId()).orElseThrow();
@@ -98,9 +102,9 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserAccountDto getUserAccount(String userId) {
+    public UserAccount.UserAccountDto getUserAccount(String userId) {
         UserAccount userAccount = userAccountRepository.findById(userId).orElseThrow();
-        return UserAccountDto.from(userAccount);
+        return UserAccount.UserAccountDto.from(userAccount);
     }
 
     public void deleteUserAccount(String userId) {
@@ -124,13 +128,20 @@ public class UserService {
         return userAccountRepository.findByEmail(email).isPresent();
     }
 
-    public BoardPrincipal loginUser(String username, String password) {
+    public UserAccount.BoardPrincipal loginUser(String username, String password) {
           UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(username, password);
             Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            BoardPrincipal principal1 = BoardPrincipal.from(UserAccountDto.from(userAccountRepository.findById(username).orElseThrow()));
-            return principal1;
+        return UserAccount.BoardPrincipal.from(UserAccount.UserAccountDto.from(userAccountRepository.findById(username).orElseThrow()));
     }
 
+    public Set<Article.ArticleDto> getMyArticles(String username) {
+        Set<Article> articles = articleRepository.findAllByUserAccountUserId(username);
+        Set<Article.ArticleDto> articleDtos = new HashSet<>();
+        for (Article article : articles) {
+            articleDtos.add(Article.ArticleDto.from(article));
+        }
+        return articleDtos;
+    }
 }

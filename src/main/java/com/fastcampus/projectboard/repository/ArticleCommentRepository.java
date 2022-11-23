@@ -19,6 +19,8 @@ public interface ArticleCommentRepository extends
         JpaRepository<ArticleComment,Long>{
     List<ArticleComment> findByArticle_Id(Long articleId);
 
+    ArticleComment findByIdAndDeleted(Long id, String deleted);
+
     @Override
     default void customize(QuerydslBindings bindings, QArticleComment root){
         bindings.excludeUnlistedProperties(true);

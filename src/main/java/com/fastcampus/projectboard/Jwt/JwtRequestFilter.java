@@ -4,7 +4,6 @@ import com.fastcampus.projectboard.Service.UserSecurityService;
 import com.fastcampus.projectboard.Util.CookieUtil;
 import com.fastcampus.projectboard.Util.RedisUtil;
 import com.fastcampus.projectboard.Util.TokenProvider;
-import com.fastcampus.projectboard.dto.security.BoardPrincipal;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.io.IOException;
 import lombok.RequiredArgsConstructor;

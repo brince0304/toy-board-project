@@ -66,14 +66,14 @@ public class ArticleCommentControllerTest {
         ArticleComment articleComment = ArticleComment.
                 of(article,userAccount,"haha");
 
-        userService.saveUserAccount(UserAccountDto.from(userAccount));
+        userService.saveUserAccount(UserAccount.UserAccountDto.from(userAccount));
     }
 
     @Test
     @WithUserDetails("test")
     void givenDetails_whenSavingArticleComment_thenSavesArticleComment() throws Exception {
         // given
-        ArticleCommentDto dto = createArticleCommentDto("haha");
+        ArticleComment.ArticleCommentDto dto = createArticleCommentDto("haha");
         //when&then
 
         mvc .perform(post("/articles/comments/1")
@@ -88,7 +88,7 @@ public class ArticleCommentControllerTest {
     @WithUserDetails("test")
     void givenDetails_whenSavingCommentReply_thenSavingCommentReply() throws Exception {
         // given
-        ArticleCommentDto dto = createArticleCommentDto2("haha");
+        ArticleComment.ArticleCommentDto dto = createArticleCommentDto2("haha");
         //when&then
 
         mvc.perform(post("/articles/comments/1/reply")
@@ -98,8 +98,8 @@ public class ArticleCommentControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/articles/1"));
     }
-    private ArticleCommentDto createArticleCommentDto(String content) {
-        return ArticleCommentDto.of(
+    private ArticleComment.ArticleCommentDto createArticleCommentDto(String content) {
+        return ArticleComment.ArticleCommentDto.of(
                 1L,
                 1L,
                 createUserAccountDto(),
@@ -114,8 +114,8 @@ public class ArticleCommentControllerTest {
         );
     }
 
-    private ArticleCommentDto createArticleCommentDto2(String content) {
-        return ArticleCommentDto.of(
+    private ArticleComment.ArticleCommentDto createArticleCommentDto2(String content) {
+        return ArticleComment.ArticleCommentDto.of(
                 2L,
                 1L,
                 createUserAccountDto(),
@@ -133,8 +133,8 @@ public class ArticleCommentControllerTest {
 
 
 
-    private UserAccountDto createUserAccountDto() {
-        return UserAccountDto.of(
+    private UserAccount.UserAccountDto createUserAccountDto() {
+        return UserAccount.UserAccountDto.of(
                 "uno",
                 "password",
                 "uno@mail.com",

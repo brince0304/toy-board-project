@@ -3,10 +3,7 @@ package com.fastcampus.projectboard.Service;
 import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.UserAccount;
 import com.fastcampus.projectboard.domain.type.SearchType;
-import com.fastcampus.projectboard.dto.ArticleWithCommentDto;
-import com.fastcampus.projectboard.dto.UserAccountDto;
 import com.fastcampus.projectboard.repository.ArticleRepository;
-import com.fastcampus.projectboard.dto.ArticleDto;
 import com.fastcampus.projectboard.repository.UserAccountRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,7 +42,7 @@ class ArticleServiceTest {
         given(articleRepository.findAll(pageable)).willReturn(Page.empty());
 
         // When
-        Page<ArticleDto> articles = sut.searchArticles(null, null, pageable);
+        Page<Article.ArticleDto> articles = sut.searchArticles(null, null, pageable);
 
         // Then
         assertThat(articles).isEmpty();
@@ -61,7 +59,7 @@ class ArticleServiceTest {
         given(articleRepository.findByTitleContaining(searchKeyword, pageable)).willReturn(Page.empty());
 
         // When
-        Page<ArticleDto> articles = sut.searchArticles(searchType, searchKeyword, pageable);
+        Page<Article.ArticleDto> articles = sut.searchArticles(searchType, searchKeyword, pageable);
 
         // Then
         assertThat(articles).isEmpty();
@@ -77,7 +75,7 @@ class ArticleServiceTest {
         given(articleRepository.findById(articleId)).willReturn(Optional.of(article));
 
         // When
-        ArticleWithCommentDto dto = sut.getArticle(articleId);
+        Article.ArticleWithCommentDto dto = sut.getArticle(articleId);
 
         // Then
         assertThat(dto)
@@ -108,7 +106,7 @@ class ArticleServiceTest {
     @Test
     void givenArticleInfo_whenSavingArticle_thenSavesArticle() {
         // Given
-        ArticleDto dto = createArticleDto();
+        Article.ArticleDto dto = createArticleDto();
         given(articleRepository.save(any(Article.class))).willReturn(createArticle());
 
         // When
@@ -122,7 +120,7 @@ class ArticleServiceTest {
     void givenModifiedArticleInfo_whenUpdatingArticle_thenUpdatesArticle() {
         // Given
         Article article = createArticle();
-        ArticleDto dto = createArticleDto("새 타이틀", "새 내용", "#springboot");
+        Article.ArticleDto dto = createArticleDto("새 타이틀", "새 내용", "#springboot");
         given(articleRepository.getReferenceById(dto.id())).willReturn(article);
 
         // When
@@ -138,7 +136,7 @@ class ArticleServiceTest {
     @Test
     void givenNonexistentArticleInfo_whenUpdatingArticle_thenLogsWarningAndDoesNothing() {
         // Given
-        ArticleDto dto = createArticleDto("새 타이틀", "새 내용", "#springboot");
+        Article.ArticleDto dto = createArticleDto("새 타이틀", "새 내용", "#springboot");
         given(articleRepository.getReferenceById(dto.id())).willThrow(EntityNotFoundException.class);
 
         // When
@@ -182,13 +180,13 @@ class ArticleServiceTest {
         );
     }
 
-    private ArticleDto createArticleDto() {
+    private Article.ArticleDto createArticleDto() {
         return createArticleDto("title", "content", "#java");
     }
 
-    private ArticleDto createArticleDto(String title, String content, String hashtag) {
+    private Article.ArticleDto createArticleDto(String title, String content, String hashtag) {
 
-        return ArticleDto.of(1L,
+        return Article.ArticleDto.of(1L,
                 createUserAccountDto(),
                 title,
                 content,
@@ -202,8 +200,8 @@ class ArticleServiceTest {
                 );
     }
 
-    private UserAccountDto createUserAccountDto() {
-        return UserAccountDto.of(
+    private UserAccount.UserAccountDto createUserAccountDto() {
+        return UserAccount.UserAccountDto.of(
                 "uno",
                 "password",
                 "uno@mail.com",
@@ -215,6 +213,22 @@ class ArticleServiceTest {
                 "uno",
                 null
         );
+    }
+
+    private Article.ArticleWithCommentDto createArticleWithCommentDto() {
+        return Article.ArticleWithCommentDto.builder()
+                .id(1L)
+                .userAccountDto(createUserAccountDto())
+                .title("title")
+                .content("content")
+                .createdAt(LocalDateTime.now())
+                .createdBy("Uno")
+                .modifiedAt(LocalDateTime.now())
+                .modifiedBy("Uno")
+                .deleted("N")
+                .likeCount(0)
+                .articleCommentDtos(null)
+                .build();
     }
 
 }

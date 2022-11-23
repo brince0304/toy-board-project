@@ -3,8 +3,6 @@ package com.fastcampus.projectboard.Service;
 import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.ArticleComment;
 import com.fastcampus.projectboard.domain.UserAccount;
-import com.fastcampus.projectboard.dto.ArticleCommentDto;
-import com.fastcampus.projectboard.dto.UserAccountDto;
 import com.fastcampus.projectboard.repository.ArticleCommentRepository;
 import com.fastcampus.projectboard.repository.ArticleRepository;
 import com.fastcampus.projectboard.repository.UserAccountRepository;
@@ -47,7 +45,7 @@ class ArticleCommentServiceTest {
         given(articleCommentRepository.findByArticle_Id(articleId)).willReturn(List.of(expected));
 
         // When
-        List<ArticleCommentDto> actual = sut.searchArticleComments(articleId);
+        List<ArticleComment.ArticleCommentDto> actual = sut.searchArticleComments(articleId);
 
         // Then
         assertThat(actual)
@@ -60,7 +58,7 @@ class ArticleCommentServiceTest {
     @Test
     void givenArticleCommentInfo_whenSavingArticleComment_thenSavesArticleComment() {
         // Given
-        ArticleCommentDto dto = createArticleCommentDto("댓글");
+        ArticleComment.ArticleCommentDto dto = createArticleCommentDto("댓글");
         given(articleRepository.getReferenceById(dto.articleId())).willReturn(createArticle());
         given(articleCommentRepository.save(any(ArticleComment.class))).willReturn(null);
 
@@ -76,7 +74,7 @@ class ArticleCommentServiceTest {
     @Test
     void givenNonexistentArticle_whenSavingArticleComment_thenLogsSituationAndDoesNothing() {
         // Given
-        ArticleCommentDto dto = createArticleCommentDto("댓글");
+        ArticleComment.ArticleCommentDto dto = createArticleCommentDto("댓글");
         given(articleRepository.getReferenceById(dto.articleId())).willThrow(EntityNotFoundException.class);
 
         // When
@@ -94,7 +92,7 @@ class ArticleCommentServiceTest {
         String oldContent = "content";
         String updatedContent = "댓글";
         ArticleComment articleComment = createArticleComment(oldContent);
-        ArticleCommentDto dto = createArticleCommentDto(updatedContent);
+        ArticleComment.ArticleCommentDto dto = createArticleCommentDto(updatedContent);
         given(articleCommentRepository.getReferenceById(dto.id())).willReturn(articleComment);
 
         // When
@@ -111,7 +109,7 @@ class ArticleCommentServiceTest {
     @Test
     void givenNonexistentArticleComment_whenUpdatingArticleComment_thenLogsWarningAndDoesNothing() {
         // Given
-        ArticleCommentDto dto = createArticleCommentDto("댓글");
+        ArticleComment.ArticleCommentDto dto = createArticleCommentDto("댓글");
         given(articleCommentRepository.getReferenceById(dto.id())).willThrow(EntityNotFoundException.class);
 
         // When
@@ -155,8 +153,8 @@ class ArticleCommentServiceTest {
         then(articleCommentRepository).should().getReferenceById(parentId);
     }
 
-    private ArticleCommentDto createArticleCommentDto(String content) {
-        return ArticleCommentDto.of(
+    private ArticleComment.ArticleCommentDto createArticleCommentDto(String content) {
+        return ArticleComment.ArticleCommentDto.of(
                 1L,
                 1L,
                 createUserAccountDto(),
@@ -171,8 +169,8 @@ class ArticleCommentServiceTest {
         );
     }
 
-    private ArticleCommentDto createArticleCommentDto2(String content) {
-        return ArticleCommentDto.of(
+    private ArticleComment.ArticleCommentDto createArticleCommentDto2(String content) {
+        return ArticleComment.ArticleCommentDto.of(
                 2L,
                 1L,
                 createUserAccountDto(),
@@ -190,8 +188,8 @@ class ArticleCommentServiceTest {
 
 
 
-    private UserAccountDto createUserAccountDto() {
-        return UserAccountDto.of(
+    private UserAccount.UserAccountDto createUserAccountDto() {
+        return UserAccount.UserAccountDto.of(
                 "uno",
                 "password",
                 "uno@mail.com",

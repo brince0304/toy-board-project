@@ -33,8 +33,9 @@
             <label class="form-label">내용</label>
             <input type="hidden" th:value="${dto.content}" id="ucontent" class="form-control">
             <div id="ueditor"></div>
-            <span class="uContentCheck field-error" ></span>
         </div>
+        <span class="uContentCheck field-error" ></span>
+
         <div class="mb-3" style="width:200px">
             <label for="hashtag" class="form-label">태그</label>
             <input type="text"  th:value="${dto.hashtag}"  name="hashtag" id="hashtag" class="form-control">
@@ -54,14 +55,6 @@
                 const articleId = $('#articleId').val();
                 const uContent = ueditor.getMarkdown();
                 const title = $('#title').val();
-                if(title == "" || title.length<5){
-                    alert("제목은 5자 이상 입력해주세요.");
-                    return;
-                }
-                if(uContent == "" || uContent.length<5){
-                    alert("내용은 5자 이상 입력해주세요.");
-                    return;
-                }
                 const hashtag = $('#hashtag').val();
                 $.ajax({
                     type: "PUT",
@@ -77,7 +70,15 @@
                             location.href = "/articles"+"/"+articleId;
                     }},
                     error: function (data) {
-                        alert(data.message);
+                        $(data).each(function () {
+                            let message = this.responseJSON;
+                            if (message.field === "title") {
+                                $('.titleCheck').text(message.message);
+                            }
+                            if (message.field === "content") {
+                                $('.uContentCheck').text(message.message);
+                            }
+                        });
                     }
                 });
             }

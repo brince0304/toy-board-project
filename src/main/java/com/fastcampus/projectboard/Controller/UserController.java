@@ -8,10 +8,7 @@ import com.fastcampus.projectboard.Util.RedisUtil;
 import com.fastcampus.projectboard.Util.TokenProvider;
 import com.fastcampus.projectboard.domain.UserAccount;
 import com.fastcampus.projectboard.domain.UserAccountRole;
-import com.fastcampus.projectboard.domain.forms.UserCreateForm;
-import com.fastcampus.projectboard.dto.LoginDto;
-import com.fastcampus.projectboard.dto.UserAccountDto;
-import com.fastcampus.projectboard.dto.security.BoardPrincipal;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
 import org.slf4j.Logger;
@@ -51,12 +48,28 @@ public class UserController {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     @GetMapping("/signup")
-    public ModelAndView signup(UserCreateForm userCreateForm) {
+    public ModelAndView signup(UserAccount.SignupDto userCreateForm) {
         ModelAndView mav = new ModelAndView();
         mav.setViewName("user/signup_form");
         mav.addObject("userCreateForm", userCreateForm);
         return mav;
     }
+
+    @GetMapping("/accounts")
+    public ModelAndView myPage(@AuthenticationPrincipal UserAccount.BoardPrincipal principal,ModelMap map) {
+        UserAccount.UserAccountDto accountDto =  userService.getUserAccount(principal.username());
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("user/my_page");
+        mav.addObject("accountDto", accountDto);
+        return mav;
+    }
+
+    @GetMapping("/accounts/articles")
+    public ResponseEntity<?> getMyArticles(@AuthenticationPrincipal UserAccount.BoardPrincipal principal) {
+        return new ResponseEntity<>(userService.getMyArticles(principal.username()), HttpStatus.OK);
+    }
+
+
 
     @PostMapping("/user/idCheck")
     public ResponseEntity<String> isUserExists(@RequestParam("userId") String userId) {
@@ -85,20 +98,20 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody @Valid UserCreateForm userCreateForm, BindingResult bindingResult) {
+    public ResponseEntity<?> signup(@RequestBody @Valid UserAccount.SignupDto userCreateForm, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(controllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
         }
         Set<UserAccountRole> roles= new HashSet<>();
         roles.add(UserAccountRole.ROLE_USER);
         roles.add(UserAccountRole.ROLE_ADMIN);
-        UserAccountDto userAccountDto = UserAccountDto.of(userCreateForm.getUserId(), userCreateForm.getPassword1(),userCreateForm.getEmail() , userCreateForm.getNickname(), userCreateForm.getMemo(), roles);
+        UserAccount.UserAccountDto userAccountDto = UserAccount.UserAccountDto.of(userCreateForm.getUserId(), userCreateForm.getPassword1(),userCreateForm.getEmail() , userCreateForm.getNickname(), userCreateForm.getMemo(), roles);
         userService.saveUserAccount(userAccountDto);
         return new ResponseEntity<>("success", HttpStatus.OK);
     }
 
     @GetMapping("/login")
-    public ModelAndView login(LoginDto dto, HttpServletRequest req, HttpServletResponse res) {
+    public ModelAndView login(UserAccount.LoginDto dto, HttpServletRequest req, HttpServletResponse res) {
         String referer = req.getHeader("Referer");
         req.getSession().setAttribute("prevPage", referer);
         ModelAndView mav = new ModelAndView();
@@ -108,12 +121,12 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@ModelAttribute("dto") @RequestBody @Valid LoginDto user, BindingResult bindingResult,
+    public ResponseEntity<?> login(@ModelAttribute("dto") @RequestBody @Valid UserAccount.LoginDto user, BindingResult bindingResult,
                                 HttpServletResponse res, HttpServletRequest req) throws IOException {
 
         try {
             if (!bindingResult.hasErrors()) {
-                final BoardPrincipal principal = userService.loginUser(user.getUsername(), user.getPassword());
+                final UserAccount.BoardPrincipal principal = userService.loginUser(user.getUsername(), user.getPassword());
                 Cookie accessToken = cookieUtil.createCookie(TokenProvider.ACCESS_TOKEN_NAME, tokenProvider.generateToken(principal));
                 accessToken.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds(TokenProvider.TOKEN_VALIDATION_SECOND));
                 Cookie refreshToken = cookieUtil.createCookie(TokenProvider.REFRESH_TOKEN_NAME, tokenProvider.generateRefreshToken(principal));
