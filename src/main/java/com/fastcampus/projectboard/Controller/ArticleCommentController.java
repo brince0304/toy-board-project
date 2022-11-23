@@ -30,9 +30,13 @@ public class ArticleCommentController {
         return new ResponseEntity<>(articleCommentService.searchArticleComments(articleId), HttpStatus.OK);
     }
 
-    @GetMapping("/c/{commentId}")
-    public ResponseEntity<?> getComment(@PathVariable Long commentId) {
-        return new ResponseEntity<>(articleCommentService.getArticleComment(commentId), HttpStatus.OK);
+    @GetMapping("/c/r/{parentId}")
+    public ResponseEntity<?> getChildrenComment(@PathVariable Long parentId) {
+        return new ResponseEntity<>(articleCommentService.getChildrenComment(parentId), HttpStatus.OK);
+    }
+    @GetMapping("/c/{articleCommentId}")
+    public ResponseEntity<?> getArticleComment(@PathVariable Long articleCommentId) {
+        return new ResponseEntity<>(articleCommentService.getArticleComment(articleCommentId), HttpStatus.OK);
     }
 
 

@@ -16,10 +16,12 @@ import java.util.List;
 public interface ArticleCommentRepository extends
         QuerydslPredicateExecutor<ArticleComment>,
         QuerydslBinderCustomizer<QArticleComment>,
-        JpaRepository<ArticleComment,Long>{
+        JpaRepository<ArticleComment,Long>,ArticleCommentRepositoryCustom {
     List<ArticleComment> findByArticle_Id(Long articleId);
 
     ArticleComment findByIdAndDeleted(Long id, String deleted);
+
+
 
     @Override
     default void customize(QuerydslBindings bindings, QArticleComment root){
@@ -28,5 +30,8 @@ public interface ArticleCommentRepository extends
 
         bindings.bind(root.createdBy).first((StringExpression::containsIgnoreCase));
         bindings.bind(root.createdAt).first((DateTimeExpression::eq));
+        bindings.bind(root.createdAt).first((DateTimeExpression::eq));
     }
+
+
 }

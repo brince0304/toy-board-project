@@ -3,6 +3,7 @@ package com.fastcampus.projectboard.Service;
 import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.ArticleComment;
 import com.fastcampus.projectboard.repository.ArticleCommentRepository;
+import com.fastcampus.projectboard.repository.ArticleCommentRepositoryCustomImpl;
 import com.fastcampus.projectboard.repository.ArticleRepository;
 
 import com.fastcampus.projectboard.repository.UserAccountRepository;
@@ -13,8 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -24,6 +27,8 @@ public class ArticleCommentService {
 
     private final ArticleRepository articleRepository;
     private final ArticleCommentRepository articleCommentRepository;
+    private final ArticleCommentRepositoryCustomImpl articleCommentRepositoryCustom;
+
 
     @Transactional(readOnly = true)
     public List<ArticleComment.ArticleCommentDto> searchArticleComments(Long articleId) {
@@ -61,8 +66,15 @@ public class ArticleCommentService {
 
     @Transactional(readOnly = true)
     public ArticleComment.ArticleCommentDto getArticleComment(Long articleCommentId) {
-        ArticleComment articleComment = articleCommentRepository.findByIdAndDeleted(articleCommentId,"N");
+        ArticleComment articleComment = articleCommentRepository.getReferenceById(articleCommentId);
         return ArticleComment.ArticleCommentDto.from(articleComment);
+    }
+    @Transactional(readOnly = true)
+    public Set<ArticleComment.ArticleCommentDto> getChildrenComment(Long parentId) {
+        Set<ArticleComment.ArticleCommentDto> articleCommentDtos = new HashSet<>();
+        articleCommentDtos = articleCommentRepositoryCustom.getChildrenCommentIsNotDeleted(parentId).stream().map(ArticleComment.ArticleCommentDto::from
+        ).collect(Collectors.toSet());
+        return articleCommentDtos;
     }
 
 
