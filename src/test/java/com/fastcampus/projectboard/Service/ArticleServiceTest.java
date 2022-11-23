@@ -1,6 +1,7 @@
 package com.fastcampus.projectboard.Service;
 
 import com.fastcampus.projectboard.domain.Article;
+import com.fastcampus.projectboard.domain.Hashtag;
 import com.fastcampus.projectboard.domain.UserAccount;
 import com.fastcampus.projectboard.domain.type.SearchType;
 import com.fastcampus.projectboard.repository.ArticleRepository;
@@ -17,7 +18,9 @@ import org.springframework.data.domain.Pageable;
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.BDDAssertions.catchThrowable;
@@ -106,13 +109,22 @@ class ArticleServiceTest {
     @Test
     void givenArticleInfo_whenSavingArticle_thenSavesArticle() {
         // Given
-        Article.ArticleDto dto = createArticleDto();
-        given(articleRepository.save(any(Article.class))).willReturn(createArticle());
+        Article article = createArticle();
+        Hashtag hashtag= createHashtag();
+        Set<Hashtag.HashtagDto> dtos= new HashSet<>();
+        dtos.add(Hashtag.HashtagDto.from(hashtag));
 
         // When
-
+        sut.saveArticle(Article.ArticleDto.from(article),dtos);
         // Then
         then(articleRepository).should().save(any(Article.class));
+    }
+
+    private Hashtag createHashtag() {
+        return Hashtag.builder()
+                .id(1L)
+                .hashtag("hashtag")
+                .build();
     }
 
     @DisplayName("게시글의 수정 정보를 입력하면, 게시글을 수정한다.")
@@ -151,13 +163,13 @@ class ArticleServiceTest {
     void givenArticleId_whenDeletingArticle_thenDeletesArticle() {
         // Given
         Long articleId = 1L;
-        willDoNothing().given(articleRepository).deleteById(articleId);
-
+        Article article = createArticle();
         // When
         sut.deleteArticle(1L);
 
         // Then
-        then(articleRepository).should().deleteById(articleId);
+        then(articleRepository).should().getReferenceById(articleId);
+
     }
 
 

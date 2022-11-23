@@ -1,8 +1,6 @@
 package com.fastcampus.projectboard.domain;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.*;
@@ -10,6 +8,7 @@ import java.util.*;
 @Entity
 @Getter
 @ToString(callSuper = true)
+@Builder
 public class Hashtag{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,9 +25,10 @@ public class Hashtag{
     protected Hashtag() {
     }
 
-    public Hashtag(Long id,String hashtag) {
+    public Hashtag(Long id,String hashtag, Set<ArticleHashtag> articles) {
         this.id = id;
         this.hashtag = hashtag;
+        this.articles = articles;
     }
     public Hashtag(String hashtag) {
         this.hashtag = hashtag;
@@ -39,7 +39,7 @@ public class Hashtag{
     }
 
     public static Hashtag of(Long id, String hashtag) {
-        return new Hashtag(id, hashtag);
+        return new Hashtag(id, hashtag,null);
     }
 
     @Override

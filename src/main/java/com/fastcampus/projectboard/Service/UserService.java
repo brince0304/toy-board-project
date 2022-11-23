@@ -79,15 +79,6 @@ public class UserService {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
     }
-
-
-
-
-
-
-
-
-
     public void updateUserAccount(UserAccount.UserAccountDto userDto) {
         try {
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -103,8 +94,12 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public UserAccount.UserAccountDto getUserAccount(String userId) {
-        UserAccount userAccount = userAccountRepository.findById(userId).orElseThrow();
-        return UserAccount.UserAccountDto.from(userAccount);
+        try {
+            UserAccount userAccount = userAccountRepository.findById(userId).orElseThrow();
+            return UserAccount.UserAccountDto.from(userAccount);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("회원정보 조회에 실패했습니다");
+        }
     }
 
     public void deleteUserAccount(String userId) {

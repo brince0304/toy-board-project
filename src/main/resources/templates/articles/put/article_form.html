@@ -65,10 +65,9 @@
                         "hashtag": hashtag}),
                     contentType: "application/json; charset=utf-8",
                     success: function (data) {
-                        if(data.message == "articleUpdating Success"){
                             alert('수정되었습니다.');
                             location.href = "/articles"+"/"+articleId;
-                    }},
+                    },
                     error: function (data) {
                         $(data).each(function () {
                             let message = this.responseJSON;

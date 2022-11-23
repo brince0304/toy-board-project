@@ -346,29 +346,6 @@ const editor = new toastui.Editor({
         }
     }
 });
-function uploadArticle(){
-    const title = $('#title').val();
-    const hashtag = $('#hashtag').val();
-    const data = {
-        title: title,
-        content: editor.getHTML(),
-        hashtag: hashtag
-    }
-    $.ajax({
-        type: "POST",
-        url: "/articles",
-        data: JSON.stringify(data),
-        contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        success: function (response) {
-            alert("등록되었습니다.")
-            location.href= "/articles/"+response;
-        },
-        error: function (request, status, error) {
-            alert(request.responseText);
-        }
-    });
-}
 
 
 
