@@ -226,5 +226,22 @@ public class UserAccount extends AuditingFields {
         }
 
     }
+    @Builder
+    public record UserAccountUpdateRequestDto(
+            @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,25}$", message = "* 패스워드는 영문, 숫자, 특수문자를 포함한 8자이상 25자 이하여야 합니다.")
+            String password1,
+            @NotEmpty(message = "* 입력값을 확인해주세요.")
+            String password2,
+            @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$", message = "* 이메일 형식을 확인해주세요.")
+            String email,
+            @Size(min=2, max=10, message = "* 닉네임은 2자 이상 10자 이하로 입력해주세요.")
+            String nickname,
+            @Size(max=50, message = "* 메모는 50자 이하로 입력해주세요.")
+            String memo
+    ) {
+        public static UserAccountUpdateRequestDto of( String password1, String password2, String email, String nickname, String memo) {
+            return new UserAccountUpdateRequestDto( password1, password2, email, nickname, memo);
+        }
+    }
 }
 
