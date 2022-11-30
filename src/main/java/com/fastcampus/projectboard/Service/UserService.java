@@ -73,11 +73,11 @@ public class UserService {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
     }
-    public void updateUserAccount(UserAccount.UserAccountDto userDto) {
+    public void updateUserAccount(String userId,UserAccount.UserAccountUpdateRequestDto userDto) {
         try {
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-            UserAccount userAccount = userAccountRepository.findById(userDto.userId()).orElseThrow();
-            if (userDto.userPassword() != null) { userAccount.setUserPassword(passwordEncoder.encode(userDto.userPassword())); }
+            UserAccount userAccount = userAccountRepository.findById(userId).orElseThrow();
+            if (userDto.password1() != null) { userAccount.setUserPassword(passwordEncoder.encode(userDto.password1())); }
             if (userDto.nickname() != null) { userAccount.setNickname(userDto.nickname()); }
             if (userDto.email() != null) { userAccount.setEmail(userDto.email()); }
             if (userDto.memo() != null) { userAccount.setMemo(userDto.memo()); }

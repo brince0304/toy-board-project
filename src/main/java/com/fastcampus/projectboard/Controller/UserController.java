@@ -62,6 +62,23 @@ public class UserController {
         return new ResponseEntity<>(userService.getMyArticles(principal.username()), HttpStatus.OK);
     }
 
+    @PutMapping("/accounts")
+    public ResponseEntity<?> updateMyAccount(@AuthenticationPrincipal UserAccount.BoardPrincipal principal
+            ,@Valid @RequestBody UserAccount.UserAccountUpdateRequestDto dto, BindingResult bindingResult) {
+        if(!dto.password1().equals(dto.password2())){
+            bindingResult.addError(new FieldError("dto","password2","비밀번호가 일치하지 않습니다."));
+            return new ResponseEntity<>(controllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
+        }
+        else if(principal==null){
+            return new ResponseEntity<>("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
+        }
+        else if(bindingResult.hasErrors()){
+            return new ResponseEntity<>(controllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
+        }
+        userService.updateUserAccount(principal.username(),dto);
+        return new ResponseEntity<>("수정되었습니다.", HttpStatus.OK);
+    }
+
 
 
     @PostMapping("/user/idCheck")
