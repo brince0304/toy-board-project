@@ -7,100 +7,125 @@
     <link href="/css/user.css" rel="stylesheet">
     <meta charset="UTF-8">
     <title>Title</title>
+    <style>
+        .left-box {
+            float: left;
+        }
+        .right-box {
+            float: right;
+        }
+    </style>
 </head>
 <header id="header">
     <hr>
+
 </header>
 <body>
-<div id="myPage">
-</div>
-
-<div id="myInfo">
-    <div class="container mt-4 mb-4 p-3 d-flex justify-content-center">
-        <div class="card p-4">
-            <div class=" image d-flex flex-column justify-content-center align-items-center">
-                <button class="btn btn-secondary"><img src="https://i.imgur.com/wvxPV9S.png" height="100"
-                                                       width="100"/></button>
-                <span class="name mt-3" th:text="${accountDto.nickname()}"></span> <span class="idd"
-                                                                                         th:text="${'@'+accountDto.nickname()}"></span>
-                <div class="d-flex flex-row justify-content-center align-items-center gap-2"><span class="idd1"
-                                                                                                   th:text="${accountDto.userId()}"></span>
-                    <span><i class="fa fa-copy"></i></span></div>
-                <div class="d-flex flex-row justify-content-center align-items-center mt-3"><span
-                        class="number">1069 <span
-                        class="follow">Followers</span></span></div>
-                <div class=" d-flex mt-2">
-                    <button class="btn1 btn-dark">Edit Profile</button>
-                </div>
-                <div class="text mt-3"><span th:text="${accountDto.memo()}"> </span>
-                </div>
-                <div class="gap-3 mt-3 icons d-flex flex-row justify-content-center align-items-center"><span><i
-                        class="fa fa-twitter"></i></span> <span><i class="fa fa-facebook-f"></i></span> <span><i
-                        class="fa fa-instagram"></i></span> <span><i class="fa fa-linkedin"></i></span></div>
-                <div class=" px-2 rounded mt-4 date "><span class="join" th:text="${accountDto.createdAt()}"></span>
+<div id="myPage"  >
+    <div class='container' >
+    <div class='row'>
+        <div class='col-md-3'>
+            <div class='list-group '>
+                <a href='#' class='list-group-item list-group-item-action active'>
+                    마이페이지
+                    </a>
+                <a href='#' onclick='getMyInfo()' class='list-group-item list-group-item-action'>내 정보</a>
+                <a href='#' onclick='profileUpdateForm()' class='list-group-item list-group-item-action'>정보 수정</a>
+                <a href='#' class='list-group-item list-group-item-action'>활동 기록</a>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<div id="profileUpdateForm">
-
-    <div class="container rounded bg-white mt-5 mb-5">
-        <div class="row">
-            <div class="col-md-3 border-right">
-                <div class="d-flex flex-column align-items-center text-center p-3 py-5"><img class="rounded-circle mt-5"
-                                                                                             width="150px"
-                                                                                             src="https://st3.depositphotos.com/15648834/17930/v/600/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg"><span
-                        class="font-weight-bold" th:text="${accountDto.userId()}"></span><span
-                        class="text-black-50" th:text="${accountDto.email()}"></span><span> </span></div>
-            </div>
-            <div class="col-md-5 border-right">
-                <div class="p-3 py-5">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h4 class="text-right">프로필 수정</h4>
+    <div id="myInfo" class="justify-content-center" >
+        <div class="container mt-4 mb-4 p-3 d-flex justify-content-center">
+            <div class="card p-4">
+                <div class=" image d-flex flex-column justify-content-center align-items-center">
+                    <button class="btn btn-secondary"><img src="https://i.imgur.com/wvxPV9S.png" height="100"
+                                                           width="100"/></button>
+                    <span class="name mt-3" th:text="${accountDto.nickname()}"></span> <span class="idd"
+                                                                                             th:text="${'@'+accountDto.nickname()}"></span>
+                    <div class="d-flex flex-row justify-content-center align-items-center gap-2"><span class="idd1"
+                                                                                                       th:text="${accountDto.userId()}"></span>
+                        <span><i class="fa fa-copy"></i></span></div>
+                    <div class="d-flex flex-row justify-content-center align-items-center mt-3"><span
+                            class="number">1069 <span
+                            class="follow">Followers</span></span></div>
+                    <div class=" d-flex mt-2">
+                        <button class="btn1 btn-dark">Edit Profile</button>
                     </div>
-                    <div class="row mt-2">
-                        <div class="col-md-6"><label class="labels">아이디</label><span
-                                th:text="${accountDto.userId()}"></span>
-                     </div>
-                        <div class="col-md-6"><label class="labels">닉네임</label><input id="nickname" type="text"
-                                                                                      class="form-control"
-                                                                                      th:value="${accountDto.nickname()}">
-                            <span class="field-error nicknameCheck">닉네임은 2자 이상 10자 이하로 입력해주세요.</span>
-                        </div>
+                    <div class="text mt-3"><span th:text="${accountDto.memo()}"> </span>
                     </div>
-                    <div class="row mt-2">
-                        <div class="col-md-6"><label class="labels">비밀번호</label><input id="password1" type="password"
-                                                                                       class="form-control">
-                            <span class="field-error passwordCheck">비밀번호는 특수문자,대소문,숫자 포함 8자 이상 25자 이하로 입력해주세요.</span>
-                        </div>
-                        <div class="col-md-6"><label class="labels">비밀번호 확인</label><input id="password2" type="password"
-                                                                                          class="form-control">
-                            <span class="field-error passwordInvalidCheck"></span>
-                        </div>
-                    </div>
-                    <input type="hidden" id="nicknameDoubleChk"/>
-                    <div class="row mt-3">
-                        <div class="col-md-12"><label class="labels">이메일</label><input id="email" type="text"
-                                                                                       class="form-control"
-                                                                                       th:value="${accountDto.email()}">
-                            <span class="field-error emailCheck"></span>
-                            <input type="hidden" id="emailDoubleChk"/></div>
-                        <div class="col-md-12"><label for="memo" class="labels">소개</label><textarea id="memo"
-                                                                                                    class="form-control"
-                                                                                                    th:text="${accountDto.memo()}"></textarea>
-                        </div>
-                    </div>
-                    <div class="row mt-3">
-                    </div>
-                    <div class="mt-5 text-center">
-                        <button class="btn btn-primary profile-button" onclick="updateAccountProfile()" type="button">수정하기</button>
+                    <div class="gap-3 mt-3 icons d-flex flex-row justify-content-center align-items-center"><span><i
+                            class="fa fa-twitter"></i></span> <span><i class="fa fa-facebook-f"></i></span> <span><i
+                            class="fa fa-instagram"></i></span> <span><i class="fa fa-linkedin"></i></span></div>
+                    <div class=" px-2 rounded mt-4 date "><span class="join" th:text="${accountDto.createdAt()}"></span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <div id="profileUpdateForm" >
+
+        <div class="container rounded bg-white mt-5 mb-5">
+            <div class="row">
+                <div class="col-md-3 border-right">
+                    <div class="d-flex flex-column align-items-center text-center p-3 py-5"><img class="rounded-circle mt-5"
+                                                                                                 width="150px"
+                                                                                                 src="https://st3.depositphotos.com/15648834/17930/v/600/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg"><span
+                            class="font-weight-bold" th:text="${accountDto.userId()}"></span><span
+                            class="text-black-50" th:text="${accountDto.email()}"></span><span> </span></div>
+                </div>
+                <div class="col-md-5 border-right">
+                    <div class="p-3 py-5">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="text-right">프로필 수정</h4>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-6"><label class="labels">아이디</label><span
+                                    th:text="${accountDto.userId()}"></span>
+                            </div>
+                            <div class="col-md-6"><label class="labels">닉네임</label><input id="nickname" type="text"
+                                                                                          class="form-control"
+                                                                                          th:value="${accountDto.nickname()}">
+                                <span class="field-error nicknameCheck">닉네임은 2자 이상 10자 이하로 입력해주세요.</span>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-6"><label class="labels">비밀번호</label><input id="password1" type="password"
+                                                                                           class="form-control">
+                                <span class="field-error passwordCheck">비밀번호는 특수문자,대소문,숫자 포함 8자 이상 25자 이하로 입력해주세요.</span>
+                            </div>
+                            <div class="col-md-6"><label class="labels">비밀번호 확인</label><input id="password2" type="password"
+                                                                                              class="form-control">
+                                <span class="field-error passwordInvalidCheck"></span>
+                            </div>
+                        </div>
+                        <input type="hidden" id="nicknameDoubleChk"/>
+                        <div class="row mt-3">
+                            <div class="col-md-12"><label class="labels">이메일</label><input id="email" type="text"
+                                                                                           class="form-control"
+                                                                                           th:value="${accountDto.email()}">
+                                <span class="field-error emailCheck"></span>
+                                <input type="hidden" id="emailDoubleChk"/></div>
+                            <div class="col-md-12"><label for="memo" class="labels">소개</label><textarea id="memo"
+                                                                                                        class="form-control"
+                                                                                                        th:text="${accountDto.memo()}"></textarea>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                        </div>
+                        <div class="mt-5 text-center">
+                            <button class="btn btn-primary profile-button" onclick="updateAccountProfile()" type="button">수정하기</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+
 
 
 <div id="myArticles">
@@ -124,22 +149,7 @@
 </footer>
 <script>
     $(document).ready(function () {
-        let html = "";
-        html += "<div class='container'>";
-        html += "<div class='row'>";
-        html += "<div class='col-md-3'>";
-        html += "<div class='list-group '>";
-        html += "<a href='#' class='list-group-item list-group-item-action active'>";
-        html += "마이페이지";
-        html += "</a>";
-        html += "<a href='#' onclick='getMyInfo()' class='list-group-item list-group-item-action'>내 정보</a>";
-        html += "<a href='#' onclick='profileUpdateForm()' class='list-group-item list-group-item-action'>정보 수정</a>";
-        html += "<a href='#' class='list-group-item list-group-item-action'>활동 기록</a>";
-        html += "</div>"
-        html += "</div>";
-        html += "</div>";
-        html += "</div>";
-        $("#myPage").html(html);
+        $("#profileUpdateForm").hide();
     });
 
     function getMyInfo() {
