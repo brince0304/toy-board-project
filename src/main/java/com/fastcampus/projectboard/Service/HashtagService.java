@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 public class HashtagService {
 
     private final HashtagRepository hashtagRepository;
-    private final ArticleHashtagRepository articleHashtagRepository;
 
     public void saveHashtags(Set<Hashtag.HashtagDto> hashtags) {
         hashtags.stream()
@@ -32,6 +31,7 @@ public class HashtagService {
                     }
                 });
     }
+    @Transactional(readOnly = true)
     public Hashtag.HashtagDto getHashtag(String hashtag) {
         return Hashtag.HashtagDto.from(hashtagRepository.findByHashtag(hashtag).orElseThrow());
     }
@@ -40,6 +40,7 @@ public class HashtagService {
         hashtagRepository.save(hashtag);
     }
 
+    @Transactional(readOnly = true)
     public Set<Article.ArticleDto> getArticlesByHashtag(String hashtag) {
         return hashtagRepository.findByHashtag(hashtag).get().getArticles().stream().map(t-> Article.ArticleDto.from(t.getArticle())
         ).collect(Collectors.toSet());

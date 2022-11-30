@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 @Component
 public class ControllerUtil {
 
+
     public String getIp(HttpServletRequest request){
         String ip = request.getHeader("X-Forwarded-For");
         if (ip == null) {

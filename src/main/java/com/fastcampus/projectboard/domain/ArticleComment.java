@@ -1,10 +1,7 @@
 package com.fastcampus.projectboard.domain;
 
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -28,6 +25,8 @@ import java.util.stream.Collectors;
         @Index(columnList= "createdBy")
 })
 @Entity
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ArticleComment extends AuditingFields{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
@@ -85,7 +84,7 @@ public class ArticleComment extends AuditingFields{
     public int hashCode() {
         return Objects.hash(id);
     }
-
+    @Builder
     public record ArticleCommentRequest(
             Long articleId,
             @Size(min = 2, max= 100, message = "* 댓글은 2자 이상 100자 이하로 입력해주세요.")
@@ -114,43 +113,7 @@ public class ArticleComment extends AuditingFields{
     }
 
 
-    public record ArticleResponse(
-            Long id,
-            String title,
-            String content,
-            LocalDateTime createdAt,
-            String email,
-            String nickname,
-            String deleted,
-            Integer viewCount,
-            Integer likeCount
-    ) implements Serializable {
-
-        public static ArticleResponse of(Long id, String title, String content,  LocalDateTime createdAt, String email, String nickname, String deleted,Integer viewCount, Integer likeCount) {
-            return new ArticleResponse(id, title, content,  createdAt, email, nickname, deleted,viewCount, likeCount);
-        }
-
-        public static ArticleResponse from(Article.ArticleDto dto) {
-            String nickname = dto.userAccountDto().nickname();
-            if (nickname == null || nickname.isBlank()) {
-                nickname = dto.userAccountDto().userId();
-            }
-
-            return new ArticleResponse(
-                    dto.id(),
-                    dto.title(),
-                    dto.content(),
-                    dto.createdAt(),
-                    dto.userAccountDto().email(),
-                    nickname,
-                    dto.deleted(),
-                    dto.viewCount(),
-                    dto.likeCount()
-            );
-        }
-
-    }
-
+    @Builder
     public record ArticleCommentResponse(
             Long id,
             String content,
@@ -174,21 +137,20 @@ public class ArticleComment extends AuditingFields{
                 nickname = dto.userAccountDto().userId();
             }
 
-            return new ArticleCommentResponse(
-                    dto.id(),
-                    dto.content(),
-                    dto.createdAt(),
-                    dto.userAccountDto().email(),
-                    nickname,
-                    dto.userAccountDto().userId()
-                    ,dto.deleted(),
-                    dto.children(),
-                    dto.isParent()
-
-            );
+            return ArticleCommentResponse.builder()
+                    .id(dto.id())
+                    .content(dto.content())
+                    .createdAt(dto.createdAt())
+                    .email(dto.userAccountDto().email())
+                    .nickname(nickname)
+                    .userId(dto.userAccountDto().userId())
+                    .deleted(dto.deleted())
+                    .children(dto.children())
+                    .isParent(dto.isParent())
+                    .build();
         }
     }
-
+    @Builder
     public record ArticleCommentDto(
             Long id,
             Long articleId,
@@ -210,21 +172,19 @@ public class ArticleComment extends AuditingFields{
         }
 
         public static ArticleCommentDto from(ArticleComment entity) {
-            return new ArticleCommentDto(
-                    entity.getId(),
-                    entity.getArticle().getId(),
-                    UserAccount.UserAccountDto.from(entity.getUserAccount()),
-                    entity.getContent(),
-                    entity.getCreatedAt(),
-                    entity.getCreatedBy(),
-                    entity.getModifiedAt(),
-                    entity.getModifiedBy(),
-                    entity.getDeleted(),
-                    entity.getChildren().stream()
-                            .map(ArticleCommentDto::from)
-                            .collect(Collectors.toCollection(LinkedHashSet::new)),
-                    entity.getIsParent()
-            );
+            return ArticleCommentDto.builder()
+                    .id(entity.getId())
+                    .articleId(entity.getArticle().getId())
+                    .userAccountDto(UserAccount.UserAccountDto.from(entity.getUserAccount()))
+                    .content(entity.getContent())
+                    .createdAt(entity.getCreatedAt())
+                    .createdBy(entity.getCreatedBy())
+                    .modifiedAt(entity.getModifiedAt())
+                    .modifiedBy(entity.getModifiedBy())
+                    .deleted(entity.getDeleted())
+                    .children(entity.getChildren().stream().map(ArticleCommentDto::from).collect(Collectors.toSet()))
+                    .isParent(entity.getParent() == null ? "Y" : "N")
+                    .build();
         }
 
         public ArticleComment toEntity(Article article, UserAccount userAccount) {

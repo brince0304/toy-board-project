@@ -1,13 +1,14 @@
 package com.fastcampus.projectboard.domain;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
 
 @Entity
-@Setter
 @Getter
+@Builder
 public class ArticleHashtag {
 
     @Id
@@ -16,10 +17,12 @@ public class ArticleHashtag {
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "article_id")
+    @Setter
     private Article article;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "hashtag_id")
+    @Setter
     private Hashtag hashtag;
 
     protected ArticleHashtag() {

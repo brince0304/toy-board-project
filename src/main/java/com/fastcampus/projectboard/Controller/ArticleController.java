@@ -7,7 +7,6 @@ import com.fastcampus.projectboard.domain.ArticleComment;
 import com.fastcampus.projectboard.domain.Hashtag;
 import com.fastcampus.projectboard.domain.UserAccount;
 import com.fastcampus.projectboard.domain.type.SearchType;
-import com.fastcampus.projectboard.domain.type.StatusEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -41,18 +40,19 @@ public class ArticleController {
 
 
     @GetMapping
-    public String articles(
+    public String getArticles(
             @RequestParam(required = false) SearchType searchType,
             @RequestParam(required = false) String searchValue,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
             , ModelMap map) {
-        map.addAttribute("articles", articleService.searchArticles(searchType, searchValue, pageable).map(ArticleComment.ArticleResponse::from));
+
+        map.addAttribute("articles", articleService.searchArticles(searchType, searchValue, pageable).map(Article.ArticleResponse::from));
         return "articles/index";
     }
 
     @GetMapping("/{articleId}")
-    public String article(@PathVariable Long articleId, ModelMap map, ArticleComment.ArticleCommentRequest dto,
-                          @AuthenticationPrincipal UserAccount.BoardPrincipal principal, HttpServletRequest req, HttpServletResponse res) {
+    public String getArticleByArticleId(@PathVariable Long articleId, ModelMap map, ArticleComment.ArticleCommentRequest dto,
+                                        @AuthenticationPrincipal UserAccount.BoardPrincipal principal, HttpServletRequest req, HttpServletResponse res) {
         try{
         Article.ArticleWithCommentResponse article = Article.ArticleWithCommentResponse.from(articleService.getArticle(articleId));
         articleService.updateViewCount(req.getRemoteAddr(), articleId);
@@ -67,15 +67,15 @@ public class ArticleController {
     }
     @ResponseBody
     @PostMapping("/{articleId}")
-    public ResponseEntity<String> likeArticle(@PathVariable String articleId, HttpServletRequest req) {
+    public ResponseEntity<String> updateLikeCount(@PathVariable String articleId, HttpServletRequest req) {
         Long id = Long.parseLong(articleId);
-        Integer count = articleService.updateLike(req.getRemoteAddr(), id);
+        Integer count = articleService.updateLikeCount(req.getRemoteAddr(), id);
         return new ResponseEntity<>(String.valueOf(count), HttpStatus.OK);
     }
 
 
     @GetMapping("/search-hashtag/{hashtag}")
-    public String hashtag(@PathVariable String hashtag, ModelMap map) {
+    public String searchArticlesByHashtag(@PathVariable String hashtag, ModelMap map) {
         Set<Article.ArticleDto> set = hashtagService.getArticlesByHashtag(hashtag);
         Hashtag.HashtagDto dto = hashtagService.getHashtag(hashtag);
         map.addAttribute("articles", set);
@@ -85,7 +85,7 @@ public class ArticleController {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/post")
-    public String articleCreate(Model model, Article.ArticleRequest dto, @AuthenticationPrincipal UserAccount.BoardPrincipal principal) {
+    public String getPostPage(Model model, Article.ArticleRequest dto, @AuthenticationPrincipal UserAccount.BoardPrincipal principal) {
         if (principal == null) {
             return "redirect:/login";
         }
@@ -94,8 +94,8 @@ public class ArticleController {
     }
     @ResponseBody
     @PostMapping
-    public ResponseEntity<String> articleSave(@RequestBody @Valid Article.ArticleRequest dto, BindingResult bindingResult,
-                              @AuthenticationPrincipal UserAccount.BoardPrincipal boardPrincipal) {
+    public ResponseEntity<String> saveArticle(@RequestBody @Valid Article.ArticleRequest dto, BindingResult bindingResult,
+                                              @AuthenticationPrincipal UserAccount.BoardPrincipal boardPrincipal) {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>("내용을 확인해주세요.", HttpStatus.BAD_REQUEST);
         }
@@ -108,7 +108,7 @@ public class ArticleController {
     }
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/post/{articleId}")
-    public String articleUpdate(@PathVariable Long articleId, ModelMap map,
+    public String updateArticle(@PathVariable Long articleId, ModelMap map,
                                 Article.ArticleRequest dto,
                                 @AuthenticationPrincipal UserAccount.BoardPrincipal boardPrincipal) {
         Article.ArticleWithCommentDto articleDto = articleService.getArticle(articleId);
@@ -143,7 +143,7 @@ public class ArticleController {
     @ResponseBody
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping
-    public ResponseEntity<String> articleDelete(@RequestBody Map<String,String> articleId, @AuthenticationPrincipal UserAccount.BoardPrincipal boardPrincipal) {
+    public ResponseEntity<String> deleteArticleByArticleId(@RequestBody Map<String,String> articleId, @AuthenticationPrincipal UserAccount.BoardPrincipal boardPrincipal) {
         String id = boardPrincipal.getUsername();
         Long aId = Long.parseLong(articleId.get("articleId"));
         if (articleService.getArticle(aId).getUserAccountDto().userId().equals(id)) {

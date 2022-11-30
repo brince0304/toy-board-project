@@ -1,6 +1,5 @@
 package com.fastcampus.projectboard.Controller;
 
-import com.fastcampus.projectboard.Service.UserSecurityService;
 import com.fastcampus.projectboard.Service.UserService;
 import com.fastcampus.projectboard.Util.ControllerUtil;
 import com.fastcampus.projectboard.Util.CookieUtil;
@@ -10,18 +9,12 @@ import com.fastcampus.projectboard.domain.UserAccount;
 import com.fastcampus.projectboard.domain.UserAccountRole;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -113,28 +106,28 @@ public class UserController {
     @GetMapping("/login")
     public ModelAndView login(UserAccount.LoginDto dto, HttpServletRequest req, HttpServletResponse res) {
         String referer = req.getHeader("Referer");
-        req.getSession().setAttribute("prevPage", referer);
         ModelAndView mav = new ModelAndView();
         mav.setViewName("user/login_form");
         mav.addObject("dto", dto);
+        mav.getModelMap().addAttribute("prevPage",referer);
         return mav;
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@ModelAttribute("dto") @RequestBody @Valid UserAccount.LoginDto user, BindingResult bindingResult,
-                                HttpServletResponse res, HttpServletRequest req) throws IOException {
+                                HttpServletResponse res, HttpServletRequest req, ModelMap map) throws IOException {
 
         try {
             if (!bindingResult.hasErrors()) {
-                final UserAccount.BoardPrincipal principal = userService.loginUser(user.getUsername(), user.getPassword());
+                final UserAccount.BoardPrincipal principal = userService.loginByUserNameAndPassword(user.getUsername(), user.getPassword());
                 Cookie accessToken = cookieUtil.createCookie(TokenProvider.ACCESS_TOKEN_NAME, tokenProvider.generateToken(principal));
-                accessToken.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds(TokenProvider.TOKEN_VALIDATION_SECOND));
+                accessToken.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds(TokenProvider.REFRESH_TOKEN_VALIDATION_SECOND));
                 Cookie refreshToken = cookieUtil.createCookie(TokenProvider.REFRESH_TOKEN_NAME, tokenProvider.generateRefreshToken(principal));
                 refreshToken.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds(TokenProvider.REFRESH_TOKEN_VALIDATION_SECOND));
                 redisUtil.setDataExpire(refreshToken.getValue(), principal.getUsername(), TokenProvider.REFRESH_TOKEN_VALIDATION_SECOND);
                 res.addCookie(accessToken);
                 res.addCookie(refreshToken);
-                return new ResponseEntity<>(req.getSession().getAttribute("prevPage").toString(), HttpStatus.OK);
+                return new ResponseEntity<>(map.getAttribute("prevPage"), HttpStatus.OK);
             }
             else{
                 return new ResponseEntity<>(controllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);

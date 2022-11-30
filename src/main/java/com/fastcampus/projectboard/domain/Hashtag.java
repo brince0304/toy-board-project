@@ -53,7 +53,7 @@ public class Hashtag{
     public int hashCode() {
         return Objects.hash(id);
     }
-
+    @Builder
     public record HashtagDto(Long id, String hashtag) {
 
         public static HashtagDto of(String hashtag) {

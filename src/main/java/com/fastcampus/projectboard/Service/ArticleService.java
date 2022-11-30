@@ -2,7 +2,6 @@ package com.fastcampus.projectboard.Service;
 
 import com.fastcampus.projectboard.Util.RedisUtil;
 import com.fastcampus.projectboard.domain.Article;
-import com.fastcampus.projectboard.domain.ArticleComment;
 import com.fastcampus.projectboard.domain.ArticleHashtag;
 import com.fastcampus.projectboard.domain.Hashtag;
 import com.fastcampus.projectboard.domain.type.SearchType;
@@ -69,7 +68,7 @@ public class ArticleService {
         }
     }
 
-    public Integer updateLike(String clientIp,Long articleId) {
+    public Integer updateLikeCount(String clientIp, Long articleId) {
         Article article = articleRepository.findById(articleId).orElseThrow(EntityNotFoundException::new);
 
         if(redisUtil.isFirstIpRequest2(clientIp, articleId)) {

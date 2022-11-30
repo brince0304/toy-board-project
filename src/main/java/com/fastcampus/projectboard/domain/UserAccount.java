@@ -1,9 +1,6 @@
 package com.fastcampus.projectboard.domain;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,6 +27,7 @@ import java.util.stream.Collectors;
         @Index(columnList = "createdBy")
 })
 @Entity
+@Builder
 public class UserAccount extends AuditingFields {
     @Id
     @Column(length = 50)
@@ -83,7 +81,7 @@ public class UserAccount extends AuditingFields {
 
     @Getter
     @Setter
-    @NoArgsConstructor
+    @Builder
     public static class SignupDto implements Serializable {
         @Size(min = 6, max = 25, message = "* 아이디는 6자 이상 25자 이하로 입력해주세요.")
         private String userId;
@@ -106,7 +104,7 @@ public class UserAccount extends AuditingFields {
 
     }
 
-
+    @Builder
     public record BoardPrincipal(
             String username,
             String password,
@@ -154,7 +152,7 @@ public class UserAccount extends AuditingFields {
         @Override public boolean isEnabled() { return true; }
 
     }
-
+    @Builder
     public static class LoginDto {
         private String username;
         private String password;
@@ -176,6 +174,7 @@ public class UserAccount extends AuditingFields {
         }
     }
 
+    @Builder
     public record UserAccountDto(
             String userId,
             String userPassword,

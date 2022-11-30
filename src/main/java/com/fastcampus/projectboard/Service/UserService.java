@@ -1,12 +1,7 @@
 package com.fastcampus.projectboard.Service;
 
-import com.fastcampus.projectboard.Jwt.TokenDto;
-import com.fastcampus.projectboard.Util.RedisUtil;
-import com.fastcampus.projectboard.Util.SaltUtil;
-import com.fastcampus.projectboard.Util.TokenProvider;
 import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.UserAccount;
-import com.fastcampus.projectboard.domain.UserAccountRole;
 import com.fastcampus.projectboard.repository.ArticleCommentRepository;
 import com.fastcampus.projectboard.repository.ArticleRepository;
 import com.fastcampus.projectboard.repository.UserAccountRepository;
@@ -24,7 +19,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -123,7 +117,7 @@ public class UserService {
         return userAccountRepository.findByEmail(email).isPresent();
     }
 
-    public UserAccount.BoardPrincipal loginUser(String username, String password) {
+    public UserAccount.BoardPrincipal loginByUserNameAndPassword(String username, String password) {
           UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(username, password);
             Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);

@@ -1,5 +1,6 @@
 package com.fastcampus.projectboard.Util;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -10,7 +11,9 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Service
+@RequiredArgsConstructor
 public class RedisUtil {
+
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;

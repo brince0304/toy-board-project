@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 })  //테이블 컬럼 인덱스 설정
  // 인덱스 이름이 없으니 키 부여
 @Entity
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Article extends AuditingFields{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 프라이머리 키
@@ -90,10 +92,10 @@ public class Article extends AuditingFields{
     public int hashCode() {
         return Objects.hash(id);
     }
-
+    @Builder
     @Getter
     @Setter
-    @NoArgsConstructor
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
     public static class ArticleRequest implements Serializable {
         @Nullable
         private Long articleId;
@@ -157,7 +159,7 @@ public class Article extends AuditingFields{
         }
     }
 
-
+    @Builder
     public record ArticleWithCommentResponse(
             Long id,
             String title,
@@ -199,7 +201,7 @@ public class Article extends AuditingFields{
         }
 
     }
-
+    @Builder
     public record ArticleDto(
             Long id,
             UserAccount.UserAccountDto userAccountDto,
@@ -223,19 +225,19 @@ public class Article extends AuditingFields{
         }
 
         public static ArticleDto from(Article entity) {
-            return ArticleDto.of(
-                    entity.getId(),
-                    UserAccount.UserAccountDto.from(entity.getUserAccount()),
-                    entity.getTitle(),
-                    entity.getContent(),
-                    entity.getCreatedAt(),
-                    entity.getCreatedBy(),
-                    entity.getModifiedAt(),
-                    entity.getModifiedBy()
-                    ,entity.getDeleted(),
-                    entity.getViewCount(),
-                    entity.getLikeCount()
-            );
+            return ArticleDto.builder()
+                    .id(entity.getId())
+                    .userAccountDto(UserAccount.UserAccountDto.from(entity.getUserAccount()))
+                    .title(entity.getTitle())
+                    .content(entity.getContent())
+                    .createdAt(entity.getCreatedAt())
+                    .createdBy(entity.getCreatedBy())
+                    .modifiedAt(entity.getModifiedAt())
+                    .modifiedBy(entity.getModifiedBy())
+                    .deleted(entity.getDeleted())
+                    .viewCount(entity.getViewCount())
+                    .likeCount(entity.getLikeCount())
+                    .build();
         }
 
         public Article toEntity() {
@@ -249,7 +251,6 @@ public class Article extends AuditingFields{
     @Builder
     @Getter
     @Setter
-    @NoArgsConstructor
     public static class ArticleWithCommentDto {
         Long id ;
         UserAccount.UserAccountDto userAccountDto ;
@@ -292,22 +293,57 @@ public class Article extends AuditingFields{
         }
 
         public static ArticleWithCommentDto from(Article entity) {
-            return new ArticleWithCommentDto(
-                    entity.getId(),
-                    UserAccount.UserAccountDto.from(entity.getUserAccount()),
-                    entity.getArticleComments().stream()
-                            .map(ArticleComment.ArticleCommentDto::from)
-                            .collect(Collectors.toCollection(LinkedHashSet::new)),
-                    entity.getTitle(),
-                    entity.getContent(),
-                    entity.getCreatedAt(),
-                    entity.getCreatedBy(),
-                    entity.getModifiedAt(),
-                    entity.getModifiedBy(),
-                    null,
-                    entity.getDeleted(),
-                    entity.getViewCount(),
-                    entity.getLikeCount()
+            return ArticleWithCommentDto.builder()
+                    .id(entity.getId())
+                    .userAccountDto(UserAccount.UserAccountDto.from(entity.getUserAccount()))
+                    .articleCommentDtos(entity.getArticleComments().stream().map(ArticleComment.ArticleCommentDto::from).collect(Collectors.toCollection(LinkedHashSet::new)))
+                    .title(entity.getTitle())
+                    .content(entity.getContent())
+                    .createdAt(entity.getCreatedAt())
+                    .createdBy(entity.getCreatedBy())
+                    .modifiedAt(entity.getModifiedAt())
+                    .modifiedBy(entity.getModifiedBy())
+                    .deleted(entity.getDeleted())
+                    .viewCount(entity.getViewCount())
+                    .likeCount(entity.getLikeCount())
+                    .build();
+        }
+
+    }
+
+    @Builder
+    public record ArticleResponse(
+            Long id,
+            String title,
+            String content,
+            LocalDateTime createdAt,
+            String email,
+            String nickname,
+            String deleted,
+            Integer viewCount,
+            Integer likeCount
+    ) implements Serializable {
+
+        public static ArticleResponse of(Long id, String title, String content,  LocalDateTime createdAt, String email, String nickname, String deleted,Integer viewCount, Integer likeCount) {
+            return new ArticleResponse(id, title, content,  createdAt, email, nickname, deleted,viewCount, likeCount);
+        }
+
+        public static ArticleResponse from(Article.ArticleDto dto) {
+            String nickname = dto.userAccountDto().nickname();
+            if (nickname == null || nickname.isBlank()) {
+                nickname = dto.userAccountDto().userId();
+            }
+
+            return new ArticleResponse(
+                    dto.id(),
+                    dto.title(),
+                    dto.content(),
+                    dto.createdAt(),
+                    dto.userAccountDto().email(),
+                    nickname,
+                    dto.deleted(),
+                    dto.viewCount(),
+                    dto.likeCount()
             );
         }
 
