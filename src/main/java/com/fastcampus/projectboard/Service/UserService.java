@@ -151,4 +151,12 @@ public class UserService {
         }
         return articleDtos;
     }
+
+    public void saveUserAccountWithoutProfile(UserAccount.SignupDto user) throws IOException {
+        String password = user.getPassword1();
+        UserAccount account = userAccountRepository.save(user.toEntity());
+        account.setUserPassword(new BCryptPasswordEncoder().encode(password));
+        account.setProfileImgName("default.jpg");
+        account.setProfileImgPath(uploadPath+"/default.jpg");
+    }
 }
