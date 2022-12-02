@@ -1,10 +1,12 @@
 package com.fastcampus.projectboard.domain;
 
+import io.micrometer.core.lang.Nullable;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -27,7 +29,6 @@ import java.util.stream.Collectors;
         @Index(columnList = "createdBy")
 })
 @Entity
-@Builder
 public class UserAccount extends AuditingFields {
     @Id
     @Column(length = 50)
@@ -45,6 +46,9 @@ public class UserAccount extends AuditingFields {
     @Enumerated(EnumType.STRING)
     private Set<UserAccountRole> roles;
 
+    @Setter private String profileImgName;
+    @Setter private String profileImgPath;
+
 
 
 
@@ -53,19 +57,19 @@ public class UserAccount extends AuditingFields {
 
 
     public UserAccount() {}
-
-    private UserAccount(String userId, String userPassword, String email, String nickname, String memo,Set<UserAccountRole> roles) {
+    @Builder
+    private UserAccount(String userId, String userPassword, String email, String nickname, String memo,Set<UserAccountRole> roles, String profileImgName, String profileImgPath) {
         this.userId = userId;
         this.userPassword = userPassword;
         this.email = email;
         this.nickname = nickname;
         this.memo = memo;
         this.roles = roles;
+        this.profileImgName = profileImgName;
+        this.profileImgPath = profileImgPath;
+
     }
 
-    public static UserAccount of(String userId, String userPassword, String email, String nickname, String memo,Set<UserAccountRole> roles) {
-        return new UserAccount(userId, userPassword, email, nickname, memo,roles);
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -82,6 +86,7 @@ public class UserAccount extends AuditingFields {
     @Getter
     @Setter
     @Builder
+    @AllArgsConstructor
     public static class SignupDto implements Serializable {
         @Size(min = 6, max = 25, message = "* 아이디는 6자 이상 25자 이하로 입력해주세요.")
         private String userId;
@@ -102,6 +107,23 @@ public class UserAccount extends AuditingFields {
         @Size(max=50, message = "* 메모는 50자 이하로 입력해주세요.")
         private String memo;
 
+        private MultipartFile imgFile;
+
+        protected SignupDto() {}
+
+           public UserAccount toEntity() {
+                return UserAccount.builder()
+                        .userId(userId)
+                        .userPassword(password1)
+                        .nickname(nickname)
+                        .email(email)
+                        .memo(memo)
+                        .roles(Set.of(UserAccountRole.ROLE_USER))
+                        .build();
+            }
+
+
+
     }
 
     @Builder
@@ -111,33 +133,35 @@ public class UserAccount extends AuditingFields {
             Collection<? extends GrantedAuthority> authorities,
             String email,
             String nickname,
-            String memo
+            String memo,
+            String profileImgName,
+            String profileImgPath
     )  implements UserDetails {
-        public static BoardPrincipal of(String username, String password, Collection<? extends GrantedAuthority> authorities,String email, String nickname, String memo) {
-            // 지금은 인증만 하고 권한을 다루고 있지 않아서 임의로 세팅한다.
 
-            return new BoardPrincipal(
-                    username,
-                    password,
-                    authorities,
-                    email,
-                    nickname,
-                    memo
-            );
-        }
         public static BoardPrincipal from(UserAccountDto dto) {
-            return BoardPrincipal.of(
-                    dto.userId(),
-                    dto.userPassword(),
-                    dto.roles().stream().map(role -> new SimpleGrantedAuthority(role.name())).collect(Collectors.toSet()),
-                    dto.email(),
-                    dto.nickname(),
-                    dto.memo()
-            );
+            return BoardPrincipal.builder()
+                    .username(dto.userId())
+                    .password(dto.userPassword())
+                    .authorities(dto.roles().stream().map(role -> new SimpleGrantedAuthority(role.name())).collect(Collectors.toSet()))
+                    .email(dto.email())
+                    .nickname(dto.nickname())
+                    .memo(dto.memo())
+                    .profileImgName(dto.profileImgName())
+                    .profileImgPath(dto.profileImgPath())
+                    .build();
         }
 
         public UserAccountDto toDto() {
-            return UserAccountDto.of(username,password, email, nickname, memo, authorities.stream().map(role -> UserAccountRole.valueOf(role.getAuthority())).collect(Collectors.toSet()));
+            return UserAccountDto.builder()
+                    .userId(username)
+                    .userPassword(password)
+                    .email(email)
+                    .nickname(nickname)
+                    .memo(memo)
+                    .roles(authorities.stream().map(GrantedAuthority::getAuthority).map(UserAccountRole::valueOf).collect(Collectors.toSet()))
+                    .profileImgName(profileImgName)
+                    .profileImgPath(profileImgPath)
+                    .build();
         }
 
 
@@ -185,44 +209,43 @@ public class UserAccount extends AuditingFields {
             String createdBy,
             LocalDateTime modifiedAt,
             String modifiedBy,
-            Set<UserAccountRole> roles
+            Set<UserAccountRole> roles,
+            String profileImgName,
+            String profileImgPath
 
     ) {
-        public static UserAccountDto of(String userId, String userPassword, String email, String nickname, String memo, Set<UserAccountRole> roles) {
-            return new UserAccountDto(userId, userPassword, email, nickname, memo, null,null,null,null,roles);
-        }
 
-
-        public static UserAccountDto of(String userId, String userPassword, String email, String nickname, String memo, LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy,Set<UserAccountRole> roles) {
-            return new UserAccountDto(userId, userPassword, email, nickname, memo, createdAt, createdBy, modifiedAt, modifiedBy,roles);
-        }
 
         public static UserAccountDto from(UserAccount entity) {
-            return new UserAccountDto(
-                    entity.getUserId(),
-                    entity.getUserPassword(),
-                    entity.getEmail(),
-                    entity.getNickname(),
-                    entity.getMemo(),
-                    entity.getCreatedAt(),
-                    entity.getCreatedBy(),
-                    entity.getModifiedAt(),
-                    entity.getModifiedBy(),
-                    entity.getRoles()
-            );
+            return UserAccountDto.builder()
+                    .userId(entity.getUserId())
+                    .userPassword(entity.getUserPassword())
+                    .email(entity.getEmail())
+                    .nickname(entity.getNickname())
+                    .memo(entity.getMemo())
+                    .createdAt(entity.getCreatedAt())
+                    .createdBy(entity.getCreatedBy())
+                    .modifiedAt(entity.getModifiedAt())
+                    .modifiedBy(entity.getModifiedBy())
+                    .roles(entity.getRoles())
+                    .profileImgName(entity.getProfileImgName())
+                    .profileImgPath(entity.getProfileImgPath())
+                    .build();
         }
 
         public UserAccount toEntity() {
             BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-            return UserAccount.of(
-                    userId,
-                    userPassword,
-                    email,
-                    nickname,
-                    memo,
-                    roles
-            );
+            return UserAccount.builder()
+                    .userId(userId)
+                    .userPassword(passwordEncoder.encode(userPassword))
+                    .email(email)
+                    .nickname(nickname)
+                    .memo(memo)
+                    .roles(roles)
+                    .profileImgName(profileImgName)
+                    .profileImgPath(profileImgPath)
+                    .build();
         }
 
     }
