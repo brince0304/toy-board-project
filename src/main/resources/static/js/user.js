@@ -140,7 +140,7 @@ function signupCheck() {
         }
     }
     formData.append(
-        "key",
+        "signupDto",
         new Blob([JSON.stringify(data.info)], { type: "application/json" })
     );
 

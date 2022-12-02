@@ -107,8 +107,6 @@ public class UserAccount extends AuditingFields {
         @Size(max=50, message = "* 메모는 50자 이하로 입력해주세요.")
         private String memo;
 
-        private MultipartFile imgFile;
-
         protected SignupDto() {}
 
            public UserAccount toEntity() {

@@ -10,8 +10,10 @@
   헤더
   <hr>
 </header>
-<form method="post" style="width:700px">
+<form method="post" style="width:700px"  enctype="multipart/form-data">
   <p class="register">회원가입</p>
+  <label for="imgFile">프로필 사진</label>
+    <input type="file" name="imgFile" id="imgFile" class="form-control">
   <label for="userId" class="form-label"> 아이디 </label>
     <input id="userId"  type="text" class="input" >
   <div class="line-box" >

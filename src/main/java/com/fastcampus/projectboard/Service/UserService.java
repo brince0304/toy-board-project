@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -18,9 +19,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -34,24 +39,37 @@ public class UserService {
 
     private final ArticleRepository articleRepository;
     private final ArticleCommentRepository articleCommentRepository;
+    @Value("${com.example.upload.path.profileImg}") // application.properties의 변수
+    private String uploadPath;
 
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public void saveUserAccount(UserAccount.UserAccountDto user) {
-        if(userAccountRepository.findById(user.userId()).isPresent()){
-            throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
-        }
-        if(userAccountRepository.findByEmail(user.email()).isPresent()){
-            throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
-        }
-        if(userAccountRepository.findByNickname(user.nickname()).isPresent()){
-            throw new IllegalArgumentException("이미 존재하는 닉네임입니다.");
-        }
-        String password = user.userPassword();
+    public void saveUserAccount(UserAccount.SignupDto user,MultipartFile imgFile) throws IOException {
+        String password = user.getPassword1();
         UserAccount account = userAccountRepository.save(user.toEntity());
         account.setUserPassword(new BCryptPasswordEncoder().encode(password));
+        UUID uuid = UUID.randomUUID();
+        String fileName = uuid.toString() + "_" + imgFile.getOriginalFilename();
+        File profileImg=  new File(uploadPath,fileName);
+        imgFile.transferTo(profileImg);
+        account.setProfileImgName(fileName);
+        account.setProfileImgPath(uploadPath+"/"+fileName);
+
     }
+
+    public void changeAccountProfileImg(String id,MultipartFile imgFile) throws IOException {
+        UserAccount account = userAccountRepository.findById(id).orElseThrow(()->new IllegalArgumentException("해당 유저가 없습니다."));
+        UUID uuid = UUID.randomUUID();
+        String fileName = uuid.toString() + "_" + imgFile.getOriginalFilename();
+        File profileImg=  new File(uploadPath,fileName);
+        imgFile.transferTo(profileImg);
+        account.setProfileImgName(fileName);
+        account.setProfileImgPath(uploadPath+"/"+fileName);
+    }
+
+
+
 
     @Transactional(readOnly = true)
     public boolean isUserExists(String userId){

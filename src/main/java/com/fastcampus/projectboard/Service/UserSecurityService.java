@@ -37,8 +37,15 @@ public class UserSecurityService implements UserDetailsService {
             for (UserAccountRole role : account.getRoles()) {
                 authorities.add(new SimpleGrantedAuthority(role.getValue()));
             }
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        return new UserAccount.BoardPrincipal(account.getUserId(), account.getUserPassword(), authorities, account.getEmail(), account.getNickname(), account.getMemo());
+            return UserAccount.BoardPrincipal.builder()
+                    .username(account.getUserId())
+                    .password(account.getUserPassword())
+                    .nickname(account.getNickname())
+                    .email(account.getEmail())
+                    .profileImgName(account.getProfileImgName())
+                    .profileImgPath(account.getProfileImgPath())
+                    .authorities(authorities)
+                    .build();
         }
 
 
