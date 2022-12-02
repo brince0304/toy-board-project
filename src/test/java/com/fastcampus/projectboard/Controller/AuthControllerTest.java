@@ -21,6 +21,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.io.IOException;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -49,23 +51,23 @@ public class AuthControllerTest {
     }
 
     @BeforeEach
-    void setUp() {
-        UserAccount userAccount = UserAccount.of(
-                "test",
-                "12341234",
-                "test@email.com",
-                "test",
-                "test",
-                null);
+    void setUp() throws IOException {
+        UserAccount.SignupDto signupDto = UserAccount.SignupDto.builder()
+                .userId("test")
+                .password1("Tjrgus97!@")
+                .password2("Tjrgus97!@")
+                .nickname("brince")
+                .email("brince@email.com")
+                .build();
 
         Article article = Article.of(
-                userAccount,"haha","haha"
+                signupDto.toEntity(),"haha","haha"
         );
 
         ArticleComment articleComment = ArticleComment.
-                of(article,userAccount,"haha");
+                of(article,signupDto.toEntity(),"haha");
 
-        userService.saveUserAccount(UserAccount.UserAccountDto.from(userAccount));
+        userService.saveUserAccountWithoutProfile(signupDto);
         articleService.saveArticle(Article.ArticleDto.from(article),null);
         articleCommmentService.saveArticleComment(ArticleComment.ArticleCommentDto.from(articleComment));
     }
@@ -112,10 +114,8 @@ public class AuthControllerTest {
     void givenUserId_whenUpdatingUserDetails_thenUpdatesUserDetail() throws Exception {
         //given
         UserAccount.UserAccountUpdateRequestDto userAccountUpdateRequestDto = UserAccount.UserAccountUpdateRequestDto.builder()
-                .userId("test")
-                .password1("Tjrgus97!@")
-                .password2("Tjrgus97!@")
-                .email("email@email.com")
+                .nickname("brince")
+                .email("brince@email.com")
                 .build();
         String body = mapper.writeValueAsString(userAccountUpdateRequestDto);
         //when & then
@@ -126,7 +126,6 @@ public class AuthControllerTest {
     void givenNothing_whenUpdatingUserDetails_thenGetsUnauthorizedError() throws Exception {
         //given
         UserAccount.UserAccountUpdateRequestDto userAccountUpdateRequestDto = UserAccount.UserAccountUpdateRequestDto.builder()
-                .userId("test")
                 .password1("Tjrgus97!@")
                 .password2("Tjrgus97!@")
                 .email("email@email.com")

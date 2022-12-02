@@ -174,14 +174,12 @@ class ArticleServiceTest {
 
 
     private UserAccount createUserAccount() {
-        return UserAccount.of(
-                "uno",
-                "password",
-                "uno@email.com",
-                "Uno",
-                null
-                ,null
-        );
+        return UserAccount.builder()
+                .userId("userId")
+                .userPassword("Tjrgus97!@")
+                .nickname("nickname")
+                .email("email@email.com")
+                .build();
     }
 
     private Article createArticle() {
@@ -213,18 +211,7 @@ class ArticleServiceTest {
     }
 
     private UserAccount.UserAccountDto createUserAccountDto() {
-        return UserAccount.UserAccountDto.of(
-                "uno",
-                "password",
-                "uno@mail.com",
-                "Uno",
-                "This is memo",
-                LocalDateTime.now(),
-                "uno",
-                LocalDateTime.now(),
-                "uno",
-                null
-        );
+        return UserAccount.UserAccountDto.from(createUserAccount());
     }
 
     private Article.ArticleWithCommentDto createArticleWithCommentDto() {

@@ -20,6 +20,7 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -49,30 +50,34 @@ public class ArticleCommentControllerTest {
     }
 
     @BeforeEach
-    void setUp() {
-        UserAccount userAccount = UserAccount.of(
-                "test",
-                "12341234",
-                "test@email.com",
-                "test",
-                "test",
-                null);
+    void setUp() throws IOException {
+        UserAccount.SignupDto signupDto = UserAccount.SignupDto.builder()
+                .userId("test")
+                .password1("Tjrgus97!@")
+                .password2("Tjrgus97!@")
+                .nickname("brince")
+                .email("brince@email.com")
+                .build();
 
         Article article = Article.of(
-                userAccount,"haha","haha"
+                signupDto.toEntity(),"haha","haha"
         );
 
         ArticleComment articleComment = ArticleComment.
-                of(article,userAccount,"haha");
+                of(article,signupDto.toEntity(),"haha");
 
-        userService.saveUserAccount(UserAccount.UserAccountDto.from(userAccount));
+        userService.saveUserAccountWithoutProfile(signupDto);
     }
+
 
     @Test
     @WithUserDetails("test")
     void givenDetails_whenSavingArticleComment_thenSavesArticleComment() throws Exception {
         // given
-        ArticleComment.ArticleCommentDto dto = createArticleCommentDto("haha");
+        ArticleComment.ArticleCommentDto dto = ArticleComment.ArticleCommentDto.builder()
+                .content("haha")
+                .articleId(1L)
+                .build();
         //when&then
 
         mvc .perform(post("/articles/comments/1")
@@ -87,7 +92,10 @@ public class ArticleCommentControllerTest {
     @WithUserDetails("test")
     void givenDetails_whenSavingCommentReply_thenSavingCommentReply() throws Exception {
         // given
-        ArticleComment.ArticleCommentDto dto = createArticleCommentDto2("haha");
+        ArticleComment.ArticleCommentDto dto = ArticleComment.ArticleCommentDto.builder()
+                .content("haha")
+                .articleId(1L)
+                .build();
         //when&then
 
         mvc.perform(post("/articles/comments/1/reply")
@@ -97,90 +105,19 @@ public class ArticleCommentControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/articles/1"));
     }
-    private ArticleComment.ArticleCommentDto createArticleCommentDto(String content) {
-        return ArticleComment.ArticleCommentDto.of(
-                1L,
-                1L,
-                createUserAccountDto(),
-                content,
-                LocalDateTime.now(),
-                "uno",
-                LocalDateTime.now(),
-                "uno",
-                "N",
-                null,
-                null
-        );
-    }
-
-    private ArticleComment.ArticleCommentDto createArticleCommentDto2(String content) {
-        return ArticleComment.ArticleCommentDto.of(
-                2L,
-                1L,
-                createUserAccountDto(),
-                content,
-                LocalDateTime.now(),
-                "uno",
-                LocalDateTime.now(),
-                "uno",
-                "N",
-                null,
-                "N"
-        );
-    }
 
 
 
 
-    private UserAccount.UserAccountDto createUserAccountDto() {
-        return UserAccount.UserAccountDto.of(
-                "uno",
-                "password",
-                "uno@mail.com",
-                "Uno",
-                "This is memo",
-                LocalDateTime.now(),
-                "uno",
-                LocalDateTime.now(),
-                "uno",
-                Set.of()
-        );
-    }
 
-    private ArticleComment createArticleComment(String content) {
-        return ArticleComment.of(
-                Article.of(createUserAccount(), "title", "content"),
-                createUserAccount(),
-                content
-        );
-    }
 
-    private ArticleComment createArticleComment2(String content) {
-        return ArticleComment.of(
-                Article.of(createUserAccount(), "title", "content"),
-                createUserAccount(),
-                content,
-                createArticleComment("댓글")
-        );
-    }
 
-    private UserAccount createUserAccount() {
-        return UserAccount.of(
-                "uno",
-                "password",
-                "uno@email.com",
-                "Uno",
-                null,
-                Set.of()
-        );
-    }
 
-    private Article createArticle() {
-        return Article.of(
-                createUserAccount(),
-                "title",
-                "content"
-        );
-    }
+
+
+
+
+
+
 
 }

@@ -24,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -65,23 +66,24 @@ class ArticleControllerTest {
 
 
     @BeforeEach
-    void setUp() {
-        UserAccount userAccount = UserAccount.of(
-                "test",
-                "12341234",
-                "test@email.com",
-                "test",
-                "test",
-                null);
+    void setUp() throws IOException {
+        UserAccount.SignupDto signupDto = UserAccount.SignupDto.builder()
+                .userId("test")
+                .password1("Tjrgus97!@")
+                .password2("Tjrgus97!@")
+                .nickname("brince")
+                .email("brince@email.com")
+                .build();
 
         Article article = Article.of(
-                userAccount,"haha","haha"
+                signupDto.toEntity(),"haha","haha"
         );
 
         ArticleComment articleComment = ArticleComment.
-                of(article,userAccount,"haha");
+                of(article,signupDto.toEntity(),"haha");
 
-        userService.saveUserAccount(UserAccount.UserAccountDto.from(userAccount));
+        userService.saveUserAccountWithoutProfile(signupDto);
+        articleService.saveArticle(Article.ArticleDto.from(article),null);
     }
 
     @DisplayName("[view][GET] 게시글 페이지 ")
@@ -114,7 +116,10 @@ class ArticleControllerTest {
     @WithUserDetails("test")
     public void givenArticleInfo_whenSavingArticle_thenSavesArticle() throws Exception {
         //given
-       Article.ArticleDto articleDto = Article.ArticleDto.from(createArticle());
+        Article.ArticleDto articleDto = Article.ArticleDto.builder()
+                .title("haha")
+                .content("haha")
+                .build();
         //when & then
         mvc.perform(post("/articles/post")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -132,7 +137,7 @@ class ArticleControllerTest {
     public void givenNothing_whenRequestingArticleView_thenReturnsArticleView() throws Exception {
         //given
         Long articleId = 1L;
-        given(articleService.getArticle(articleId)).willReturn(createArticleWithCommentsDto());
+
         //when & then
         mvc.perform(get("/articles/"+articleId)).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
@@ -147,11 +152,7 @@ class ArticleControllerTest {
     @Test
     void givenNothing_whenUpdatingArticle_thenUpdatesArticle() throws Exception {
         //given
-        Article article = createArticle();
-        Article newArticle = createArticle();
-        Article.ArticleDto articleDto = Article.ArticleDto.from(newArticle);
-        Long articleId = article.getId();
-
+        Long articleId = 1L;
 
         //when
 
@@ -191,12 +192,7 @@ class ArticleControllerTest {
     @Test
     void givenHashtag_whenSearchingArticlesByHashtag_thenGetsArticles() throws Exception {
         //given
-        Hashtag hashtag = Hashtag.of(1L, "test");
-        Set<Hashtag.HashtagDto> dto = new HashSet<>();
-        dto.add(Hashtag.HashtagDto.from(hashtag));
-        Article article = createArticle();
-        userService.saveUserAccount(createUserAccountDto());
-        articleService.saveArticle(Article.ArticleDto.from(article),dto);
+
 
         //when & then
         mvc.perform(get("/articles/search-hashtag/"))
@@ -208,56 +204,10 @@ class ArticleControllerTest {
     }
 
 
-    private Article.ArticleWithCommentDto createArticleWithCommentsDto() {
-        return Article.ArticleWithCommentDto.of(
-                1L,
-                createUserAccountDto(),
-                Set.of(),
-                "title",
-                "content",
-                LocalDateTime.now(),
-                "uno",
-                LocalDateTime.now(),
-                String.valueOf(LocalDateTime.now()),
-                "N",
-                0,
-                0
 
 
-        );
-    }
-    private UserAccount createUserAccount() {
-        return UserAccount.of(
-                "uno",
-                "password",
-                "uno@email.com",
-                "Uno",
-                null,
-                null
-        );
-    }
 
-    private Article createArticle() {
-        return Article.of(
-                createUserAccount(),
-                "title",
-                "content");
-    }
 
-    private UserAccount.UserAccountDto createUserAccountDto() {
-        return UserAccount.UserAccountDto.of(
-                "uno",
-                "pw",
-                "uno@mail.com",
-                "Uno",
-                "memo",
-                LocalDateTime.now(),
-                "uno",
-                LocalDateTime.now(),
-                "uno",
-                null
-        );
-    }
 
 
 
