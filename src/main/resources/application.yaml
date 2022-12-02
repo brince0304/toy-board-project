@@ -42,7 +42,7 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
-      location: /tmp
+      location: /Users/brinc/Desktop/brincestudy/fastcampus-project-board/src/main/resources/static/profileImg
       enabled: true
-com.example.upload.path.profileImg : /tmp/profileImg
+com.example.upload.path.profileImg : /Users/brinc/Desktop/brincestudy/fastcampus-project-board/src/main/resources/static/profileImg
 
