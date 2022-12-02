@@ -9,6 +9,7 @@ import com.fastcampus.projectboard.domain.UserAccount;
 import com.fastcampus.projectboard.domain.UserAccountRole;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,8 +28,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -61,6 +61,14 @@ public class UserController {
         mav.setViewName("user/my_page");
         mav.addObject("accountDto", accountDto);
         return mav;
+    }
+    @GetMapping("/accounts/{username}")
+    public ResponseEntity<?> getProfileImg (@PathVariable String username) throws IOException {
+        UserAccount.UserAccountDto accountDto = userService.getUserAccount(username);
+        InputStream inputStream = new FileInputStream(new File(accountDto.profileImgPath()));
+        byte[] imageByteArray = IOUtils.toByteArray(inputStream);
+        inputStream.close();
+        return new ResponseEntity<>(imageByteArray, HttpStatus.OK);
     }
 
     @GetMapping("/accounts/articles")
@@ -115,12 +123,18 @@ public class UserController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestPart("signupDto") @Valid UserAccount.SignupDto userCreateForm, BindingResult bindingResult
-    ,@RequestPart("imgFile") MultipartFile imgFile) throws IOException {
+    ,@RequestPart(value = "imgFile",required = false) MultipartFile imgFile) throws IOException {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(controllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
         }
-        userService.saveUserAccount(userCreateForm,imgFile);
-        return new ResponseEntity<>("success", HttpStatus.OK);
+        if(imgFile==null){
+            userService.saveUserAccountWithoutProfile(userCreateForm);
+            return new ResponseEntity<>("success", HttpStatus.OK);
+        }
+        else {
+            userService.saveUserAccount(userCreateForm, imgFile);
+            return new ResponseEntity<>("success", HttpStatus.OK);
+        }
     }
     @PostMapping("/accounts/upload/{id}")
     public ResponseEntity<?> changeProfileImg(@PathVariable String id, @RequestPart(value="file",required = false)  MultipartFile imgFile) {
