@@ -8,6 +8,7 @@ import com.fastcampus.projectboard.config.SecurityConfig;
 import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.ArticleComment;
 import com.fastcampus.projectboard.domain.UserAccount;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,10 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.io.IOException;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @DisplayName("View 컨트롤러 - 인증")
@@ -28,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @Import(SecurityConfig.class)
 public class AuthControllerTest {
+    private final ObjectMapper mapper;
 
     private final MockMvc mvc;
     @MockBean
@@ -37,7 +42,8 @@ public class AuthControllerTest {
     @MockBean
     private final ArticleCommentService articleCommmentService;
 
-    public AuthControllerTest(@Autowired MockMvc mvc, @Autowired UserService userService, @Autowired ArticleService articleService, @Autowired ArticleCommentService articleCommmentService) {
+    public AuthControllerTest(@Autowired ObjectMapper mapper, @Autowired MockMvc mvc, @Autowired UserService userService, @Autowired ArticleService articleService, @Autowired ArticleCommentService articleCommmentService) {
+        this.mapper = mapper;
         this.mvc = mvc;
         this.userService = userService;
         this.articleService = articleService;
@@ -45,23 +51,23 @@ public class AuthControllerTest {
     }
 
     @BeforeEach
-    void setUp() {
-        UserAccount userAccount = UserAccount.of(
-                "test",
-                "12341234",
-                "test@email.com",
-                "test",
-                "test",
-                null);
+    void setUp() throws IOException {
+        UserAccount.SignupDto signupDto = UserAccount.SignupDto.builder()
+                .userId("test")
+                .password1("Tjrgus97!@")
+                .password2("Tjrgus97!@")
+                .nickname("brince")
+                .email("brince@email.com")
+                .build();
 
         Article article = Article.of(
-                userAccount,"haha","haha"
+                signupDto.toEntity(),"haha","haha"
         );
 
         ArticleComment articleComment = ArticleComment.
-                of(article,userAccount,"haha");
+                of(article,signupDto.toEntity(),"haha");
 
-        userService.saveUserAccount(UserAccount.UserAccountDto.from(userAccount));
+        userService.saveUserAccountWithoutProfile(signupDto);
         articleService.saveArticle(Article.ArticleDto.from(article),null);
         articleCommmentService.saveArticleComment(ArticleComment.ArticleCommentDto.from(articleComment));
     }
@@ -102,5 +108,31 @@ public class AuthControllerTest {
 
         mvc.perform(get("/accounts/articles")).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+    }
+    @WithUserDetails("test")
+    @Test
+    void givenUserId_whenUpdatingUserDetails_thenUpdatesUserDetail() throws Exception {
+        //given
+        UserAccount.UserAccountUpdateRequestDto userAccountUpdateRequestDto = UserAccount.UserAccountUpdateRequestDto.builder()
+                .nickname("brince")
+                .email("brince@email.com")
+                .build();
+        String body = mapper.writeValueAsString(userAccountUpdateRequestDto);
+        //when & then
+        mvc.perform(put("/accounts").content(body).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk()).andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN));
+    }
+    @Test
+    void givenNothing_whenUpdatingUserDetails_thenGetsUnauthorizedError() throws Exception {
+        //given
+        UserAccount.UserAccountUpdateRequestDto userAccountUpdateRequestDto = UserAccount.UserAccountUpdateRequestDto.builder()
+                .password1("Tjrgus97!@")
+                .password2("Tjrgus97!@")
+                .email("email@email.com")
+                .build();
+        String body = mapper.writeValueAsString(userAccountUpdateRequestDto);
+        //when & then
+        mvc.perform(put("/accounts").content(body).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized()).andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN));
     }
 }

@@ -20,8 +20,8 @@ Array.from(delete_elements).forEach(function (element) {
                     location.reload();
                 }
 },
-                error: function (xhr, status, error) {
-                    alert(status);
+                error: function (request, status, error) {
+                    alert(request.responseText);
                 }
             });
         }
@@ -67,8 +67,8 @@ function replyDelete(id) {
                     getComment();
                 }
             },
-            error: function (xhr, status, error) {
-                alert(status);
+            error: function (request, status, error) {
+                alert(request.responseText);
             }
         })}}
 
@@ -137,7 +137,7 @@ function getComment(){
                     html += "<li class='list-group-item comments'>";
                     html += "<div class='comment' id='"+this.id+"comment'>";
                     html += "<a href='javascript:; class='userImg'>";
-                    html += "<img src='/img/img.png' width='20' height='18' style='display:inline'>";
+                    html += "<img src='/images/img.png' width='20' height='18' style='display:inline'>";
                     html += "</a>";
                     html += "<a href='javascript:;' class='writer' style='display:inline'>" + this.userAccountDto.nickname + "</a>";
                     html += "<div class='comment-info'>";
@@ -153,7 +153,7 @@ function getComment(){
                     html += "</button>";
                     html += "</a>";
                     html += "<a href='javascript:;'>";
-                    html += "<button type='button'  onclick='commentUpdateForm("+this.id+")' class='btn btn-outline-secondary'  id='"+this.id+"updateBtn'>수정";
+                    html += "<button type='button'  onclick='commentUpdateForm("+this.id+")' th:if='${"+this.userAccountDto.userId+".equals(#authentication.getName())}' class='btn btn-outline-secondary'  id='"+this.id+"updateBtn'>수정";
                     html += "</button>";
                     html += "</a>";
                     html += "</div>";
@@ -194,7 +194,7 @@ function commentDelete (id) {
             }
             ,
             error: function (xhr, status, error) {
-                alert(status);
+                alert(status.message);
             }
         });
     }
@@ -213,7 +213,7 @@ function commentUpdateForm(id){
             html += "<div class='field-error "+id+"ucommentContentCheck'>";
             html += "</div>";
             html += "<div class='comment-update-btn'>";
-            html += "<button type='button' class='btn btn-secondary' onclick='commentUpdate("+data.id+")'>수정</button>";
+            html += "<button type='button' class='btn btn-secondary'  onclick='commentUpdate("+data.id+")'>수정</button>";
             html += "<button type='button' class='btn btn-secondary' onclick='commentUpdateCancel("+data.id+")'>취소</button>";
             html += "</div>";
             html += "</div>";
@@ -221,7 +221,7 @@ function commentUpdateForm(id){
             $("#"+data.id+"content").html(html);
         },
         error: function (xhr, status, error) {
-            alert(status);
+            alert(status.message);
         }
     });
 }
@@ -255,7 +255,7 @@ function getChildrenComment(id){
                     html += "<li class='list-group-item comments'>";
                     html += "<div class='childrenComment' id='" + this.id + "comment'>";
                     html += "<a href='javascript:; class='comment-img'>";
-                    html+=  "<img src='/img/reply-ico.png' alt='답글' style='display:inline' class='replyicon'>"
+                    html+=  "<img src='/images/reply-ico.png' alt='답글' style='display:inline' class='replyicon'>"
                     html += "<img src='' width='50' height='50'>";
                     html += "</a>";
                     html += "<div class='comment-info'>";

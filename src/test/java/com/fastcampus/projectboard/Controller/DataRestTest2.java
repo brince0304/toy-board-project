@@ -44,7 +44,13 @@ public class DataRestTest2 {
     @DisplayName("게시글 단건 조회 테스트")
     @Test
     void articleTest() throws Exception {
-        UserAccount account = UserAccount.of("brince","1234","brince@naver.com","brince","hhaa",null);
+        UserAccount account = UserAccount.builder()
+                .userId("test")
+                .userPassword("Tjrgus97!@")
+                .nickname("brince")
+                .email("brince@email.com")
+                .build();
+
         Article article = Article.of(account,"haha","content");
         articleRepository.save(article);
         Long id = article.getId();

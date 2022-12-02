@@ -93,7 +93,9 @@ public class TokenProvider  {
     }
 
     public Authentication getAuthentication(String requestAccessToken) {
-        UserDetails userDetails = new UserAccount.BoardPrincipal(getUsername(requestAccessToken), null, null, null,null,null);
+        UserDetails userDetails = UserAccount.BoardPrincipal.builder()
+                .username(getUsername(requestAccessToken))
+                .build();
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 }

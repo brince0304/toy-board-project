@@ -126,26 +126,34 @@ $("#email").blur(function(){
 
 
 function signupCheck() {
-    const data = {
-        'userId': $('#userId').val(),
-        'email': $('#email').val(),
-        'password1': $('#password1').val(),
-        'password2': $('#password2').val(),
-        'nickname': $('#nickname').val(),
-        'memo': $('#memo').val()
+    var filearray
+    var formData = new FormData();
+    formData.append("imgFile", $("#imgFile")[0].files[0]);
+    var data = {
+        info: {
+            userId: $("#userId").val(),
+            password1: $("#password1").val(),
+            password2: $("#password2").val(),
+            nickname: $("#nickname").val(),
+            email: $("#email").val(),
+            memo: $("#memo").val()
+        }
+    }
+    formData.append(
+        "signupDto",
+        new Blob([JSON.stringify(data.info)], { type: "application/json" })
+    );
 
-    };
-
+    console.log(formData);
     //위에서 만든 오브젝트를 json 타입으로 바꾼다.
-    const json = JSON.stringify(data);
     $.ajax({
         type : 'POST',
         url : '/signup',
-        data : json,
-        contentType : "application/json; charset=utf-8",
+        data : formData,
+        processData : false,
+        contentType : false,
         success: function ( ){
-            alert('가입이 완료되었습니다.');
-            location.href = '/articles';
+            alert("회원가입 성공");
         },
         error: function (status) {
             console.log(status);

@@ -2,56 +2,297 @@
 <html layout:decorate="~{layout}" xmlns:layout="http://www.w3.org/1999/xhtml" lang="ko">
 <link href="/css/bootstrap.min.css" rel="stylesheet">
 <head>
-  <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-  <link href="/css/bootstrap.min.css" rel="stylesheet">
-  <link href="/css/user.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/user.css" rel="stylesheet">
     <meta charset="UTF-8">
     <title>Title</title>
+    <style>
+        .left-box {
+            float: left;
+        }
+        .right-box {
+            float: right;
+        }
+    </style>
 </head>
 <header id="header">
-  <hr>
+    <hr>
+
 </header>
 <body>
-<div id="myPage">
-<div id="myInfo">
+<div id="myPage"  >
+    <div class='container' >
+    <div class='row'>
+        <div class='col-md-3'>
+            <div class='list-group '>
+                <a href='#' class='list-group-item list-group-item-action active'>
+                    마이페이지
+                    </a>
+                <a href='#' onclick='getMyInfo()' class='list-group-item list-group-item-action'>내 정보</a>
+                <a href='#' onclick='profileUpdateForm()' class='list-group-item list-group-item-action'>정보 수정</a>
+                <a href='#' class='list-group-item list-group-item-action'>활동 기록</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="myInfo" class="justify-content-center" >
+        <div class="container mt-4 mb-4 p-3 d-flex justify-content-center">
+            <div class="card p-4">
+                <div class=" image d-flex flex-column justify-content-center align-items-center">
+                    <img id="imgId" th:src="@{/accounts/}+${accountDto.userId}" width="100" height="100"  alt="첨부이미지" th:if="${accountDto.profileImgPath() != null}" />
+                        <img width="100" height="100" src="/images/default.jpg" alt="첨부이미지" th:if="${accountDto.profileImgPath() == null}" />
+                    <span class="name mt-3" th:text="${accountDto.nickname()}"></span> <span class="idd"
+                                                                                             th:text="${'@'+accountDto.nickname()}"></span>
+                    <div class="d-flex flex-row justify-content-center align-items-center gap-2"><span class="idd1"
+                                                                                                       th:text="${accountDto.userId()}"></span>
+                        <span><i class="fa fa-copy"></i></span></div>
+                    <div class="d-flex flex-row justify-content-center align-items-center mt-3"><span
+                            class="number">1069 <span
+                            class="follow">Followers</span></span></div>
+                    <div class=" d-flex mt-2">
+                        <button class="btn1 btn-dark">Edit Profile</button>
+                    </div>
+                    <div class="text mt-3"><span th:text="${accountDto.memo()}"> </span>
+                    </div>
+                    <div class="gap-3 mt-3 icons d-flex flex-row justify-content-center align-items-center"><span><i
+                            class="fa fa-twitter"></i></span> <span><i class="fa fa-facebook-f"></i></span> <span><i
+                            class="fa fa-instagram"></i></span> <span><i class="fa fa-linkedin"></i></span></div>
+                    <div class=" px-2 rounded mt-4 date "><span class="join" th:text="${accountDto.createdAt()}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="profileUpdateForm" >
+
+        <div class="container rounded bg-white mt-5 mb-5">
+            <div class="row">
+                <div class="col-md-3 border-right">
+                    <div class="d-flex flex-column align-items-center text-center p-3 py-5"><img class="rounded-circle mt-5"
+                                                                                                 width="150px"
+                                                                                                 th:src="@{/accounts/}+${accountDto.userId}" th:if="${accountDto.profileImgPath() !=null}">
+                        <img class="rounded-circle mt-5" with="150px" src="/images/default.jpg" alt="첨부이미지" th:if="${accountDto.profileImgPath() == null}" ><span
+                            class="font-weight-bold" th:text="${accountDto.userId()}"></span><span
+                            class="text-black-50" th:text="${accountDto.email()}"></span><span> </span></div>
+                </div>
+                <div class="col-md-5 border-right">
+                    <div class="p-3 py-5">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="text-right">프로필 수정</h4>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-6"><label class="labels">아이디</label><span
+                                    th:text="${accountDto.userId()}"></span>
+                            </div>
+                            <div class="col-md-6"><label class="labels">닉네임</label><input id="nickname" type="text"
+                                                                                          class="form-control"
+                                                                                          th:value="${accountDto.nickname()}">
+                                <span class="field-error nicknameCheck">닉네임은 2자 이상 10자 이하로 입력해주세요.</span>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-6"><label class="labels">비밀번호</label><input id="password1" type="password"
+                                                                                           class="form-control">
+                                <span class="field-error passwordCheck">비밀번호는 특수문자,대소문,숫자 포함 8자 이상 25자 이하로 입력해주세요.</span>
+                            </div>
+                            <div class="col-md-6"><label class="labels">비밀번호 확인</label><input id="password2" type="password"
+                                                                                              class="form-control">
+                                <span class="field-error passwordInvalidCheck"></span>
+                            </div>
+                        </div>
+                        <input type="hidden" id="nicknameDoubleChk"/>
+                        <div class="row mt-3">
+                            <div class="col-md-12"><label class="labels">이메일</label><input id="email" type="text"
+                                                                                           class="form-control"
+                                                                                           th:value="${accountDto.email()}">
+                                <span class="field-error emailCheck"></span>
+                                <input type="hidden" id="emailDoubleChk"/></div>
+                            <div class="col-md-12"><label for="memo" class="labels">소개</label><textarea id="memo"
+                                                                                                        class="form-control"
+                                                                                                        th:text="${accountDto.memo()}"></textarea>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                        </div>
+                        <div class="mt-5 text-center">
+                            <button class="btn btn-primary profile-button" onclick="updateAccountProfile()" type="button">수정하기</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div id="myArticles">
 
 </div>
-  <div id="myArticles">
+<div id="myComments">
 
-  </div>
-  <div id="myComments">
-
-  </div>
 </div>
+
 
 </body>
 <script src="/js/user.js"></script>
 
 <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
+        crossorigin="anonymous"></script>
 
 <footer id="footer">
-  푸터
+    푸터
 </footer>
 <script>
-    $(document).ready(function(){
-        let html="";
-        html += "<div class='container'>";
-        html += "<div class='row'>";
-        html += "<div class='col-md-3'>";
-        html += "<div class='list-group '>";
-        html += "<a href='#' class='list-group-item list-group-item-action active'>";
-        html += "마이페이지";
-        html += "</a>";
-        html += "<a href='#' class='list-group-item list-group-item-action'>내 정보</a>";
-        html += "<a href='#' class='list-group-item list-group-item-action'>내가 쓴 글</a>";
-        html += "<a href='#' class='list-group-item list-group-item-action'>내가 쓴 댓글</a>";
-        html += "</div>"
-        html += "</div>";
-      html += "</div>";
-      html += "</div>";
-        $("#myPage").html(html);
+    $(document).ready(function () {
+        $("#profileUpdateForm").hide();
     });
+
+    function getMyInfo() {
+        $('#myInfo').show();
+        $('#myArticles').hide();
+        $('#myComments').hide();
+        $('#profileUpdateForm').hide();
+    }
+
+    function profileUpdateForm() {
+        $('#myInfo').hide();
+        $('#profileUpdateForm').show();
+    }
+
+    $("#nickname").blur(function () {
+        var nickname = $("#nickname").val();
+        if (nickname == "" || nickname.length > 10 || nickname.length < 2) {
+            $(".nicknameCheck").text("닉네임은 2자 이상 10자 이하로 설정해주세요.");
+            $(".nicknameCheck").css("color", "red");
+            $("#nicknameDoubleChk").val("false");
+        } else {
+            $.ajax({
+                url: '/user/nicknameCheck?nickname=' + nickname,
+                type: 'post',
+                cache: false,
+                success: function () {
+                    $(".nicknameCheck").text("사용중인 닉네임입니다.");
+                    $(".nicknameCheck").css("color", "red");
+                    $("#nicknameDoubleChk").val("false");
+                },
+                error: function () {
+                    $(".nicknameCheck").text("사용가능한 닉네임입니다.");
+                    $(".nicknameCheck").css("color", "green");
+                    $("#nicknameDoubleChk").val("true");
+                }
+            });
+        }
+    });
+
+    $("#email").blur(function () {
+        var email = $("#email").val();
+        var regExp = /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/i;
+        if (email == "" || email.match(regExp) == null) {
+            $(".emailCheck").text("올바른 이메일 주소를 입력해주세요.");
+            $(".emailCheck").css("color", "red");
+            $("#emailDoubleChk").val("false");
+        } else {
+            $.ajax({
+                url: '/user/emailCheck?email=' + email,
+                type: 'post',
+                cache: false,
+                success: function () {
+                    $(".emailCheck").text("사용중인 이메일입니다.");
+                    $(".emailCheck").css("color", "red");
+                    $("#emailDoubleChk").val("false");
+                },
+                error: function () {
+                    $(".emailCheck").text("사용가능한 이메일입니다.");
+                    $(".emailCheck").css("color", "green");
+                    $("#emailDoubleChk").val("true");
+                }
+            });
+        }
+    });
+
+    $("#password1").blur(function () {
+        var password1 = $("#password1").val();
+        var reg = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
+        if (reg.test(password1) == false) {
+            $(".passwordCheck").text("비밀번호를 올바르게 입력해주세요.");
+            $(".passwordCheck").css("color", "red");
+        } else {
+            $(".passwordCheck").text("사용가능한 비밀번호입니다.");
+            $(".passwordCheck").css("color", "green");
+        }
+    });
+    $("#password2").blur(function () {
+        var password2 = $("#password2").val();
+        var password1 = $("#password1").val();
+        if (password2 != password1) {
+            $(".passwordInvalidCheck").text("비밀번호가 일치하지 않습니다");
+            $(".passwordInvalidCheck").css("color", "red");
+        } else {
+            $(".passwordInvalidCheck").text("비밀번호가 일치합니다.");
+            $(".passwordInvalidCheck").css("color", "green");
+        }
+    });
+
+    function updateAccountProfile() {
+        const data = {
+            'email': $('#email').val(),
+            'password1': $('#password1').val(),
+            'password2': $('#password2').val(),
+            'nickname': $('#nickname').val(),
+            'memo': $('#memo').val()
+
+        };
+
+        //위에서 만든 오브젝트를 json 타입으로 바꾼다.
+        const json = JSON.stringify(data);
+        $.ajax({
+            type : 'PUT',
+            url : '/accounts',
+            data : json,
+            contentType : "application/json; charset=utf-8",
+            success: function ( ){
+                alert('수정되었습니다.');
+                location.href = '/accounts';
+            },
+            error: function (status) {
+                console.log(status);
+                $(status.responseJSON).each(function(){
+                    if(this.field===('userId')){
+                        $(".idCheck").text(this.message);
+                        $(".idCheck").css("color", "red");
+                    }
+                    if(this.field===('password1')){
+                        $(".passwordCheck").text(this.message);
+                        $(".passwordCheck").css("color", "red");
+                    }
+                    if(this.field===('password2')){
+                        $(".passwordInvalidCheck").text(this.message);
+                        $(".passwordInvalidCheck").css("color", "red");
+                    }
+                    if(this.field===('nickname')){
+                        $(".nicknameCheck").text(this.message);
+                        $(".nicknameCheck").css("color", "red");
+                    }
+                    if(this.field===('email')){
+                        $(".emailCheck").text(this.message);
+                        $(".emailCheck").css("color", "red");
+                    }
+                    if(this.field===('memo')){
+                        $(".memoCheck").text(this.message);
+                        $(".memoCheck").css("color", "red");
+                    }
+                });
+
+            }
+        });
+    }
+
 </script>
 
 </html>

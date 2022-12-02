@@ -16,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.persistence.EntityNotFoundException;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -50,16 +51,16 @@ public class UserServiceTest {
 
     @DisplayName("회원 정보를 입력하면 아이디를 생성한다.")
     @Test
-    void givenInfo_whenRegistering_thenSavesAccount() {
+    void givenInfo_whenRegistering_thenSavesAccount() throws IOException {
         //Given
-        UserAccount.UserAccountDto userAccountDto = createUserAccountDto();
-        given(userAccountRepository.save(userAccountDto.toEntity())).willReturn(userAccountDto.toEntity());
+        UserAccount.SignupDto signupDto = UserAccount.SignupDto.from(createUserAccount());
+        given(userAccountRepository.save(signupDto.toEntity())).willReturn(signupDto.toEntity());
 
         //when
-        sut.saveUserAccount(userAccountDto);
+        sut.saveUserAccountWithoutProfile(signupDto);
 
         //then
-        assertThat(userAccountDto.toEntity()).isNotNull().isEqualTo(userAccountDto.toEntity());
+        assertThat(signupDto.toEntity()).isNotNull().isEqualTo(signupDto.toEntity());
 
     }
     @DisplayName("업데이트된 정보를 입력하면 계정 정보를 수정한다.")
@@ -69,16 +70,16 @@ public class UserServiceTest {
         UserAccount.UserAccountDto userDto = createUserAccountDto();
         UserAccount account = userDto.toEntity();
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        UserAccount updatedAccount = UserAccount.of(userDto.userId()
-                , "12345"
-                , userDto.email()
-                ,userDto.nickname()
-                ,"memo123",
-                null);
+        UserAccount updatedAccount = UserAccount.builder()
+                .userId(account.getUserId())
+                .userPassword(passwordEncoder.encode("1234"))
+                .nickname("updatedName")
+                .email("updatedEmail")
+                .build();
         given(userAccountRepository.findById(account.getUserId())).willReturn(Optional.of(account));
         String encodedPassword = passwordEncoder.encode(updatedAccount.getUserPassword());
         //when
-        sut.updateUserAccount(UserAccount.UserAccountDto.from(updatedAccount));
+        sut.updateUserAccount(updatedAccount.getUserId(), UserAccount.UserAccountUpdateRequestDto.from(updatedAccount));
 
         //then
         assertThat(account)
@@ -119,14 +120,14 @@ public class UserServiceTest {
 
 
     private UserAccount createUserAccount() {
-        return UserAccount.of(
-                "uno",
-                "password",
-                "uno@email.com",
-                "Uno",
-                null,
-                null
-        );
+        return UserAccount.builder()
+                .userId("brince0304")
+                .userPassword("Tjrgus97!@")
+                .email("brince@email.com")
+                .nickname("brince")
+                .memo("memo")
+                .build();
+
     }
 
     private Article createArticle() {
@@ -157,17 +158,12 @@ public class UserServiceTest {
     }
 
     private UserAccount.UserAccountDto createUserAccountDto() {
-        return UserAccount.UserAccountDto.of(
-                "uno",
-                "password",
-                "uno@mail.com",
-                "Uno",
-                "This is memo",
-                LocalDateTime.now(),
-                "uno",
-                LocalDateTime.now(),
-                "uno"
-                ,null
-        );
+        return UserAccount.UserAccountDto.from(createUserAccount());
     }
+
+
+    private UserAccount.SignupDto createSignupDto() {
+        return UserAccount.SignupDto.from(createUserAccount());
+    }
+
 }
