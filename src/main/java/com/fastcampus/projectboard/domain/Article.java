@@ -95,7 +95,6 @@ public class Article extends AuditingFields{
     @Builder
     @Getter
     @Setter
-    @AllArgsConstructor(access = AccessLevel.PRIVATE)
     public static class ArticleRequest implements Serializable {
         @Nullable
         private Long articleId;
@@ -106,10 +105,10 @@ public class Article extends AuditingFields{
         @Nullable
         private String hashtag;
         private Set<Hashtag.HashtagDto> hashtags = new HashSet<>();
+        protected ArticleRequest() {
+        }
 
-
-        public ArticleRequest(Long articleID,String title, String content,String hashtag) {
-            Set<Hashtag.HashtagDto> hashtags = new HashSet<>();
+        public ArticleRequest(Long articleID,String title, String content,String hashtag, Set<Hashtag.HashtagDto> hashtags) {
             if(hashtag!=null) {
                 if (hashtag.contains("#")) {
                     String newHashtag = hashtag.replaceAll(" ", "");
