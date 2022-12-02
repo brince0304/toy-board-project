@@ -107,9 +107,22 @@ public class UserAccount extends AuditingFields {
         @Size(max=50, message = "* 메모는 50자 이하로 입력해주세요.")
         private String memo;
 
+        private MultipartFile imgFile;
+
         protected SignupDto() {}
 
-           public UserAccount toEntity() {
+        public static SignupDto from(UserAccount userAccount) {
+            return SignupDto.builder()
+                    .userId(userAccount.getUserId())
+                    .password1(userAccount.getUserPassword())
+                    .password2(userAccount.getUserPassword())
+                    .nickname(userAccount.getNickname())
+                    .email(userAccount.getEmail())
+                    .memo(userAccount.getMemo())
+                    .build();
+        }
+
+        public UserAccount toEntity() {
                 return UserAccount.builder()
                         .userId(userId)
                         .userPassword(password1)
@@ -262,6 +275,16 @@ public class UserAccount extends AuditingFields {
     ) {
         public static UserAccountUpdateRequestDto of( String password1, String password2, String email, String nickname, String memo) {
             return new UserAccountUpdateRequestDto( password1, password2, email, nickname, memo);
+        }
+
+        public static UserAccountUpdateRequestDto from(UserAccount updatedAccount) {
+            return UserAccountUpdateRequestDto.builder()
+                    .password1(updatedAccount.getUserPassword())
+                    .password2(updatedAccount.getUserPassword())
+                    .email(updatedAccount.getEmail())
+                    .nickname(updatedAccount.getNickname())
+                    .memo(updatedAccount.getMemo())
+                    .build();
         }
     }
 }
