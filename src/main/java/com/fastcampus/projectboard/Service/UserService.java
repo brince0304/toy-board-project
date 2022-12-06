@@ -55,11 +55,14 @@ public class UserService {
         imgFile.transferTo(profileImg);
         account.setProfileImgName(fileName);
         account.setProfileImgPath(uploadPath+"/"+fileName);
-
     }
 
     public void changeAccountProfileImg(String id,MultipartFile imgFile) throws IOException {
         UserAccount account = userAccountRepository.findById(id).orElseThrow(()->new IllegalArgumentException("해당 유저가 없습니다."));
+        if(account.getProfileImgName()!=null && !account.getProfileImgName().equals("default.jpg")){
+            File file = new File(account.getProfileImgPath());
+            file.delete();
+        }
         UUID uuid = UUID.randomUUID();
         String fileName = uuid.toString() + "_" + imgFile.getOriginalFilename();
         File profileImg=  new File(uploadPath,fileName);

@@ -70,12 +70,15 @@
         <div class="container rounded bg-white mt-5 mb-5">
             <div class="row">
                 <div class="col-md-3 border-right">
-                    <div class="d-flex flex-column align-items-center text-center p-3 py-5"><img class="rounded-circle mt-5"
+                    <div class="d-flex flex-column align-items-center text-center p-3 py-5"><img id="profileImg" class="rounded-circle mt-5"
                                                                                                  width="150px"
-                                                                                                 th:src="@{/accounts/}+${accountDto.userId}" th:if="${accountDto.profileImgPath() !=null}">
-                        <img class="rounded-circle mt-5" with="150px" src="/images/default.jpg" alt="첨부이미지" th:if="${accountDto.profileImgPath() == null}" ><span
-                            class="font-weight-bold" th:text="${accountDto.userId()}"></span><span
-                            class="text-black-50" th:text="${accountDto.email()}"></span><span> </span></div>
+                                                                                                 th:src="@{/accounts/}+${accountDto.userId}" src="" th:if="${accountDto.profileImgPath() !=null}" alt="프로필사진">
+                        <img id="profileImg" class="rounded-circle mt-5" width="150px"  src="/images/default.jpg" alt="첨부이미지" th:if="${accountDto.profileImgPath() == null}" >
+                        <img id="preview" class="rounded-circle mt-5" type="hidden" width="150px" height="150px" src="" alt="첨부이미지" />
+                        <input type="file" name="updateProfileImg" id="updateProfileImg"  accept=".jpg, .png" class="form-control">
+                            <button type="button" class="btn btn-primary" onclick="profileImgUpdate()">이미지 등록</button>
+                            <input type="hidden" id="userId" th:value="${accountDto.userId()}">
+                    </div>
                 </div>
                 <div class="col-md-5 border-right">
                     <div class="p-3 py-5">
@@ -292,6 +295,41 @@
             }
         });
     }
+    $(document).ready(function () {
+        $("#preview").hide();
+    });
+
+    $("#updateProfileImg").on("change", function(event) {
+        var file = $("#updateProfileImg")[0].files[0];
+        var reader = new FileReader();
+        console.log(reader);
+        reader.onload = function(e) {
+            $("#profileImg").attr("src", e.target.result);
+        }
+        reader.readAsDataURL(file);
+    });
+
+    function profileImgUpdate(){
+        var userId = $('#userId').val();
+        var formData = new FormData();
+        formData.append("imgFile", $("#updateProfileImg")[0].files[0]);
+        $.ajax({
+            url: '/accounts/'+userId,
+            type: 'PUT',
+            data: formData,
+            enctype: 'multipart/form-data',
+            processData: false,
+            contentType: false,
+            success: function (data) {
+                alert('프로필 사진이 변경되었습니다.');
+                location.href = '/accounts';
+            },
+            error: function (status) {
+                console.log(status);
+            }
+        });
+    }
+
 
 </script>
 

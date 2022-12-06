@@ -126,7 +126,6 @@ $("#email").blur(function(){
 
 
 function signupCheck() {
-    var filearray
     var formData = new FormData();
     formData.append("imgFile", $("#imgFile")[0].files[0]);
     var data = {
@@ -143,7 +142,6 @@ function signupCheck() {
         "signupDto",
         new Blob([JSON.stringify(data.info)], { type: "application/json" })
     );
-
     console.log(formData);
     //위에서 만든 오브젝트를 json 타입으로 바꾼다.
     $.ajax({
