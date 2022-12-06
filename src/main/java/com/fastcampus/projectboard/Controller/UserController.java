@@ -65,7 +65,7 @@ public class UserController {
     @GetMapping("/accounts/{username}")
     public ResponseEntity<?> getProfileImg (@PathVariable String username) throws IOException {
         UserAccount.UserAccountDto accountDto = userService.getUserAccount(username);
-        InputStream inputStream = new FileInputStream(new File(accountDto.profileImgPath()));
+        InputStream inputStream = new FileInputStream(accountDto.profileImgPath());
         byte[] imageByteArray = IOUtils.toByteArray(inputStream);
         inputStream.close();
         return new ResponseEntity<>(imageByteArray, HttpStatus.OK);
@@ -122,22 +122,25 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestPart("signupDto") @Valid UserAccount.SignupDto userCreateForm, BindingResult bindingResult
+    public ResponseEntity<?> signup(@RequestPart("signupDto") @Valid UserAccount.SignupDto signupDto, BindingResult bindingResult
     ,@RequestPart(value = "imgFile",required = false) MultipartFile imgFile) throws IOException {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(controllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
         }
+        else if(!signupDto.getPassword1().equals(signupDto.getPassword2())){
+            bindingResult.addError(new FieldError("userCreateForm","password2","비밀번호가 일치하지 않습니다."));
+            return new ResponseEntity<>(controllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
+        }
         if(imgFile==null){
-            userService.saveUserAccountWithoutProfile(userCreateForm);
-            return new ResponseEntity<>("success", HttpStatus.OK);
+            userService.saveUserAccountWithoutProfile(signupDto);
         }
         else {
-            userService.saveUserAccount(userCreateForm, imgFile);
-            return new ResponseEntity<>("success", HttpStatus.OK);
+            userService.saveUserAccount(signupDto, imgFile);
         }
+        return new ResponseEntity<>("success", HttpStatus.OK);
     }
-    @PostMapping("/accounts/upload/{id}")
-    public ResponseEntity<?> changeProfileImg(@PathVariable String id, @RequestPart(value="file",required = false)  MultipartFile imgFile) {
+    @PutMapping("/accounts/{id}")
+    public ResponseEntity<?> changeProfileImg(@PathVariable String id, @RequestPart(value="imgFile",required = true)  MultipartFile imgFile) {
         if (imgFile == null) {
             return new ResponseEntity<>("파일이 없습니다.", HttpStatus.BAD_REQUEST);
         }

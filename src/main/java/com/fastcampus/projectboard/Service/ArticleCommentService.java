@@ -71,10 +71,8 @@ public class ArticleCommentService {
     }
     @Transactional(readOnly = true)
     public Set<ArticleComment.ArticleCommentDto> getChildrenComment(Long parentId) {
-        Set<ArticleComment.ArticleCommentDto> articleCommentDtos = new HashSet<>();
-        articleCommentDtos = articleCommentRepositoryCustom.getChildrenCommentIsNotDeleted(parentId).stream().map(ArticleComment.ArticleCommentDto::from
+        return articleCommentRepositoryCustom.getChildrenCommentIsNotDeleted(parentId).stream().map(ArticleComment.ArticleCommentDto::from
         ).collect(Collectors.toSet());
-        return articleCommentDtos;
     }
 
 
