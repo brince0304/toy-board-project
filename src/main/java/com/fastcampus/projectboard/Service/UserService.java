@@ -1,5 +1,6 @@
 package com.fastcampus.projectboard.Service;
 
+import com.fastcampus.projectboard.Util.FileUtil;
 import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.UserAccount;
 import com.fastcampus.projectboard.repository.ArticleCommentRepository;
@@ -38,7 +39,8 @@ public class UserService {
     private final UserAccountRepository userAccountRepository;
 
     private final ArticleRepository articleRepository;
-    private final ArticleCommentRepository articleCommentRepository;
+    private final FileUtil fileUtil;
+
     @Value("${com.example.upload.path.profileImg}") // application.properties의 변수
     private String uploadPath;
 
@@ -49,12 +51,9 @@ public class UserService {
         String password = user.getPassword1();
         UserAccount account = userAccountRepository.save(user.toEntity());
         account.setUserPassword(new BCryptPasswordEncoder().encode(password));
-        UUID uuid = UUID.randomUUID();
-        String fileName = uuid.toString() + "_" + imgFile.getOriginalFilename();
-        File profileImg=  new File(uploadPath,fileName);
-        imgFile.transferTo(profileImg);
-        account.setProfileImgName(fileName);
-        account.setProfileImgPath(uploadPath+"/"+fileName);
+        File profileImg = fileUtil.getMultipartFileToFile(imgFile);
+        account.setProfileImgName(profileImg.getName());
+        account.setProfileImgPath(uploadPath+"/"+profileImg.getName());
     }
 
     public void changeAccountProfileImg(String id,MultipartFile imgFile) throws IOException {
@@ -63,12 +62,9 @@ public class UserService {
             File file = new File(account.getProfileImgPath());
             file.delete();
         }
-        UUID uuid = UUID.randomUUID();
-        String fileName = uuid.toString() + "_" + imgFile.getOriginalFilename();
-        File profileImg=  new File(uploadPath,fileName);
-        imgFile.transferTo(profileImg);
-        account.setProfileImgName(fileName);
-        account.setProfileImgPath(uploadPath+"/"+fileName);
+        File profileImg = fileUtil.getMultipartFileToFile(imgFile);
+        account.setProfileImgName(profileImg.getName());
+        account.setProfileImgPath(uploadPath+"/"+profileImg.getName());
     }
 
 

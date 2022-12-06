@@ -1,18 +1,19 @@
 package com.fastcampus.projectboard.domain;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
-@RequiredArgsConstructor
+@AllArgsConstructor
 @Getter
 @Builder
-public class File {
+@NoArgsConstructor
+public class File extends AuditingFields{
     @Id
     private Long id;
     @Setter
@@ -20,7 +21,8 @@ public class File {
     private String fileName;
     @Setter
     @Column(nullable = false)
-    private String filePath;
+    @Value("${com.example.upload.path.profileImg}")
+    private String filePath ;
     @Setter
     @Column(nullable = false)
     private String fileType;
@@ -42,32 +44,35 @@ public class File {
                 .build();
     }
 
+    @Builder
+    public  record FileDto (
+            Long id,
+            String fileName,
+            String filePath,
+            String fileType,
+            Long fileSize,
+            UserAccount.UserAccountDto userAccountDto,
+LocalDateTime createdAt,
+            String createdBy,
+            LocalDateTime modifiedAt,
+            String modifiedBy
 
-    public static class FileDto  {
-        private final Long id;
-        private final String fileName;
-        private final String filePath;
-        private final String fileType;
-        private final Long fileSize;
-        private final UserAccount userAccount;
-        @Builder
-        public FileDto(Long id, String fileName, String filePath, String fileType, Long fileSize, UserAccount userAccount) {
-            this.id = id;
-            this.fileName = fileName;
-            this.filePath = filePath;
-            this.fileType = fileType;
-            this.fileSize = fileSize;
-            this.userAccount = userAccount;
-        }
+    )  {
 
-        public FileDto(File file) {
-            this.id = file.getId();
-            this.fileName = file.getFileName();
-            this.filePath = file.getFilePath();
-            this.fileType = file.getFileType();
-            this.fileSize = file.getFileSize();
-            this.userAccount = file.getUserAccount();
-        }
+
+        public static FileDto from(File file) {
+            return new FileDto(
+                    file.getId(),
+                    file.getFileName(),
+                    file.getFilePath(),
+                    file.getFileType(),
+                    file.getFileSize(),
+                    UserAccount.UserAccountDto.from(file.getUserAccount()),
+                    file.getCreatedAt(),
+                    file.getCreatedBy(),
+                    file.getModifiedAt(),
+                    file.getModifiedBy()
+            );}
 
         public File toEntity() {
             return File.builder()
@@ -76,18 +81,24 @@ public class File {
                     .filePath(filePath)
                     .fileType(fileType)
                     .fileSize(fileSize)
-                    .userAccount(userAccount)
                     .build();
         }
+
+
 
     }
 
     public static class FileRequestDto implements Serializable{
-        private final String fileName;
+        @Setter
+        private String fileName;
         private final String filePath;
         private final String fileType;
         private final Long fileSize;
         private final UserAccount userAccount;
+
+        UUID uuid = UUID.randomUUID();
+        String uuidString = uuid.toString();
+
         @Builder
         public FileRequestDto(String fileName, String filePath, String fileType, Long fileSize, UserAccount userAccount) {
             this.fileName = fileName;
@@ -107,32 +118,35 @@ public class File {
                     .build();
         }
     }
-    public static class FileResponseDto implements Serializable{
-        private final Long id;
-        private final String fileName;
-        private final String filePath;
-        private final String fileType;
-        private final Long fileSize;
-        private final UserAccount userAccount;
-        @Builder
-        public FileResponseDto(Long id, String fileName, String filePath, String fileType, Long fileSize, UserAccount userAccount) {
-            this.id = id;
-            this.fileName = fileName;
-            this.filePath = filePath;
-            this.fileType = fileType;
-            this.fileSize = fileSize;
-            this.userAccount = userAccount;
-        }
-
-        public FileResponseDto(File file) {
-            this.id = file.getId();
-            this.fileName = file.getFileName();
-            this.filePath = file.getFilePath();
-            this.fileType = file.getFileType();
-            this.fileSize = file.getFileSize();
-            this.userAccount = file.getUserAccount();
+    public record FileResponseDto(
+            Long id,
+            String fileName,
+            String filePath,
+            String fileType,
+            Long fileSize,
+            UserAccount.UserAccountDto userAccountDto,
+            LocalDateTime createdAt,
+            String createdBy,
+            LocalDateTime modifiedAt,
+            String modifiedBy
+    ) {
+        public static FileResponseDto from(File file) {
+            return new FileResponseDto(
+                    file.getId(),
+                    file.getFileName(),
+                    file.getFilePath(),
+                    file.getFileType(),
+                    file.getFileSize(),
+                    UserAccount.UserAccountDto.from(file.getUserAccount()),
+                    file.getCreatedAt(),
+                    file.getCreatedBy(),
+                    file.getModifiedAt(),
+                    file.getModifiedBy()
+            );
         }
     }
+
+
 }
 
 
