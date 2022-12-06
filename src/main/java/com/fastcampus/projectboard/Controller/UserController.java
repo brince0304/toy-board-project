@@ -1,13 +1,13 @@
 package com.fastcampus.projectboard.Controller;
 
+import com.fastcampus.projectboard.Service.FileService;
 import com.fastcampus.projectboard.Service.UserService;
-import com.fastcampus.projectboard.Util.ControllerUtil;
-import com.fastcampus.projectboard.Util.CookieUtil;
-import com.fastcampus.projectboard.Util.RedisUtil;
-import com.fastcampus.projectboard.Util.TokenProvider;
+import com.fastcampus.projectboard.Util.*;
+import com.fastcampus.projectboard.domain.SaveFile;
 import com.fastcampus.projectboard.domain.UserAccount;
 import com.fastcampus.projectboard.domain.UserAccountRole;
 
+import com.fastcampus.projectboard.repository.SaveFileRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -38,9 +38,9 @@ import java.util.concurrent.TimeUnit;
 public class UserController {
     private final UserService userService;
     private final TokenProvider tokenProvider;
-    private final CookieUtil cookieUtil;
     private final RedisUtil redisUtil;
-    private final ControllerUtil controllerUtil;
+
+    private final FileService fileService;
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Value("${com.example.upload.path.profileImg}") // application.properties의 변수
@@ -65,9 +65,8 @@ public class UserController {
     @GetMapping("/accounts/{username}")
     public ResponseEntity<?> getProfileImg (@PathVariable String username) throws IOException {
         UserAccount.UserAccountDto accountDto = userService.getUserAccount(username);
-        InputStream inputStream = new FileInputStream(accountDto.profileImgPath());
-        byte[] imageByteArray = IOUtils.toByteArray(inputStream);
-        inputStream.close();
+        File profileImg = FileUtil.getFileFromFileDomain(accountDto.profileImg());
+        byte[] imageByteArray = IOUtils.toByteArray(new FileInputStream(profileImg));
         return new ResponseEntity<>(imageByteArray, HttpStatus.OK);
     }
 
@@ -81,13 +80,13 @@ public class UserController {
             ,@Valid @RequestBody UserAccount.UserAccountUpdateRequestDto dto, BindingResult bindingResult) {
         if(!dto.password1().equals(dto.password2())){
             bindingResult.addError(new FieldError("dto","password2","비밀번호가 일치하지 않습니다."));
-            return new ResponseEntity<>(controllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ControllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
         }
         else if(principal==null){
             return new ResponseEntity<>("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
         }
         else if(bindingResult.hasErrors()){
-            return new ResponseEntity<>(controllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ControllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
         }
         userService.updateUserAccount(principal.username(),dto);
         return new ResponseEntity<>("수정되었습니다.", HttpStatus.OK);
@@ -125,17 +124,18 @@ public class UserController {
     public ResponseEntity<?> signup(@RequestPart("signupDto") @Valid UserAccount.SignupDto signupDto, BindingResult bindingResult
     ,@RequestPart(value = "imgFile",required = false) MultipartFile imgFile) throws IOException {
         if (bindingResult.hasErrors()) {
-            return new ResponseEntity<>(controllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ControllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
         }
         else if(!signupDto.getPassword1().equals(signupDto.getPassword2())){
             bindingResult.addError(new FieldError("userCreateForm","password2","비밀번호가 일치하지 않습니다."));
-            return new ResponseEntity<>(controllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ControllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
         }
         if(imgFile==null){
             userService.saveUserAccountWithoutProfile(signupDto);
         }
         else {
-            userService.saveUserAccount(signupDto, imgFile);
+            Long fileId = fileService.saveFile(FileUtil.getFileDtoFromMultiPartFile(imgFile,signupDto.getUserId()));
+            userService.saveUserAccount(signupDto, fileId);
         }
         return new ResponseEntity<>("success", HttpStatus.OK);
     }
@@ -145,7 +145,8 @@ public class UserController {
             return new ResponseEntity<>("파일이 없습니다.", HttpStatus.BAD_REQUEST);
         }
         try {
-            userService.changeAccountProfileImg(id,imgFile);
+            Long fileId = fileService.saveFile(FileUtil.getFileDtoFromMultiPartFile(imgFile,id));
+            userService.changeAccountProfileImg(id,fileId);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -169,9 +170,9 @@ public class UserController {
         try {
             if (!bindingResult.hasErrors()) {
                 final UserAccount.BoardPrincipal principal = userService.loginByUserNameAndPassword(user.getUsername(), user.getPassword());
-                Cookie accessToken = cookieUtil.createCookie(TokenProvider.ACCESS_TOKEN_NAME, tokenProvider.generateToken(principal));
+                Cookie accessToken = CookieUtil.createCookie(TokenProvider.ACCESS_TOKEN_NAME, tokenProvider.generateToken(principal));
                 accessToken.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds(TokenProvider.REFRESH_TOKEN_VALIDATION_SECOND));
-                Cookie refreshToken = cookieUtil.createCookie(TokenProvider.REFRESH_TOKEN_NAME, tokenProvider.generateRefreshToken(principal));
+                Cookie refreshToken = CookieUtil.createCookie(TokenProvider.REFRESH_TOKEN_NAME, tokenProvider.generateRefreshToken(principal));
                 refreshToken.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds(TokenProvider.REFRESH_TOKEN_VALIDATION_SECOND));
                 redisUtil.setDataExpire(refreshToken.getValue(), principal.getUsername(), TokenProvider.REFRESH_TOKEN_VALIDATION_SECOND);
                 res.addCookie(accessToken);
@@ -179,13 +180,13 @@ public class UserController {
                 return new ResponseEntity<>(map.getAttribute("prevPage"), HttpStatus.OK);
             }
             else{
-                return new ResponseEntity<>(controllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(ControllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             bindingResult.addError(new FieldError("dto", "username", "아이디 또는 비밀번호가 일치하지 않습니다."));
 
-            return new ResponseEntity<>(controllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ControllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -194,8 +195,8 @@ public class UserController {
              HttpServletRequest req,
             HttpServletResponse res) {
         SecurityContextHolder.clearContext();
-        Cookie accessToken = cookieUtil.getCookie(req, TokenProvider.ACCESS_TOKEN_NAME);
-        Cookie refreshToken = cookieUtil.getCookie(req, TokenProvider.REFRESH_TOKEN_NAME);
+        Cookie accessToken = CookieUtil.getCookie(req, TokenProvider.ACCESS_TOKEN_NAME);
+        Cookie refreshToken = CookieUtil.getCookie(req, TokenProvider.REFRESH_TOKEN_NAME);
         if (accessToken != null) {
             Long expiration = tokenProvider.getExpireTime(accessToken.getValue());
             redisUtil.setBlackList(accessToken.getValue(), "accessToken", expiration-System.currentTimeMillis());

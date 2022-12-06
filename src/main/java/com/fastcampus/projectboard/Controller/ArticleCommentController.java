@@ -22,7 +22,6 @@ import java.util.logging.Logger;
 public class ArticleCommentController {
     private final Logger log = Logger.getLogger(this.getClass().getName());
 
-    private final ControllerUtil controllerUtil;
     private final ArticleCommentService articleCommentService;
 
     @GetMapping("/{articleId}")
@@ -47,9 +46,9 @@ public class ArticleCommentController {
                                               @AuthenticationPrincipal UserAccount.BoardPrincipal principal) {
         if (bindingResult.hasErrors()) {
             log.info("bindingResult.hasErrors()");
-            System.out.println(new ResponseEntity<>(controllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST));
+            System.out.println(new ResponseEntity<>(ControllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST));
 
-            return new ResponseEntity<>(controllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ControllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
         }
 
         if (principal == null) {
@@ -63,7 +62,7 @@ public class ArticleCommentController {
     @PostMapping("/reply")
     public ResponseEntity<?> writeChildrenComment(@RequestBody @Valid ArticleComment.ArticleCommentRequest dto,BindingResult bindingResult,  @AuthenticationPrincipal UserAccount.BoardPrincipal principal) {
         if(bindingResult.hasErrors()) {
-            return new ResponseEntity<>(controllerUtil.getErrors(bindingResult),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ControllerUtil.getErrors(bindingResult),HttpStatus.BAD_REQUEST);
         }
         if (principal == null) {
             return new ResponseEntity<>("로그인이 필요합니다.", HttpStatus.BAD_REQUEST);
@@ -99,7 +98,7 @@ public class ArticleCommentController {
         Long articleCommentId = dto.articleCommentId();
         String content = dto.content();
         if (result.hasErrors()) {
-            return new ResponseEntity<>(controllerUtil.getErrors(result), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ControllerUtil.getErrors(result), HttpStatus.BAD_REQUEST);
         }
         if (principal == null) {
             return new ResponseEntity<>("로그인이 필요합니다.", HttpStatus.BAD_REQUEST);
