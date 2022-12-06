@@ -1,7 +1,6 @@
 package com.fastcampus.projectboard.Service;
 
-import com.fastcampus.projectboard.domain.File;
-import com.fastcampus.projectboard.repository.ArticleRepository;
+import com.fastcampus.projectboard.domain.SaveFile;
 import com.fastcampus.projectboard.repository.FileRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,10 +10,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import static org.mockito.BDDMockito.*;
 
-import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("비즈니스 로직 - 파")
 @ExtendWith(MockitoExtension.class)
-class FileServiceTest {
+class SaveFileServiceTest {
     @InjectMocks
     private FileService sut;
 
@@ -26,10 +24,10 @@ class FileServiceTest {
     void givenFileId_whenGettingFile_thenGetsFile() {
         //given
         Long fileId = 1L;
-        File file = File.builder().
+        SaveFile saveFile = SaveFile.builder().
                 id(fileId).
                 build();
-        given(fileRepository.findById(fileId)).willReturn(java.util.Optional.of(file));
+        given(fileRepository.findById(fileId)).willReturn(java.util.Optional.of(saveFile));
         //when
         sut.getFile(fileId);
 
@@ -41,7 +39,7 @@ class FileServiceTest {
     void givenFileId_whenDeletingFile_thenDeletesFile() {
         //given
         Long fileId = 1L;
-        File file = File.builder().
+        SaveFile saveFile = SaveFile.builder().
                 id(fileId).
                 build();
 
@@ -56,14 +54,14 @@ class FileServiceTest {
     void givenFileInfo_whenInsertingFile_thenSavesFile() {
         //given
         Long fileId = 1L;
-        File file = File.builder().
+        SaveFile saveFile = SaveFile.builder().
                 id(fileId).
                 build();
-        given(fileRepository.save(file)).willReturn(file);
+        given(fileRepository.save(saveFile)).willReturn(saveFile);
         //when
-        sut.saveFile(file);
+        sut.saveFile(saveFile);
 
         //then
-        then(fileRepository).should().save(file);
+        then(fileRepository).should().save(saveFile);
     }
 }

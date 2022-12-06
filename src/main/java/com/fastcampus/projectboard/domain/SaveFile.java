@@ -13,7 +13,8 @@ import java.util.UUID;
 @Getter
 @Builder
 @NoArgsConstructor
-public class File extends AuditingFields{
+@ToString
+public class SaveFile extends AuditingFields{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,7 +23,6 @@ public class File extends AuditingFields{
     private String fileName;
     @Setter
     @Column(nullable = false)
-    @Value("${com.example.upload.path.profileImg}")
     private String filePath ;
     @Setter
     @Column(nullable = false)
@@ -31,9 +31,8 @@ public class File extends AuditingFields{
     @Column(nullable = false)
     private Long fileSize;
     @Setter
-    @JoinColumn(nullable = false, name = "userId")
-    @ManyToOne(optional = false)
-    private UserAccount userAccount;
+    @Column(nullable = false)
+    private String uploadUser;
 
     public FileDto toDto() {
         return FileDto.builder()
@@ -42,8 +41,10 @@ public class File extends AuditingFields{
                 .filePath(filePath)
                 .fileType(fileType)
                 .fileSize(fileSize)
+                .uploadUser(uploadUser)
                 .build();
     }
+
 
     @Builder
     public  record FileDto (
@@ -52,7 +53,7 @@ public class File extends AuditingFields{
             String filePath,
             String fileType,
             Long fileSize,
-            UserAccount.UserAccountDto userAccountDto,
+            String uploadUser,
 LocalDateTime createdAt,
             String createdBy,
             LocalDateTime modifiedAt,
@@ -61,29 +62,32 @@ LocalDateTime createdAt,
     )  {
 
 
-        public static FileDto from(File file) {
+        public static FileDto from(SaveFile saveFile) {
             return new FileDto(
-                    file.getId(),
-                    file.getFileName(),
-                    file.getFilePath(),
-                    file.getFileType(),
-                    file.getFileSize(),
-                    UserAccount.UserAccountDto.from(file.getUserAccount()),
-                    file.getCreatedAt(),
-                    file.getCreatedBy(),
-                    file.getModifiedAt(),
-                    file.getModifiedBy()
+                    saveFile.getId(),
+                    saveFile.getFileName(),
+                    saveFile.getFilePath(),
+                    saveFile.getFileType(),
+                    saveFile.getFileSize(),
+                    saveFile.getUploadUser(),
+                    saveFile.getCreatedAt(),
+                    saveFile.getCreatedBy(),
+                    saveFile.getModifiedAt(),
+                    saveFile.getModifiedBy()
             );}
 
-        public File toEntity() {
-            return File.builder()
+        public SaveFile toEntity() {
+            return SaveFile.builder()
                     .id(id)
                     .fileName(fileName)
                     .filePath(filePath)
                     .fileType(fileType)
                     .fileSize(fileSize)
+                    .uploadUser(uploadUser)
                     .build();
         }
+
+
 
 
 
@@ -95,27 +99,27 @@ LocalDateTime createdAt,
         private final String filePath;
         private final String fileType;
         private final Long fileSize;
-        private final UserAccount userAccount;
+        private final String uploadUser;
 
         UUID uuid = UUID.randomUUID();
         String uuidString = uuid.toString();
 
         @Builder
-        public FileRequestDto(String fileName, String filePath, String fileType, Long fileSize, UserAccount userAccount) {
+        public FileRequestDto(String fileName, String filePath, String fileType, Long fileSize, String uploadUser) {
             this.fileName = fileName;
             this.filePath = filePath;
             this.fileType = fileType;
             this.fileSize = fileSize;
-            this.userAccount = userAccount;
+            this.uploadUser = uploadUser;
         }
 
-        public File toEntity() {
-            return File.builder()
+        public SaveFile toEntity() {
+            return SaveFile.builder()
                     .fileName(fileName)
                     .filePath(filePath)
                     .fileType(fileType)
                     .fileSize(fileSize)
-                    .userAccount(userAccount)
+                    .uploadUser(uploadUser)
                     .build();
         }
     }
@@ -125,24 +129,24 @@ LocalDateTime createdAt,
             String filePath,
             String fileType,
             Long fileSize,
-            UserAccount.UserAccountDto userAccountDto,
+            String uploadUser,
             LocalDateTime createdAt,
             String createdBy,
             LocalDateTime modifiedAt,
             String modifiedBy
     ) {
-        public static FileResponseDto from(File file) {
+        public static FileResponseDto from(SaveFile saveFile) {
             return new FileResponseDto(
-                    file.getId(),
-                    file.getFileName(),
-                    file.getFilePath(),
-                    file.getFileType(),
-                    file.getFileSize(),
-                    UserAccount.UserAccountDto.from(file.getUserAccount()),
-                    file.getCreatedAt(),
-                    file.getCreatedBy(),
-                    file.getModifiedAt(),
-                    file.getModifiedBy()
+                    saveFile.getId(),
+                    saveFile.getFileName(),
+                    saveFile.getFilePath(),
+                    saveFile.getFileType(),
+                    saveFile.getFileSize(),
+                    saveFile.getUploadUser(),
+                    saveFile.getCreatedAt(),
+                    saveFile.getCreatedBy(),
+                    saveFile.getModifiedAt(),
+                    saveFile.getModifiedBy()
             );
         }
     }
