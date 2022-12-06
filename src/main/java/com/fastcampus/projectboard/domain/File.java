@@ -15,6 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class File extends AuditingFields{
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Setter
     @Column(nullable = false)

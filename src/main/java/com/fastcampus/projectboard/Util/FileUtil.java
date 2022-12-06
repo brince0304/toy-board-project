@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.UUID;
 @Service
-@RequiredArgsConstructor
 public class FileUtil {
     public  String getExtension(String fileName) {
         return fileName.substring(fileName.lastIndexOf(".") + 1);
@@ -30,6 +29,10 @@ public class FileUtil {
         File file = new File(getFileNameWithUUID(multipartFile.getOriginalFilename()));
         multipartFile.transferTo(file);
         return file;
+    }
+
+    public File getFileFromFileDomain(com.fastcampus.projectboard.domain.File.FileDto fileDto) {
+        return new File(fileDto.filePath()+"/"+fileDto.fileName());
     }
 
 
