@@ -40,7 +40,7 @@ public class ArticleCommentService {
 
     public void saveArticleComment(ArticleComment.ArticleCommentDto dto) {
         try {
-            Article article = articleRepository.getReferenceById(dto.articleId());
+            Article article = articleRepository.findById(dto.articleId()).orElseThrow(() -> new EntityNotFoundException("게시글이 없습니다 - articleId: " + dto.articleId()));
                 ArticleComment comment = articleCommentRepository.save( dto.toEntity(article,dto.userAccountDto().toEntity()));
                 comment.setIsParent("Y");
         } catch (EntityNotFoundException e) {
@@ -51,7 +51,7 @@ public class ArticleCommentService {
 
     public void updateArticleComment(Long id,String content) {
         try {
-            ArticleComment articleComment = articleCommentRepository.getReferenceById(id);
+            ArticleComment articleComment = articleCommentRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("댓글을 찾을 수 없습니다 - id: " + id));
             if (content != null) { articleComment.setContent(content);}
         } catch (EntityNotFoundException e) {
             log.warn("댓글 업데이트 실패. 게시글을 찾을 수 없습니다 - dto: {}", e.getLocalizedMessage());
@@ -59,14 +59,13 @@ public class ArticleCommentService {
     }
 
     public void deleteArticleComment(Long Id) {
-
-        articleCommentRepository.getReferenceById(Id).setDeleted("Y");
+        articleCommentRepository.findById(Id).ifPresent(o->o.setDeleted("Y"));
     }
 
 
     @Transactional(readOnly = true)
     public ArticleComment.ArticleCommentDto getArticleComment(Long articleCommentId) {
-        ArticleComment articleComment = articleCommentRepository.getReferenceById(articleCommentId);
+        ArticleComment articleComment = articleCommentRepository.findById(articleCommentId).orElseThrow();
         return ArticleComment.ArticleCommentDto.from(articleComment);
     }
     @Transactional(readOnly = true)
@@ -78,7 +77,7 @@ public class ArticleCommentService {
 
     public void saveChildrenComment(Long parentId, ArticleComment.ArticleCommentDto children) {
         try {
-            ArticleComment parent = articleCommentRepository.getReferenceById(parentId);
+            ArticleComment parent = articleCommentRepository.findById(parentId).orElseThrow(()-> new EntityNotFoundException("부모 댓글이 없습니다 - parentId: " + parentId));
             ArticleComment articleComment = children.toEntity(parent.getArticle(),children.userAccountDto().toEntity());
             articleCommentRepository.save(articleComment);
             articleComment.setIsParent("N");

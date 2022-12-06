@@ -3,7 +3,6 @@ package com.fastcampus.projectboard.Service;
 import com.fastcampus.projectboard.Util.FileUtil;
 import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.UserAccount;
-import com.fastcampus.projectboard.repository.ArticleCommentRepository;
 import com.fastcampus.projectboard.repository.ArticleRepository;
 import com.fastcampus.projectboard.repository.UserAccountRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,11 +21,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.EntityNotFoundException;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -72,10 +71,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public boolean isUserExists(String userId){
-        if(userAccountRepository.findById(userId).isPresent()){
-            return true;
-        }
-        return false;
+        return userAccountRepository.existsById(userId);
     }
 
 
@@ -93,7 +89,7 @@ public class UserService {
     public void updateUserAccount(String userId,UserAccount.UserAccountUpdateRequestDto userDto) {
         try {
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-            UserAccount userAccount = userAccountRepository.findById(userId).orElseThrow();
+            UserAccount userAccount = userAccountRepository.findById(userId).orElseThrow(()->new EntityNotFoundException("해당 유저가 없습니다."));
             if (userDto.password1() != null) { userAccount.setUserPassword(passwordEncoder.encode(userDto.password1())); }
             if (userDto.nickname() != null) { userAccount.setNickname(userDto.nickname()); }
             if (userDto.email() != null) { userAccount.setEmail(userDto.email()); }
@@ -106,7 +102,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public UserAccount.UserAccountDto getUserAccount(String userId) {
         try {
-            UserAccount userAccount = userAccountRepository.findById(userId).orElseThrow();
+            UserAccount userAccount = userAccountRepository.findById(userId).orElseThrow(()->new EntityNotFoundException("해당 유저가 없습니다."));
             return UserAccount.UserAccountDto.from(userAccount);
         } catch (Exception e) {
             throw new IllegalArgumentException("회원정보 조회에 실패했습니다");
@@ -122,16 +118,16 @@ public class UserService {
     }
     @Transactional(readOnly = true)
     public boolean isExistUser(String userId) {
-        return userAccountRepository.findById(userId).isPresent();
+        return userAccountRepository.existsByUserId(userId);
     }
 
     @Transactional(readOnly = true)
     public boolean isExistNickname(String nickname) {
-        return userAccountRepository.findByNickname(nickname).isPresent();
+        return userAccountRepository.existsByNickname(nickname);
     }
     @Transactional(readOnly = true)
     public boolean isExistEmail(String email) {
-        return userAccountRepository.findByEmail(email).isPresent();
+        return userAccountRepository.existsByEmail(email);
     }
 
     public UserAccount.BoardPrincipal loginByUserNameAndPassword(String username, String password) {
