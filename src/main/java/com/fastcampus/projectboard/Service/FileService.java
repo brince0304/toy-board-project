@@ -14,17 +14,19 @@ import javax.persistence.EntityNotFoundException;
 @RequiredArgsConstructor
 @Transactional
 public class FileService {
+
     private final SaveFileRepository fileRepository;
 
     public SaveFile.FileDto getFile(Long fileId) {
+        log.info("getFile() fileId: {}", fileId);
         return fileRepository.findById(fileId).map(SaveFile.FileDto::from).orElseThrow(()-> new EntityNotFoundException("파일이 없습니다 - fileId: " + fileId));
     }
-
     public void deleteFile(Long fileId) {
+        log.info("deleteFile() fileId: {}", fileId);
         fileRepository.deleteById(fileId);
     }
-
-    public Long saveFile(SaveFile.FileDto saveFile) {
-        return fileRepository.save(saveFile.toEntity()).getId();
+    public SaveFile.FileDto saveFile(SaveFile.FileDto saveFile) {
+        log.info("saveFile() saveFile: {}", saveFile);
+        return SaveFile.FileDto.from(fileRepository.save(saveFile.toEntity()));
     }
 }

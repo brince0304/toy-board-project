@@ -6,13 +6,14 @@ import org.springframework.beans.factory.annotation.Value;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Builder
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString
 public class SaveFile extends AuditingFields{
     @Id
@@ -45,6 +46,17 @@ public class SaveFile extends AuditingFields{
                 .build();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SaveFile saveFile)) return false;
+        return id.equals(saveFile.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 
     @Builder
     public  record FileDto (

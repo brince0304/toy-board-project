@@ -45,25 +45,22 @@ public class UserService {
     private String uploadPath;
 
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public void saveUserAccount(UserAccount.SignupDto user,Long fileId) throws IOException {
+    public void saveUserAccount(UserAccount.SignupDto user, SaveFile.FileDto fileDto) throws IOException {
         String password = user.getPassword1();
         UserAccount account = userAccountRepository.save(user.toEntity());
         account.setUserPassword(new BCryptPasswordEncoder().encode(password));
-        SaveFile profileImg = fileRepository.findById(fileId).orElseThrow(()-> new EntityNotFoundException("파일이 없습니다 - fileId: " + fileId));
-        account.setProfileImg(profileImg);
-
+        account.setProfileImg(fileDto.toEntity());
     }
 
-    public void changeAccountProfileImg(String id,Long fileId) throws IOException {
+    public SaveFile.FileDto changeAccountProfileImg(String id, SaveFile.FileDto fileDto) throws IOException {
         UserAccount account = userAccountRepository.findById(id).orElseThrow(()->new IllegalArgumentException("해당 유저가 없습니다."));
         if(account.getProfileImg()!=null && !account.getProfileImg().getFileSize().equals(0L)){
             FileUtil.deleteFile(SaveFile.FileDto.from(account.getProfileImg()));
-            fileRepository.delete(account.getProfileImg());
         }
-        SaveFile profileImg = fileRepository.findById(fileId).orElseThrow(()-> new EntityNotFoundException("파일이 없습니다 - fileId: " + fileId));
-        account.setProfileImg(profileImg);
+        SaveFile.FileDto currentImg = SaveFile.FileDto.from(account.getProfileImg());
+        account.setProfileImg(fileDto.toEntity());
+        return currentImg;
     }
 
 
