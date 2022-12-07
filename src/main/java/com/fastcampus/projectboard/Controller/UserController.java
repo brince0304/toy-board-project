@@ -64,8 +64,7 @@ public class UserController {
     }
     @GetMapping("/accounts/{username}")
     public ResponseEntity<?> getProfileImg (@PathVariable String username) throws IOException {
-        UserAccount.UserAccountDto accountDto = userService.getUserAccount(username);
-        File profileImg = FileUtil.getFileFromFileDomain(accountDto.profileImg());
+        File profileImg = FileUtil.getFileFromFileDomain(userService.getUserAccount(username).profileImg());
         byte[] imageByteArray = IOUtils.toByteArray(new FileInputStream(profileImg));
         return new ResponseEntity<>(imageByteArray, HttpStatus.OK);
     }
@@ -134,8 +133,7 @@ public class UserController {
             userService.saveUserAccountWithoutProfile(signupDto);
         }
         else {
-            Long fileId = fileService.saveFile(FileUtil.getFileDtoFromMultiPartFile(imgFile,signupDto.getUserId()));
-            userService.saveUserAccount(signupDto, fileId);
+            userService.saveUserAccount(signupDto, fileService.saveFile(FileUtil.getFileDtoFromMultiPartFile(imgFile,signupDto.getUserId())));
         }
         return new ResponseEntity<>("success", HttpStatus.OK);
     }
@@ -145,8 +143,8 @@ public class UserController {
             return new ResponseEntity<>("파일이 없습니다.", HttpStatus.BAD_REQUEST);
         }
         try {
-            Long fileId = fileService.saveFile(FileUtil.getFileDtoFromMultiPartFile(imgFile,id));
-            userService.changeAccountProfileImg(id,fileId);
+            SaveFile.FileDto fileDto = fileService.saveFile(FileUtil.getFileDtoFromMultiPartFile(imgFile,id));
+            fileService.deleteFile(userService.changeAccountProfileImg(id,fileDto).id());
         } catch (IOException e) {
             e.printStackTrace();
         }
