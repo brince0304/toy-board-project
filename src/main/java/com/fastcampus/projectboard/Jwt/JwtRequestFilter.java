@@ -37,7 +37,7 @@ import javax.servlet.http.HttpServletResponse;
 public class JwtRequestFilter extends OncePerRequestFilter {
     private final UserSecurityService userDetailsService;
     private final TokenProvider tokenProvider;
-    private final CookieUtil cookieUtil;
+
     private final RedisUtil redisUtil;
 
 
@@ -45,7 +45,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException, java.io.IOException {
-        final Cookie jwtToken = cookieUtil.getCookie(httpServletRequest, TokenProvider.ACCESS_TOKEN_NAME);
+        final Cookie jwtToken = CookieUtil.getCookie(httpServletRequest, TokenProvider.ACCESS_TOKEN_NAME);
 
         String username = null;
         String jwt = null;
@@ -72,7 +72,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 logger.warn("Cannot find username from access token");
             }
         } catch (ExpiredJwtException e) {
-            String refreshToken = cookieUtil.getCookie(httpServletRequest, TokenProvider.REFRESH_TOKEN_NAME).getValue();
+            String refreshToken = CookieUtil.getCookie(httpServletRequest, TokenProvider.REFRESH_TOKEN_NAME).getValue();
             System.out.println("refreshToken : " + refreshToken);
             if (refreshToken != null) {
                 refreshJwt = refreshToken;
@@ -89,7 +89,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null,userDetails.getAuthorities() );
                     usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
                     SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-                    Cookie newAccessToken = cookieUtil.createCookie(TokenProvider.ACCESS_TOKEN_NAME, tokenProvider.doGenerateToken(refreshUname, TokenProvider.TOKEN_VALIDATION_SECOND));
+                    Cookie newAccessToken = CookieUtil.createCookie(TokenProvider.ACCESS_TOKEN_NAME, tokenProvider.doGenerateToken(refreshUname, TokenProvider.TOKEN_VALIDATION_SECOND));
                     httpServletResponse.addCookie(newAccessToken);
                 }
             } else {
