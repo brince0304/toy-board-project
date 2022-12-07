@@ -2,8 +2,10 @@ package com.fastcampus.projectboard.Service;
 
 import com.fastcampus.projectboard.Util.FileUtil;
 import com.fastcampus.projectboard.domain.Article;
+import com.fastcampus.projectboard.domain.SaveFile;
 import com.fastcampus.projectboard.domain.UserAccount;
 import com.fastcampus.projectboard.repository.ArticleRepository;
+import com.fastcampus.projectboard.repository.SaveFileRepository;
 import com.fastcampus.projectboard.repository.UserAccountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityNotFoundException;
-import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
@@ -38,7 +39,7 @@ public class UserService {
     private final UserAccountRepository userAccountRepository;
 
     private final ArticleRepository articleRepository;
-    private final FileUtil fileUtil;
+    private final SaveFileRepository fileRepository;
 
     @Value("${com.example.upload.path.profileImg}") // application.properties의 변수
     private String uploadPath;
@@ -46,24 +47,23 @@ public class UserService {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public void saveUserAccount(UserAccount.SignupDto user,MultipartFile imgFile) throws IOException {
+    public void saveUserAccount(UserAccount.SignupDto user,Long fileId) throws IOException {
         String password = user.getPassword1();
         UserAccount account = userAccountRepository.save(user.toEntity());
         account.setUserPassword(new BCryptPasswordEncoder().encode(password));
-        File profileImg = fileUtil.getMultipartFileToFile(imgFile);
-        account.setProfileImgName(profileImg.getName());
-        account.setProfileImgPath(uploadPath+"/"+profileImg.getName());
+        SaveFile profileImg = fileRepository.findById(fileId).orElseThrow(()-> new EntityNotFoundException("파일이 없습니다 - fileId: " + fileId));
+        account.setProfileImg(profileImg);
+
     }
 
-    public void changeAccountProfileImg(String id,MultipartFile imgFile) throws IOException {
+    public void changeAccountProfileImg(String id,Long fileId) throws IOException {
         UserAccount account = userAccountRepository.findById(id).orElseThrow(()->new IllegalArgumentException("해당 유저가 없습니다."));
-        if(account.getProfileImgName()!=null && !account.getProfileImgName().equals("default.jpg")){
-            File file = new File(account.getProfileImgPath());
-            file.delete();
+        if(account.getProfileImg()!=null && !account.getProfileImg().getFileSize().equals(0L)){
+            FileUtil.deleteFile(SaveFile.FileDto.from(account.getProfileImg()));
+            fileRepository.delete(account.getProfileImg());
         }
-        File profileImg = fileUtil.getMultipartFileToFile(imgFile);
-        account.setProfileImgName(profileImg.getName());
-        account.setProfileImgPath(uploadPath+"/"+profileImg.getName());
+        SaveFile profileImg = fileRepository.findById(fileId).orElseThrow(()-> new EntityNotFoundException("파일이 없습니다 - fileId: " + fileId));
+        account.setProfileImg(profileImg);
     }
 
 
@@ -148,10 +148,23 @@ public class UserService {
     }
 
     public void saveUserAccountWithoutProfile(UserAccount.SignupDto user) throws IOException {
+        SaveFile defaultImg = fileRepository.findByFileName("default.png");
         String password = user.getPassword1();
         UserAccount account = userAccountRepository.save(user.toEntity());
         account.setUserPassword(new BCryptPasswordEncoder().encode(password));
-        account.setProfileImgName("default.jpg");
-        account.setProfileImgPath(uploadPath+"/default.jpg");
+        if(defaultImg!=null){
+            account.setProfileImg(defaultImg);
+        }
+        else{
+            SaveFile saveFile = SaveFile.builder()
+                    .fileName("default.jpg")
+                    .filePath(uploadPath+"/default.jpg")
+                    .fileSize(0L)
+                    .fileType("jpg")
+                    .uploadUser(account.getUserId())
+                    .build();
+            fileRepository.save(saveFile);
+            account.setProfileImg(saveFile);
+        }
     }
 }

@@ -40,8 +40,8 @@
         <div class="container mt-4 mb-4 p-3 d-flex justify-content-center">
             <div class="card p-4">
                 <div class=" image d-flex flex-column justify-content-center align-items-center">
-                    <img id="imgId" th:src="@{/accounts/}+${accountDto.userId}" width="100" height="100"  alt="첨부이미지" th:if="${accountDto.profileImgPath() != null}" />
-                        <img width="100" height="100" src="/images/default.jpg" alt="첨부이미지" th:if="${accountDto.profileImgPath() == null}" />
+                    <img id="imgId" th:src="@{/accounts/}+${accountDto.userId}" width="100" height="100"  alt="첨부이미지" th:if="${accountDto.profileImg() != null}" />
+                        <img width="100" height="100" src="/images/default.jpg" alt="첨부이미지" th:if="${accountDto.profileImg() == null}" />
                     <span class="name mt-3" th:text="${accountDto.nickname()}"></span> <span class="idd"
                                                                                              th:text="${'@'+accountDto.nickname()}"></span>
                     <div class="d-flex flex-row justify-content-center align-items-center gap-2"><span class="idd1"
@@ -72,8 +72,8 @@
                 <div class="col-md-3 border-right">
                     <div class="d-flex flex-column align-items-center text-center p-3 py-5"><img id="profileImg" class="rounded-circle mt-5"
                                                                                                  width="150px"
-                                                                                                 th:src="@{/accounts/}+${accountDto.userId}" src="" th:if="${accountDto.profileImgPath() !=null}" alt="프로필사진">
-                        <img id="profileImg" class="rounded-circle mt-5" width="150px"  src="/images/default.jpg" alt="첨부이미지" th:if="${accountDto.profileImgPath() == null}" >
+                                                                                                 th:src="@{/accounts/}+${accountDto.userId}" src="" th:if="${accountDto.profileImg() !=null}" alt="프로필사진">
+                        <img id="profileImg" class="rounded-circle mt-5" width="150px"  src="/images/default.jpg" alt="첨부이미지" th:if="${accountDto.profileImg() == null}" >
                         <img id="preview" class="rounded-circle mt-5" type="hidden" width="150px" height="150px" src="" alt="첨부이미지" />
                         <input type="file" name="updateProfileImg" id="updateProfileImg"  accept=".jpg, .png" class="form-control">
                             <button type="button" class="btn btn-primary" onclick="profileImgUpdate()">이미지 등록</button>
@@ -300,13 +300,13 @@
     });
 
     $("#updateProfileImg").on("change", function(event) {
-        var file = $("#updateProfileImg")[0].files[0];
+        var saveFile = $("#updateProfileImg")[0].files[0];
         var reader = new FileReader();
         console.log(reader);
         reader.onload = function(e) {
             $("#profileImg").attr("src", e.target.result);
         }
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(saveFile);
     });
 
     function profileImgUpdate(){

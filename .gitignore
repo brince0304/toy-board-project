@@ -80,7 +80,7 @@ fabric.properties
 # Editor-based Rest Client
 .idea/httpRequests
 
-# Android studio 3.1+ serialized cache file
+# Android studio 3.1+ serialized cache saveFile
 .idea/caches/build_file_checksums.ser
 
 ### Intellij+all Patch ###
@@ -93,10 +93,10 @@ fabric.properties
 !.idea/runConfigurations
 
 ### Java ###
-# Compiled class file
+# Compiled class saveFile
 *.class
 
-# Log file
+# Log saveFile
 *.log
 
 # BlueJ files
@@ -158,13 +158,13 @@ Thumbs.db:encryptable
 ehthumbs.db
 ehthumbs_vista.db
 
-# Dump file
+# Dump saveFile
 *.stackdump
 
-# Folder config file
+# Folder config saveFile
 [Dd]esktop.ini
 
-# Recycle Bin used on file shares
+# Recycle Bin used on saveFile shares
 $RECYCLE.BIN/
 
 # Windows Installer files
@@ -185,7 +185,7 @@ $RECYCLE.BIN/
 # Ignore Gradle GUI config
 gradle-app.setting
 
-# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+# Avoid ignoring Gradle wrapper jar saveFile (.jar files are usually ignored)
 !gradle-wrapper.jar
 
 # Avoid ignore Gradle wrappper properties

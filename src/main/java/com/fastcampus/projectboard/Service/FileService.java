@@ -1,7 +1,7 @@
 package com.fastcampus.projectboard.Service;
 
-import com.fastcampus.projectboard.domain.File;
-import com.fastcampus.projectboard.repository.FileRepository;
+import com.fastcampus.projectboard.domain.SaveFile;
+import com.fastcampus.projectboard.repository.SaveFileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,17 +14,17 @@ import javax.persistence.EntityNotFoundException;
 @RequiredArgsConstructor
 @Transactional
 public class FileService {
-    private final FileRepository fileRepository;
+    private final SaveFileRepository fileRepository;
 
-    public File.FileDto getFile(Long fileId) {
-        return fileRepository.findById(fileId).map(File.FileDto::from).orElseThrow(()-> new EntityNotFoundException("파일이 없습니다 - fileId: " + fileId));
+    public SaveFile.FileDto getFile(Long fileId) {
+        return fileRepository.findById(fileId).map(SaveFile.FileDto::from).orElseThrow(()-> new EntityNotFoundException("파일이 없습니다 - fileId: " + fileId));
     }
 
     public void deleteFile(Long fileId) {
         fileRepository.deleteById(fileId);
     }
 
-    public void saveFile(File file) {
-        fileRepository.save(file);
+    public Long saveFile(SaveFile.FileDto saveFile) {
+        return fileRepository.save(saveFile.toEntity()).getId();
     }
 }

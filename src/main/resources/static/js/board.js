@@ -137,7 +137,7 @@ function getComment(){
                     html += "<li class='list-group-item comments'>";
                     html += "<div class='comment' id='"+this.id+"comment'>";
                     html += "<a href='javascript:; class='userImg'>";
-                    html += "<img src='/images/img.png' width='20' height='18' style='display:inline'>";
+                    html += "<img src='/accounts/"+this.userAccountDto.userId+"' width='35px' height='35px' alt='userImg' class='userImg'>";
                     html += "</a>";
                     html += "<a href='javascript:;' class='writer' style='display:inline'>" + this.userAccountDto.nickname + "</a>";
                     html += "<div class='comment-info'>";
@@ -255,8 +255,7 @@ function getChildrenComment(id){
                     html += "<li class='list-group-item comments'>";
                     html += "<div class='childrenComment' id='" + this.id + "comment'>";
                     html += "<a href='javascript:; class='comment-img'>";
-                    html+=  "<img src='/images/reply-ico.png' alt='답글' style='display:inline' class='replyicon'>"
-                    html += "<img src='' width='50' height='50'>";
+                    html+=  "<img src='/accounts/"+this.userAccountDto.userId+"' width='35px' height='35px' alt='userImg' class='userImg' style='display:inline'>"
                     html += "</a>";
                     html += "<div class='comment-info'>";
                     html += "<span class='comment4 date'>" + getFormatDate(new Date(this.createdAt)) + "</span>";

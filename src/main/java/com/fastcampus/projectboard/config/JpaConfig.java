@@ -24,5 +24,5 @@ public class JpaConfig {
             UserAccount.BoardPrincipal principal = (UserAccount.BoardPrincipal) authentication.getPrincipal();
             return () -> Optional.of(principal.getUsername());
         }
-    }
+    } //TODO : 익명 사용자 처리
 }
