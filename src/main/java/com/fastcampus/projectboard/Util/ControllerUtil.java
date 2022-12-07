@@ -17,11 +17,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Service
+
 public class ControllerUtil {
 
-
-    public String getIp(HttpServletRequest request){
+    private ControllerUtil() {
+    }
+    public static  String getIp(HttpServletRequest request){
         String ip = request.getHeader("X-Forwarded-For");
         if (ip == null) {
             ip = request.getHeader("Proxy-Client-IP");
@@ -41,7 +42,7 @@ public class ControllerUtil {
         return ip;
     }
 
-    public String hashtagsToString(Set<Hashtag.HashtagDto> dto){
+    public static String hashtagsToString(Set<Hashtag.HashtagDto> dto){
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < dto.size(); i++) {
             if (i != dto.size() - 1) {
@@ -53,7 +54,7 @@ public class ControllerUtil {
         return  sb.toString();
     }
 
-    public Set<ErrorDto> getErrors(BindingResult bindingResult){
+    public static Set<ErrorDto> getErrors(BindingResult bindingResult){
         return bindingResult.getFieldErrors().stream().map(e->new ErrorDto(e.getField(),e.getDefaultMessage())).collect(Collectors.toSet());
     }
     @Getter
