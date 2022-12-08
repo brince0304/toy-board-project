@@ -259,14 +259,18 @@ public class UserAccount extends AuditingFields {
     }
     @Builder
     public record UserAccountUpdateRequestDto(
+            @org.springframework.lang.Nullable
             @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,25}$", message = "* 패스워드는 영문, 숫자, 특수문자를 포함한 8자이상 25자 이하여야 합니다.")
             String password1,
             @NotEmpty(message = "* 입력값을 확인해주세요.")
             String password2,
+            @org.springframework.lang.Nullable
             @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$", message = "* 이메일 형식을 확인해주세요.")
             String email,
+            @org.springframework.lang.Nullable
             @Size(min=2, max=10, message = "* 닉네임은 2자 이상 10자 이하로 입력해주세요.")
             String nickname,
+            @org.springframework.lang.Nullable
             @Size(max=50, message = "* 메모는 50자 이하로 입력해주세요.")
             String memo
     ) {

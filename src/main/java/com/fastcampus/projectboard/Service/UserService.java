@@ -46,11 +46,12 @@ public class UserService {
 
 
 
-    public void saveUserAccount(UserAccount.SignupDto user, SaveFile.FileDto fileDto) throws IOException {
+    public String saveUserAccount(UserAccount.SignupDto user, SaveFile.FileDto fileDto) throws IOException {
         String password = user.getPassword1();
         UserAccount account = userAccountRepository.save(user.toEntity());
         account.setUserPassword(new BCryptPasswordEncoder().encode(password));
         account.setProfileImg(fileDto.toEntity());
+        return user.getUserId();
     }
 
     public SaveFile.FileDto changeAccountProfileImg(String id, SaveFile.FileDto fileDto) throws IOException {
@@ -144,7 +145,7 @@ public class UserService {
         return articleDtos;
     }
 
-    public void saveUserAccountWithoutProfile(UserAccount.SignupDto user) throws IOException {
+    public String saveUserAccountWithoutProfile(UserAccount.SignupDto user) throws IOException {
         SaveFile defaultImg = fileRepository.findByFileName("default.png");
         String password = user.getPassword1();
         UserAccount account = userAccountRepository.save(user.toEntity());
@@ -163,5 +164,6 @@ public class UserService {
             fileRepository.save(saveFile);
             account.setProfileImg(saveFile);
         }
+        return account.getUserId();
     }
 }

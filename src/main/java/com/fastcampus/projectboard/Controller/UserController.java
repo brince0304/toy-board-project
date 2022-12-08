@@ -77,7 +77,7 @@ public class UserController {
     @PutMapping("/accounts")
     public ResponseEntity<?> updateMyAccount(@AuthenticationPrincipal UserAccount.BoardPrincipal principal
             ,@Valid @RequestBody UserAccount.UserAccountUpdateRequestDto dto, BindingResult bindingResult) {
-        if(!dto.password1().equals(dto.password2())){
+        if(dto.password1()!=null &&!dto.password1().equals(dto.password2())){
             bindingResult.addError(new FieldError("dto","password2","비밀번호가 일치하지 않습니다."));
             return new ResponseEntity<>(ControllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
         }
