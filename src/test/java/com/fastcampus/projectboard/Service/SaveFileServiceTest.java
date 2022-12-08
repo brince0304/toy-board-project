@@ -1,7 +1,7 @@
 package com.fastcampus.projectboard.Service;
 
 import com.fastcampus.projectboard.domain.SaveFile;
-import com.fastcampus.projectboard.repository.FileRepository;
+import com.fastcampus.projectboard.repository.SaveFileRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +18,7 @@ class SaveFileServiceTest {
 
 
     @Mock
-    private FileRepository fileRepository;
+    private SaveFileRepository fileRepository;
     @DisplayName("파일 아이디를 입력하면 파일을 조회할 수 있다.")
     @Test
     void givenFileId_whenGettingFile_thenGetsFile() {
@@ -59,7 +59,7 @@ class SaveFileServiceTest {
                 build();
         given(fileRepository.save(saveFile)).willReturn(saveFile);
         //when
-        sut.saveFile(saveFile);
+        sut.saveFile(saveFile.toDto());
 
         //then
         then(fileRepository).should().save(saveFile);

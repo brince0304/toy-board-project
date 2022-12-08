@@ -20,11 +20,11 @@ class JpaRepositoryTest {
 
     private final ArticleRepository articleRepository;
     private final ArticleCommentRepository articleCommentRepository;
-    private final FileRepository fileRepository;
+    private final SaveFileRepository fileRepository;
 
     public JpaRepositoryTest(
             @Autowired ArticleRepository articleRepository,
-            @Autowired ArticleCommentRepository articleCommentRepository, FileRepository fileRepository) {
+            @Autowired ArticleCommentRepository articleCommentRepository, SaveFileRepository fileRepository) {
         this.articleRepository = articleRepository;
         this.articleCommentRepository = articleCommentRepository;
         this.fileRepository = fileRepository;

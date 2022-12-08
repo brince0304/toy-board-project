@@ -1,5 +1,6 @@
 package com.fastcampus.projectboard.Controller;
 
+import com.fastcampus.projectboard.domain.SaveFile;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.fastcampus.projectboard.Util.FileUtil.uploadPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -80,4 +82,6 @@ public class DataRestTest {
         mvc.perform(delete("/api/userAccounts")).andExpect(status().isNotFound());
         mvc.perform(head("/api/userAccounts")).andExpect(status().isNotFound());
     }
+
+
 }
