@@ -1,9 +1,11 @@
 package com.fastcampus.projectboard.Service;
 
+import com.fastcampus.projectboard.Util.FileUtil;
 import com.fastcampus.projectboard.domain.Article;
+import com.fastcampus.projectboard.domain.SaveFile;
 import com.fastcampus.projectboard.domain.UserAccount;
-import com.fastcampus.projectboard.repository.ArticleCommentRepository;
 import com.fastcampus.projectboard.repository.ArticleRepository;
+import com.fastcampus.projectboard.repository.SaveFileRepository;
 import com.fastcampus.projectboard.repository.UserAccountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,11 +23,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
+import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -38,37 +39,29 @@ public class UserService {
     private final UserAccountRepository userAccountRepository;
 
     private final ArticleRepository articleRepository;
-    private final ArticleCommentRepository articleCommentRepository;
+    private final SaveFileRepository fileRepository;
+
     @Value("${com.example.upload.path.profileImg}") // application.properties의 변수
     private String uploadPath;
 
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public void saveUserAccount(UserAccount.SignupDto user,MultipartFile imgFile) throws IOException {
+    public String saveUserAccount(UserAccount.SignupDto user, SaveFile.FileDto fileDto) throws IOException {
         String password = user.getPassword1();
         UserAccount account = userAccountRepository.save(user.toEntity());
         account.setUserPassword(new BCryptPasswordEncoder().encode(password));
-        UUID uuid = UUID.randomUUID();
-        String fileName = uuid.toString() + "_" + imgFile.getOriginalFilename();
-        File profileImg=  new File(uploadPath,fileName);
-        imgFile.transferTo(profileImg);
-        account.setProfileImgName(fileName);
-        account.setProfileImgPath(uploadPath+"/"+fileName);
+        account.setProfileImg(fileDto.toEntity());
+        return user.getUserId();
     }
 
-    public void changeAccountProfileImg(String id,MultipartFile imgFile) throws IOException {
+    public SaveFile.FileDto changeAccountProfileImg(String id, SaveFile.FileDto fileDto) throws IOException {
         UserAccount account = userAccountRepository.findById(id).orElseThrow(()->new IllegalArgumentException("해당 유저가 없습니다."));
-        if(account.getProfileImgName()!=null && !account.getProfileImgName().equals("default.jpg")){
-            File file = new File(account.getProfileImgPath());
-            file.delete();
+        if(account.getProfileImg()!=null && !account.getProfileImg().getFileSize().equals(0L)){
+            FileUtil.deleteFile(SaveFile.FileDto.from(account.getProfileImg()));
         }
-        UUID uuid = UUID.randomUUID();
-        String fileName = uuid.toString() + "_" + imgFile.getOriginalFilename();
-        File profileImg=  new File(uploadPath,fileName);
-        imgFile.transferTo(profileImg);
-        account.setProfileImgName(fileName);
-        account.setProfileImgPath(uploadPath+"/"+fileName);
+        SaveFile.FileDto currentImg = SaveFile.FileDto.from(account.getProfileImg());
+        account.setProfileImg(fileDto.toEntity());
+        return currentImg;
     }
 
 
@@ -76,10 +69,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public boolean isUserExists(String userId){
-        if(userAccountRepository.findById(userId).isPresent()){
-            return true;
-        }
-        return false;
+        return userAccountRepository.existsById(userId);
     }
 
 
@@ -97,7 +87,7 @@ public class UserService {
     public void updateUserAccount(String userId,UserAccount.UserAccountUpdateRequestDto userDto) {
         try {
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-            UserAccount userAccount = userAccountRepository.findById(userId).orElseThrow();
+            UserAccount userAccount = userAccountRepository.findById(userId).orElseThrow(()->new EntityNotFoundException("해당 유저가 없습니다."));
             if (userDto.password1() != null) { userAccount.setUserPassword(passwordEncoder.encode(userDto.password1())); }
             if (userDto.nickname() != null) { userAccount.setNickname(userDto.nickname()); }
             if (userDto.email() != null) { userAccount.setEmail(userDto.email()); }
@@ -110,7 +100,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public UserAccount.UserAccountDto getUserAccount(String userId) {
         try {
-            UserAccount userAccount = userAccountRepository.findById(userId).orElseThrow();
+            UserAccount userAccount = userAccountRepository.findById(userId).orElseThrow(()->new EntityNotFoundException("해당 유저가 없습니다."));
             return UserAccount.UserAccountDto.from(userAccount);
         } catch (Exception e) {
             throw new IllegalArgumentException("회원정보 조회에 실패했습니다");
@@ -126,16 +116,16 @@ public class UserService {
     }
     @Transactional(readOnly = true)
     public boolean isExistUser(String userId) {
-        return userAccountRepository.findById(userId).isPresent();
+        return userAccountRepository.existsByUserId(userId);
     }
 
     @Transactional(readOnly = true)
     public boolean isExistNickname(String nickname) {
-        return userAccountRepository.findByNickname(nickname).isPresent();
+        return userAccountRepository.existsByNickname(nickname);
     }
     @Transactional(readOnly = true)
     public boolean isExistEmail(String email) {
-        return userAccountRepository.findByEmail(email).isPresent();
+        return userAccountRepository.existsByEmail(email);
     }
 
     public UserAccount.BoardPrincipal loginByUserNameAndPassword(String username, String password) {
@@ -155,11 +145,25 @@ public class UserService {
         return articleDtos;
     }
 
-    public void saveUserAccountWithoutProfile(UserAccount.SignupDto user) throws IOException {
+    public String saveUserAccountWithoutProfile(UserAccount.SignupDto user) throws IOException {
+        SaveFile defaultImg = fileRepository.findByFileName("default.png");
         String password = user.getPassword1();
         UserAccount account = userAccountRepository.save(user.toEntity());
         account.setUserPassword(new BCryptPasswordEncoder().encode(password));
-        account.setProfileImgName("default.jpg");
-        account.setProfileImgPath(uploadPath+"/default.jpg");
+        if(defaultImg!=null){
+            account.setProfileImg(defaultImg);
+        }
+        else{
+            SaveFile saveFile = SaveFile.builder()
+                    .fileName("default.jpg")
+                    .filePath(uploadPath+"/default.jpg")
+                    .fileSize(0L)
+                    .fileType("jpg")
+                    .uploadUser(account.getUserId())
+                    .build();
+            fileRepository.save(saveFile);
+            account.setProfileImg(saveFile);
+        }
+        return account.getUserId();
     }
 }

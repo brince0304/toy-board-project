@@ -46,8 +46,12 @@ public class UserAccount extends AuditingFields {
     @Enumerated(EnumType.STRING)
     private Set<UserAccountRole> roles;
 
-    @Setter private String profileImgName;
-    @Setter private String profileImgPath;
+    @Setter
+    @ToString.Exclude
+    @ManyToOne
+    @JoinColumn(name = "profile_img_id")
+    @Nullable
+    private SaveFile profileImg;
 
 
 
@@ -58,15 +62,14 @@ public class UserAccount extends AuditingFields {
 
     public UserAccount() {}
     @Builder
-    private UserAccount(String userId, String userPassword, String email, String nickname, String memo,Set<UserAccountRole> roles, String profileImgName, String profileImgPath) {
+    private UserAccount(String userId, String userPassword, String email, String nickname, String memo,Set<UserAccountRole> roles, SaveFile profileImg) {
         this.userId = userId;
         this.userPassword = userPassword;
         this.email = email;
         this.nickname = nickname;
         this.memo = memo;
         this.roles = roles;
-        this.profileImgName = profileImgName;
-        this.profileImgPath = profileImgPath;
+        this.profileImg = profileImg;
 
     }
 
@@ -145,8 +148,7 @@ public class UserAccount extends AuditingFields {
             String email,
             String nickname,
             String memo,
-            String profileImgName,
-            String profileImgPath
+            SaveFile.FileDto profileImg
     )  implements UserDetails {
 
         public static BoardPrincipal from(UserAccountDto dto) {
@@ -157,8 +159,7 @@ public class UserAccount extends AuditingFields {
                     .email(dto.email())
                     .nickname(dto.nickname())
                     .memo(dto.memo())
-                    .profileImgName(dto.profileImgName())
-                    .profileImgPath(dto.profileImgPath())
+                    .profileImg(dto.profileImg())
                     .build();
         }
 
@@ -170,8 +171,7 @@ public class UserAccount extends AuditingFields {
                     .nickname(nickname)
                     .memo(memo)
                     .roles(authorities.stream().map(GrantedAuthority::getAuthority).map(UserAccountRole::valueOf).collect(Collectors.toSet()))
-                    .profileImgName(profileImgName)
-                    .profileImgPath(profileImgPath)
+                    .profileImg(profileImg)
                     .build();
         }
 
@@ -221,8 +221,7 @@ public class UserAccount extends AuditingFields {
             LocalDateTime modifiedAt,
             String modifiedBy,
             Set<UserAccountRole> roles,
-            String profileImgName,
-            String profileImgPath
+            SaveFile.FileDto profileImg
 
     ) {
 
@@ -239,8 +238,7 @@ public class UserAccount extends AuditingFields {
                     .modifiedAt(entity.getModifiedAt())
                     .modifiedBy(entity.getModifiedBy())
                     .roles(entity.getRoles())
-                    .profileImgName(entity.getProfileImgName())
-                    .profileImgPath(entity.getProfileImgPath())
+                    .profileImg(entity.getProfileImg() == null ? null : SaveFile.FileDto.from(entity.getProfileImg()))
                     .build();
         }
 
@@ -254,22 +252,25 @@ public class UserAccount extends AuditingFields {
                     .nickname(nickname)
                     .memo(memo)
                     .roles(roles)
-                    .profileImgName(profileImgName)
-                    .profileImgPath(profileImgPath)
+                    .profileImg(profileImg == null ? null : profileImg.toEntity())
                     .build();
         }
 
     }
     @Builder
     public record UserAccountUpdateRequestDto(
+            @org.springframework.lang.Nullable
             @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,25}$", message = "* 패스워드는 영문, 숫자, 특수문자를 포함한 8자이상 25자 이하여야 합니다.")
             String password1,
             @NotEmpty(message = "* 입력값을 확인해주세요.")
             String password2,
+            @org.springframework.lang.Nullable
             @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$", message = "* 이메일 형식을 확인해주세요.")
             String email,
+            @org.springframework.lang.Nullable
             @Size(min=2, max=10, message = "* 닉네임은 2자 이상 10자 이하로 입력해주세요.")
             String nickname,
+            @org.springframework.lang.Nullable
             @Size(max=50, message = "* 메모는 50자 이하로 입력해주세요.")
             String memo
     ) {

@@ -50,7 +50,7 @@ public class ArticleService {
     @Transactional(readOnly = true)
     public Article.ArticleWithCommentDto getArticle(Long articleId) {
         Set<Hashtag.HashtagDto> hashtags =  new HashSet<>();
-        articlehashtagrepository.findByArticleId(articleId).stream().forEach(articleHashtag -> {
+        articlehashtagrepository.findByArticleId(articleId).forEach(articleHashtag -> {
             hashtags.add(Hashtag.HashtagDto.from(articleHashtag.getHashtag()));
         });
         Article.ArticleWithCommentDto article =articleRepository.findById(articleId)
@@ -93,7 +93,7 @@ public class ArticleService {
         public void updateArticle (Long articleId, Article.ArticleRequest dto){
             Article article = articleRepository.findById(articleId)
                     .orElseThrow(() -> new EntityNotFoundException("게시글이 없습니다 - articleId: " + articleId));
-            articlehashtagrepository.findByArticleId(articleId).stream().forEach(articleHashtag -> {
+            articlehashtagrepository.findByArticleId(articleId).forEach(articleHashtag -> {
                 articleHashtag.setArticle(null);
                 articleHashtag.setHashtag(null);
             });
@@ -122,6 +122,12 @@ public class ArticleService {
     }
 
     public void deleteArticleByAdmin(Long articleId) {
-        articleRepository.getReferenceById(articleId).setDeleted("Y");
+        articleRepository.findById(articleId).ifPresent(o->{
+            o.setDeleted("Y");
+            for( ArticleHashtag articleHashtag : articlehashtagrepository.findByArticleId(articleId)){
+                articleHashtag.setArticle(null);
+                articleHashtag.setHashtag(null);
+            }
+        });
     }
 }

@@ -34,7 +34,6 @@ import java.util.Set;
 @RequestMapping("/articles")
 public class ArticleController {
 
-    private final ControllerUtil controllerUtil;
     private final ArticleService articleService;
     private final HashtagService hashtagService;
 
@@ -117,7 +116,7 @@ public class ArticleController {
         if (!articleDto.getUserAccountDto().userId().equals(boardPrincipal.username())) {
             return "redirect:/articles";
         } else {
-            dto.setHashtag(String.valueOf(controllerUtil.hashtagsToString(articleDto.getHashtags())));
+            dto.setHashtag(String.valueOf(ControllerUtil.hashtagsToString(articleDto.getHashtags())));
             map.addAttribute("dto", dto);
         }
         map.addAttribute("articleId", articleId);
@@ -134,7 +133,7 @@ public class ArticleController {
             return new ResponseEntity<>("로그인이 필요합니다.", HttpStatus.BAD_REQUEST);
         }
         if (bindingResult.hasErrors()) {
-            return new ResponseEntity<>(controllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ControllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
         }
         articleService.updateArticle(dto.getArticleId(), dto);
         return new ResponseEntity<>("articleUpdating Success", HttpStatus.OK);
