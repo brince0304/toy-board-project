@@ -1,5 +1,6 @@
 package com.fastcampus.projectboard.domain;
 
+import com.fastcampus.projectboard.domain.type.UserAccountRole;
 import io.micrometer.core.lang.Nullable;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;

@@ -5,9 +5,7 @@ import com.fastcampus.projectboard.Service.UserService;
 import com.fastcampus.projectboard.Util.*;
 import com.fastcampus.projectboard.domain.SaveFile;
 import com.fastcampus.projectboard.domain.UserAccount;
-import com.fastcampus.projectboard.domain.UserAccountRole;
 
-import com.fastcampus.projectboard.repository.SaveFileRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -29,7 +27,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.*;
-import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
