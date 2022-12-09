@@ -75,8 +75,8 @@ public class ArticleController {
 
     @GetMapping("/search-hashtag/{hashtag}")
     public String searchArticlesByHashtag(@PathVariable String hashtag, ModelMap map) {
-        Set<Article.ArticleDto> set = hashtagService.getArticlesByHashtag(hashtag);
-        Hashtag.HashtagDto dto = hashtagService.getHashtag(hashtag);
+        Set<Article.ArticleDto> set = articleService.getArticlesByHashtag(hashtag);
+        Hashtag.HashtagDto dto = articleService.getHashtag(hashtag);
         map.addAttribute("articles", set);
         map.addAttribute("hashtag", dto);
         return "articles/tag/result";

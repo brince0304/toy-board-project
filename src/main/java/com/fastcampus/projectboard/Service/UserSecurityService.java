@@ -1,7 +1,7 @@
 package com.fastcampus.projectboard.Service;
 
 import com.fastcampus.projectboard.domain.UserAccount;
-import com.fastcampus.projectboard.domain.UserAccountRole;
+import com.fastcampus.projectboard.domain.type.UserAccountRole;
 import com.fastcampus.projectboard.repository.UserAccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
