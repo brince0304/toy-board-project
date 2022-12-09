@@ -121,7 +121,7 @@ public class AuthControllerTest {
                         .content(mapper.writeValueAsString(loginDto))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isBadRequest());
     }
 
     @DisplayName("계정 마이페이지")

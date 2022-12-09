@@ -24,7 +24,7 @@ import static org.mockito.BDDMockito.then;
 @ExtendWith(MockitoExtension.class)
 public class HashtagServiceTest {
     @InjectMocks
-    private HashtagService sut;
+    private ArticleService sut;
     
     @Mock
     private HashtagRepository hashtagRepository;

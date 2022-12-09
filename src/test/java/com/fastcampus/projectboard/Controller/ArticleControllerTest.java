@@ -4,11 +4,10 @@ package com.fastcampus.projectboard.Controller;
 import com.fastcampus.projectboard.Service.ArticleService;
 import com.fastcampus.projectboard.Service.HashtagService;
 import com.fastcampus.projectboard.Service.UserService;
+import com.fastcampus.projectboard.Util.CookieUtil;
+import com.fastcampus.projectboard.Util.TokenProvider;
 import com.fastcampus.projectboard.config.SecurityConfig;
-import com.fastcampus.projectboard.domain.Article;
-import com.fastcampus.projectboard.domain.ArticleComment;
-import com.fastcampus.projectboard.domain.Hashtag;
-import com.fastcampus.projectboard.domain.UserAccount;
+import com.fastcampus.projectboard.domain.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -24,11 +23,15 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 
+import javax.servlet.http.Cookie;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import static com.fastcampus.projectboard.Util.FileUtil.uploadPath;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.*;
@@ -192,27 +195,63 @@ class ArticleControllerTest {
     @Test
     void givenHashtag_whenSearchingArticlesByHashtag_thenGetsArticles() throws Exception {
         //given
-
+        given(articleService.getArticlesByHashtag(anyString())).willReturn(anySet());
 
         //when & then
         mvc.perform(get("/articles/search-hashtag/"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.TEXT_HTML))
                 .andExpect(model().attributeExists("articles"))
-                .andExpect(model().attributeExists("hashtag"));
+                .andExpect(model().attributeExists("hashtag"))
+                .andExpect(view().name("articles/search-hashtag"));
+
 
     }
 
+    private Article.ArticleDto createArticleDto(){
+        return Article.ArticleDto.builder()
+                .title("haha")
+                .content("haha")
+                .userAccountDto(createAccountDto())
+                .build();
+    }
+    private Hashtag.HashtagDto createHashtagDto(){
+        return Hashtag.HashtagDto.builder()
+                .hashtag("haha")
+                .build();
+    }
+    private ArticleHashtag createArticleHashtag(){
+        return ArticleHashtag.of(createArticleDto().toEntity(),createHashtagDto().toEntity());
+    }
 
+    private UserAccount.UserAccountDto createAccountDto(){
+        return UserAccount.UserAccountDto.builder()
+                .userId("test")
+                .userPassword("Tjrgus97!@")
+                .email("brince@email.com")
+                .nickname("brince")
+                .build();
+    }
 
+    private SaveFile.FileDto createFileDto() {
+        return SaveFile.builder()
+                .fileName("default.jpg")
+                .filePath(uploadPath+"/default.jpg")
+                .fileSize(0L)
+                .fileType("jpg")
+                .uploadUser("test")
+                .build().toDto();
+    }
 
-
-
-
-
-
-
-
-
+    private UserAccount.SignupDto createSignupDto() {
+        return UserAccount.SignupDto.builder()
+                .userId("brince0304")
+                .password1("Tjrgus97!@")
+                .password2("Tjrgus97!@")
+                .nickname("브린스")
+                .email("brince@email.com")
+                .memo("안녕하세요.")
+                .build();
+    }
 
 }
