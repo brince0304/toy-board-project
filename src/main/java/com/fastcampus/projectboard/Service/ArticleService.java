@@ -1,12 +1,11 @@
 package com.fastcampus.projectboard.Service;
 
 import com.fastcampus.projectboard.Util.RedisUtil;
-import com.fastcampus.projectboard.domain.Article;
-import com.fastcampus.projectboard.domain.ArticleHashtag;
-import com.fastcampus.projectboard.domain.Hashtag;
+import com.fastcampus.projectboard.domain.*;
 import com.fastcampus.projectboard.domain.type.SearchType;
 import com.fastcampus.projectboard.repository.ArticleHashtagRepository;
 import com.fastcampus.projectboard.repository.ArticleRepository;
+import com.fastcampus.projectboard.repository.ArticleSaveFileRepository;
 import com.fastcampus.projectboard.repository.HashtagRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -33,7 +33,11 @@ public class ArticleService {
    private final ArticleRepository articleRepository;
    private final HashtagRepository hashtagRepository;
    private final ArticleHashtagRepository articlehashtagrepository;
+
+   private final ArticleSaveFileRepository articleSaveFileRepository;
    private final RedisUtil redisUtil;
+
+
 
     @Transactional(readOnly = true)
     public Page<Article.ArticleDto> searchArticles(SearchType searchType, String searchKeyword, Pageable pageable) {
@@ -73,9 +77,7 @@ public class ArticleService {
         return Hashtag.HashtagDto.from(hashtagRepository.findByHashtag(hashtag).orElseThrow(()-> new EntityNotFoundException("해시태그가 없습니다 - hashtag: " + hashtag)));
     }
 
-    public void saveHashtag(Hashtag hashtag) {
-        hashtagRepository.save(hashtag);
-    }
+
 
 
 
@@ -114,11 +116,14 @@ public class ArticleService {
 
 
 
-    public Article.ArticleDto saveArticle(Article.ArticleDto dto, List<Hashtag.HashtagDto> hashtagDtos) {
+    public Article.ArticleDto saveArticle(Article.ArticleDto dto, List<Hashtag.HashtagDto> hashtagDtos, Set<SaveFile.FileDto> fileDtos) {
         Article article =articleRepository.save(dto.toEntity());
         for (Hashtag.HashtagDto hashtag : hashtagDtos) {
                 Hashtag hashtag1= hashtagRepository.findByHashtag(hashtag.hashtag()).orElseGet(()-> hashtagRepository.save(hashtag.toEntity()));
                 articlehashtagrepository.save(ArticleHashtag.of(article,hashtag1));
+        }
+        for (SaveFile.FileDto fileDto : fileDtos) {
+            articleSaveFileRepository.save(ArticleSaveFile.of(article,fileDto.toEntity()));
         }
         return Article.ArticleDto.from(article);
     }
@@ -149,6 +154,12 @@ public class ArticleService {
         for( ArticleHashtag articleHashtag : articlehashtagrepository.findByArticleId(articleId)){
             articleHashtag.setArticle(null);
             articleHashtag.setHashtag(null);
+        }
+        for( ArticleSaveFile articleSaveFile : articleSaveFileRepository.getSaveFileByArticleId(articleId)){
+            File file = new File(articleSaveFile.getSaveFile().getFilePath());
+            file.delete();
+            articleSaveFile.setArticle(null);
+            articleSaveFile.setSaveFile(null);
         }
         articleRepository.deleteById(articleId);
     }
