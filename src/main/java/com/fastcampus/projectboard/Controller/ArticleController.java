@@ -2,13 +2,11 @@ package com.fastcampus.projectboard.Controller;
 
 import com.fastcampus.projectboard.Service.*;
 import com.fastcampus.projectboard.Util.ControllerUtil;
-import com.fastcampus.projectboard.domain.Article;
-import com.fastcampus.projectboard.domain.ArticleComment;
-import com.fastcampus.projectboard.domain.Hashtag;
-import com.fastcampus.projectboard.domain.UserAccount;
+import com.fastcampus.projectboard.domain.*;
 import com.fastcampus.projectboard.domain.type.SearchType;
 import io.github.furstenheim.CopyDown;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -24,17 +22,18 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.*;
 
-
+@Slf4j
 @RequiredArgsConstructor
 @Controller
 @RequestMapping("/articles")
 public class ArticleController {
 
     private final ArticleService articleService;
+
+    private final FileService fileService;
 
 
     @GetMapping
@@ -49,14 +48,14 @@ public class ArticleController {
     }
 
     @GetMapping("/{articleId}")
-    public String getArticleByArticleId(@PathVariable Long articleId, ModelMap map, ArticleComment.ArticleCommentRequest dto,
-                                        @AuthenticationPrincipal UserAccount.BoardPrincipal principal, HttpServletRequest req, HttpServletResponse res) {
+    public String getArticleByArticleId(@PathVariable Long articleId, ModelMap map, ArticleComment.ArticleCommentRequest articleCommentRequest,
+                                        HttpServletRequest req) {
         try{
-        Article.ArticleWithCommentResponse article = Article.ArticleWithCommentResponse.from(articleService.getArticle(articleId));
+        Article.ArticleWithCommentResponse articleResponse = Article.ArticleWithCommentResponse.from(articleService.getArticle(articleId));
         articleService.updateViewCount(req.getRemoteAddr(), articleId);
-        map.addAttribute("article", article);
-        map.addAttribute("articleComments", article.articleCommentsResponse());
-        map.addAttribute("dto", dto);}
+        map.addAttribute("article", articleResponse);
+        map.addAttribute("articleComments", articleResponse.articleCommentsResponse());
+        map.addAttribute("dto", articleCommentRequest);}
         catch (Exception e){
             return "redirect:/articles";
         }
@@ -66,28 +65,25 @@ public class ArticleController {
     @ResponseBody
     @PostMapping("/{articleId}")
     public ResponseEntity<String> updateLikeCount(@PathVariable String articleId, HttpServletRequest req) {
-        Long id = Long.parseLong(articleId);
-        Integer count = articleService.updateLikeCount(req.getRemoteAddr(), id);
+        Integer count = articleService.updateLikeCount(req.getRemoteAddr(), Long.parseLong(articleId));
         return new ResponseEntity<>(String.valueOf(count), HttpStatus.OK);
     }
 
 
     @GetMapping("/search-hashtag/{hashtag}")
     public String searchArticlesByHashtag(@PathVariable String hashtag, ModelMap map) {
-        Set<Article.ArticleDto> set = articleService.getArticlesByHashtag(hashtag);
-        Hashtag.HashtagDto dto = articleService.getHashtag(hashtag);
-        map.addAttribute("articles", set);
-        map.addAttribute("hashtag", dto);
+        map.addAttribute("articles", articleService.getArticlesByHashtag(hashtag));
+        map.addAttribute("hashtag", articleService.getHashtag(hashtag));
         return "articles/tag/result";
     }
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/post")
-    public String getPostPage(Model model, Article.ArticleRequest dto, @AuthenticationPrincipal UserAccount.BoardPrincipal principal) {
+    public String getPostPage(Model model, Article.ArticleRequest articleRequest, @AuthenticationPrincipal UserAccount.BoardPrincipal principal) {
         if (principal == null) {
             return "redirect:/login";
         }
-        model.addAttribute("dto", dto);
+        model.addAttribute("dto", articleRequest);
         return "articles/post/article_form";
     }
     @ResponseBody
@@ -100,9 +96,13 @@ public class ArticleController {
         if (boardPrincipal == null) {
             return new ResponseEntity<>("로그인이 필요합니다.", HttpStatus.BAD_REQUEST);
         }
-        Article.ArticleDto dto1 = articleService.saveArticle(dto.toDto(boardPrincipal.toDto()), Hashtag.HashtagDto.from(dto.getHashtag()));
-        Long articleId = dto1.id();
-        return new ResponseEntity<>(articleId.toString(), HttpStatus.OK);
+        String[] fileIdArr = Objects.requireNonNull(dto.getFileIds()).split(",");
+        Set<SaveFile.FileDto> fileDtos = new HashSet<>();
+        for (String fileId : fileIdArr) {
+            log.info("fileId: {}", fileId);
+            fileDtos.add(fileService.getFile(Long.parseLong(fileId)));
+        }
+        return new ResponseEntity<>(articleService.saveArticle(dto.toDto(boardPrincipal.toDto()), Hashtag.HashtagDto.from(dto.getHashtag()),fileDtos).id().toString(), HttpStatus.OK);
     }
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/post/{articleId}")
@@ -127,7 +127,7 @@ public class ArticleController {
     @ResponseBody
     @PutMapping
     public ResponseEntity<Object> updateArticle(
-            @RequestBody @Valid Article.ArticleRequest dto,
+            @RequestBody @Valid Article.ArticleRequest articleRequest,
             BindingResult bindingResult,
             @AuthenticationPrincipal UserAccount.BoardPrincipal boardPrincipal) {
         if (boardPrincipal == null) {
@@ -136,7 +136,7 @@ public class ArticleController {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(ControllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
         }
-        articleService.updateArticle(dto.getArticleId(),dto ,Hashtag.HashtagDto.from(dto.getHashtag()));
+        articleService.updateArticle(articleRequest.getArticleId(),articleRequest ,Hashtag.HashtagDto.from(articleRequest.getHashtag()));
         return new ResponseEntity<>("articleUpdating Success", HttpStatus.OK);
     }
 
@@ -144,9 +144,8 @@ public class ArticleController {
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping
     public ResponseEntity<String> deleteArticleByArticleId(@RequestBody Map<String,String> articleId, @AuthenticationPrincipal UserAccount.BoardPrincipal boardPrincipal) {
-        String id = boardPrincipal.getUsername();
         Long aId = Long.parseLong(articleId.get("articleId"));
-        if (articleService.getArticle(aId).getUserAccountDto().userId().equals(id)) {
+        if (articleService.getArticle(aId).getUserAccountDto().userId().equals(boardPrincipal.getUsername())) {
             articleService.deleteArticle(aId);
         } else if (boardPrincipal.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
             articleService.deleteArticleByAdmin(aId);
