@@ -5,7 +5,6 @@ import com.fastcampus.projectboard.domain.Hashtag;
 import com.fastcampus.projectboard.domain.UserAccount;
 import com.fastcampus.projectboard.domain.type.SearchType;
 import com.fastcampus.projectboard.repository.ArticleRepository;
-import com.fastcampus.projectboard.repository.UserAccountRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -165,7 +163,7 @@ class ArticleServiceTest {
         Long articleId = 1L;
         Article article = createArticle();
         // When
-        sut.deleteArticle(1L);
+        sut.deleteArticleByArticleId(1L);
 
         // Then
         then(articleRepository).should().getReferenceById(articleId);
