@@ -7,6 +7,7 @@ import com.fastcampus.projectboard.domain.ArticleComment;
 import com.fastcampus.projectboard.domain.Hashtag;
 import com.fastcampus.projectboard.domain.UserAccount;
 import com.fastcampus.projectboard.domain.type.SearchType;
+import io.github.furstenheim.CopyDown;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -25,8 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 @RequiredArgsConstructor
@@ -35,7 +35,6 @@ import java.util.Set;
 public class ArticleController {
 
     private final ArticleService articleService;
-    private final HashtagService hashtagService;
 
 
     @GetMapping
@@ -101,7 +100,7 @@ public class ArticleController {
         if (boardPrincipal == null) {
             return new ResponseEntity<>("로그인이 필요합니다.", HttpStatus.BAD_REQUEST);
         }
-        Article.ArticleDto dto1 = articleService.saveArticle(dto.toDto(boardPrincipal.toDto()),dto.getHashtags());
+        Article.ArticleDto dto1 = articleService.saveArticle(dto.toDto(boardPrincipal.toDto()), Hashtag.HashtagDto.from(dto.getHashtag()));
         Long articleId = dto1.id();
         return new ResponseEntity<>(articleId.toString(), HttpStatus.OK);
     }
@@ -116,7 +115,9 @@ public class ArticleController {
         if (!articleDto.getUserAccountDto().userId().equals(boardPrincipal.username())) {
             return "redirect:/articles";
         } else {
-            dto.setHashtag(String.valueOf(ControllerUtil.hashtagsToString(articleDto.getHashtags())));
+            dto.setHashtag(ControllerUtil.hashtagsToString(articleDto.getHashtags()));
+            CopyDown converter = new CopyDown();
+            dto.setContent(converter.convert(dto.getContent()));
             map.addAttribute("dto", dto);
         }
         map.addAttribute("articleId", articleId);
@@ -135,7 +136,7 @@ public class ArticleController {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(ControllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
         }
-        articleService.updateArticle(dto.getArticleId(), dto);
+        articleService.updateArticle(dto.getArticleId(),dto ,Hashtag.HashtagDto.from(dto.getHashtag()));
         return new ResponseEntity<>("articleUpdating Success", HttpStatus.OK);
     }
 
@@ -155,8 +156,5 @@ public class ArticleController {
         return new ResponseEntity<>("articleDeleting Success", HttpStatus.OK);
     }
 
-    public boolean isLoginUser(UserAccount.BoardPrincipal boardPrincipal) {
-        return boardPrincipal.isEnabled();
-    }
 
 }
