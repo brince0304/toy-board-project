@@ -96,14 +96,14 @@ public class ArticleController {
         if (boardPrincipal == null) {
             return new ResponseEntity<>("로그인이 필요합니다.", HttpStatus.BAD_REQUEST);
         }
-        String[] fileIdArr = Objects.requireNonNull(dto.getFileIds()).split(",");
-        Set<SaveFile.FileDto> fileDtos = new HashSet<>();
-        for (String fileId : fileIdArr) {
-            log.info("fileId: {}", fileId);
-            fileDtos.add(fileService.getFile(Long.parseLong(fileId)));
-        }
+        Set<SaveFile.FileDto> fileDtos = fileService.getFileDtosFromRequestsFileIds(dto);
+        fileService.deleteUnuploadedFilesFromArticleContent(dto.getContent(), dto.getFileIds());
         return new ResponseEntity<>(articleService.saveArticle(dto.toDto(boardPrincipal.toDto()), Hashtag.HashtagDto.from(dto.getHashtag()),fileDtos).id().toString(), HttpStatus.OK);
     }
+
+
+
+
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/post/{articleId}")
     public String updateArticle(@PathVariable Long articleId, ModelMap map,
@@ -136,7 +136,10 @@ public class ArticleController {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(ControllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
         }
-        articleService.updateArticle(articleRequest.getArticleId(),articleRequest ,Hashtag.HashtagDto.from(articleRequest.getHashtag()));
+        fileService.deleteSaveFilesFromDeletedSavedFileIds(articleService.getDeletedSaveFileIdFromArticleContent(articleRequest.getArticleId(),articleRequest.getContent()));
+        Set<SaveFile.FileDto> fileDtos = fileService.getFileDtosFromRequestsFileIds(articleRequest);
+        fileService.deleteUnuploadedFilesFromArticleContent(articleRequest.getContent(), Objects.requireNonNull(articleRequest.getFileIds()));
+        articleService.updateArticle(articleRequest.getArticleId(),articleRequest ,Hashtag.HashtagDto.from(articleRequest.getHashtag()),fileDtos);
         return new ResponseEntity<>("articleUpdating Success", HttpStatus.OK);
     }
 
@@ -146,9 +149,11 @@ public class ArticleController {
     public ResponseEntity<String> deleteArticleByArticleId(@RequestBody Map<String,String> articleId, @AuthenticationPrincipal UserAccount.BoardPrincipal boardPrincipal) {
         Long aId = Long.parseLong(articleId.get("articleId"));
         if (articleService.getArticle(aId).getUserAccountDto().userId().equals(boardPrincipal.getUsername())) {
-            articleService.deleteArticle(aId);
+            articleService.deleteArticleByArticleId(aId);
+            fileService.deleteSaveFilesFromArticleId(aId);
         } else if (boardPrincipal.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
             articleService.deleteArticleByAdmin(aId);
+            fileService.deleteSaveFilesFromArticleId(aId);
         } else {
             return new ResponseEntity<>("게시글 삭제에 실패하였습니다.", HttpStatus.BAD_REQUEST);
         }

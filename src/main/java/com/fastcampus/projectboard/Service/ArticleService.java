@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -113,6 +112,28 @@ public class ArticleService {
         return article.getLikeCount();
     }
 
+    public Set<SaveFile.FileDto> getSaveFilesFromArticle(Long articleId) {
+        return articleSaveFileRepository.getSaveFileByArticleId(articleId).stream()
+                .map(ArticleSaveFile::getSaveFile)
+                .map(SaveFile.FileDto::from)
+                .collect(Collectors.toSet());
+    }
+
+
+    public Set<Long> getDeletedSaveFileIdFromArticleContent(Long articleId,String content){
+        Set<Long> deletedFileIds = new HashSet<>();
+        Set<SaveFile.FileDto> saveFiles = getSaveFilesFromArticle(articleId);
+        for(SaveFile.FileDto saveFile : saveFiles){
+            if(!content.contains(saveFile.fileName())){
+                deletedFileIds.add(saveFile.id());
+            }
+        }
+        return deletedFileIds;
+    }
+
+
+
+
 
 
 
@@ -123,11 +144,14 @@ public class ArticleService {
                 articlehashtagrepository.save(ArticleHashtag.of(article,hashtag1));
         }
         for (SaveFile.FileDto fileDto : fileDtos) {
-            articleSaveFileRepository.save(ArticleSaveFile.of(article,fileDto.toEntity()));
+            if(dto.content().contains(fileDto.fileName())){
+                articleSaveFileRepository.save(ArticleSaveFile.of(article,fileDto.toEntity()));
+            }
+
         }
         return Article.ArticleDto.from(article);
     }
-        public void updateArticle (Long articleId, Article.ArticleRequest dto, List<Hashtag.HashtagDto> hashtagDtos){
+        public void updateArticle (Long articleId, Article.ArticleRequest dto, List<Hashtag.HashtagDto> hashtagDtos, Set<SaveFile.FileDto> saveFileDtos){
             Article article = articleRepository.findById(articleId)
                     .orElseThrow(() -> new EntityNotFoundException("게시글이 없습니다 - articleId: " + articleId));
             articlehashtagrepository.findByArticleId(articleId).forEach(articleHashtag -> {
@@ -138,6 +162,11 @@ public class ArticleService {
                 Hashtag hashtag1 = hashtagRepository.findByHashtag(hashtag.hashtag()).orElseGet(()-> hashtagRepository.save(hashtag.toEntity()));
                 articlehashtagrepository.save(ArticleHashtag.of(article,hashtag1));
             }
+            for (SaveFile.FileDto saveFileDto : saveFileDtos) {
+                if(dto.getContent().contains(saveFileDto.fileName())){
+                    articleSaveFileRepository.save(ArticleSaveFile.of(article,saveFileDto.toEntity()));
+                }
+            }
             if(dto.getTitle() != null) article.setTitle(dto.getTitle());
             if(dto.getContent() != null) article.setContent(dto.getContent());
 
@@ -145,23 +174,12 @@ public class ArticleService {
 
 
 
-    public Article.ArticleDto getArticleDto2(Long articleId) {
-        return articleRepository.findById(articleId).map(Article.ArticleDto::from).orElseThrow(() -> new EntityNotFoundException("게시글이 없습니다 - articleId: " + articleId));
-
-    }
-
-    public void deleteArticle(long articleId) {
+    public void deleteArticleByArticleId(long articleId) {
         for( ArticleHashtag articleHashtag : articlehashtagrepository.findByArticleId(articleId)){
             articleHashtag.setArticle(null);
             articleHashtag.setHashtag(null);
         }
-        for( ArticleSaveFile articleSaveFile : articleSaveFileRepository.getSaveFileByArticleId(articleId)){
-            File file = new File(articleSaveFile.getSaveFile().getFilePath());
-            file.delete();
-            articleSaveFile.setArticle(null);
-            articleSaveFile.setSaveFile(null);
-        }
-        articleRepository.deleteById(articleId);
+        articleRepository.findById(articleId).orElseThrow(EntityNotFoundException::new).setDeleted("Y");
     }
 
     public void deleteArticleByAdmin(Long articleId) {
