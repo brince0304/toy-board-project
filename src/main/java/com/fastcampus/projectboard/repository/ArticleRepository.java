@@ -18,7 +18,6 @@ import java.util.Set;
 //jpa repository (setter 로 이뤄진 생성자 객체와 long id 로 구분)
 
 
-@RepositoryRestResource
 public interface ArticleRepository extends
         JpaRepository<Article, Long>,
         QuerydslPredicateExecutor<Article>,

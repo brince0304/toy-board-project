@@ -1,9 +1,12 @@
 package com.fastcampus.projectboard.domain;
 
 import lombok.*;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.persistence.*;
+import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -49,8 +52,9 @@ public class SaveFile extends AuditingFields{
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SaveFile saveFile)) return false;
-        return id.equals(saveFile.id);
+        if (o == null || getClass() != o.getClass()) return false;
+        SaveFile saveFile = (SaveFile) o;
+        return Objects.equals(fileName, saveFile.fileName) && Objects.equals(filePath, saveFile.filePath) && Objects.equals(fileType, saveFile.fileType) && Objects.equals(fileSize, saveFile.fileSize);
     }
 
     @Override
@@ -72,6 +76,9 @@ LocalDateTime createdAt,
             String modifiedBy
 
     )  {
+
+
+
 
 
         public static FileDto from(SaveFile saveFile) {

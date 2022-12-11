@@ -3,10 +3,8 @@ package com.fastcampus.projectboard.Service;
 import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.ArticleComment;
 import com.fastcampus.projectboard.repository.ArticleCommentRepository;
-import com.fastcampus.projectboard.repository.ArticleCommentRepositoryCustomImpl;
 import com.fastcampus.projectboard.repository.ArticleRepository;
 
-import com.fastcampus.projectboard.repository.UserAccountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -27,7 +24,6 @@ public class ArticleCommentService {
 
     private final ArticleRepository articleRepository;
     private final ArticleCommentRepository articleCommentRepository;
-    private final ArticleCommentRepositoryCustomImpl articleCommentRepositoryCustom;
 
 
     @Transactional(readOnly = true)
@@ -68,11 +64,7 @@ public class ArticleCommentService {
         ArticleComment articleComment = articleCommentRepository.findById(articleCommentId).orElseThrow();
         return ArticleComment.ArticleCommentDto.from(articleComment);
     }
-    @Transactional(readOnly = true)
-    public Set<ArticleComment.ArticleCommentDto> getChildrenComment(Long parentId) {
-        return articleCommentRepositoryCustom.getChildrenCommentIsNotDeleted(parentId).stream().map(ArticleComment.ArticleCommentDto::from
-        ).collect(Collectors.toSet());
-    }
+
 
 
     public void saveChildrenComment(Long parentId, ArticleComment.ArticleCommentDto children) {
