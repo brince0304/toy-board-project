@@ -7,7 +7,6 @@ import org.springframework.data.rest.core.annotation.RestResource;
 
 import java.util.Optional;
 
-@RepositoryRestResource
 public interface HashtagRepository extends JpaRepository<Hashtag, Long>{
 
     Optional<Hashtag> findByHashtag(String hashtag);
