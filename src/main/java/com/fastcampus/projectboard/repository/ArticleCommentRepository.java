@@ -12,11 +12,10 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 import java.util.List;
 
-@RepositoryRestResource
 public interface ArticleCommentRepository extends
         QuerydslPredicateExecutor<ArticleComment>,
         QuerydslBinderCustomizer<QArticleComment>,
-        JpaRepository<ArticleComment,Long>,ArticleCommentRepositoryCustom {
+        JpaRepository<ArticleComment,Long>{
     List<ArticleComment> findByArticle_Id(Long articleId);
 
     ArticleComment findByIdAndDeleted(Long id, String deleted);
