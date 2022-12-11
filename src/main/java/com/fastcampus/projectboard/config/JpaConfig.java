@@ -21,7 +21,7 @@ public class JpaConfig {
             return () -> Optional.of("anonymous");
         }
         else {
-            return () -> Optional.of(((UserAccount)authentication.getPrincipal()).getUsername());
+            return () -> Optional.of(((UserAccount)authentication.getPrincipal()).getUserId());
         }
     } //TODO : 익명 사용자 처리
 }
