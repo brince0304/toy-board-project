@@ -62,6 +62,8 @@ public class Article extends AuditingFields{
 
 
 
+
+
     protected Article() { //기본 빈 생성자
     }
 
@@ -105,17 +107,21 @@ public class Article extends AuditingFields{
         @Nullable
         private String hashtag;
 
+        @Nullable
+        private String fileIds;
 
-        public ArticleRequest(String title, String content,String hashtag) {
+
+        public ArticleRequest(String title, String content,String hashtag,String fileIds) {
             this.articleId = null;
             this.title = title;
             this.content = content;
             this.hashtag = hashtag;
+            this.fileIds = fileIds;
         }
 
 
-        public ArticleRequest of(String title, String content, String hashtag) {
-            return new ArticleRequest(title, content, hashtag);
+        public ArticleRequest of(String title, String content, String hashtag,String fileIds) {
+            return new ArticleRequest(title, content, hashtag,fileIds);
 
         }
 
