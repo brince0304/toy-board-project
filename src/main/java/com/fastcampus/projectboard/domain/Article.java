@@ -92,9 +92,9 @@ public class Article extends AuditingFields{
     public int hashCode() {
         return Objects.hash(id);
     }
-    @Builder
     @Getter
     @Setter
+    @NoArgsConstructor
     public static class ArticleRequest implements Serializable {
         @Nullable
         private Long articleId;
@@ -104,41 +104,13 @@ public class Article extends AuditingFields{
         private String content;
         @Nullable
         private String hashtag;
-        private Set<Hashtag.HashtagDto> hashtags = new HashSet<>();
-        protected ArticleRequest() {
-        }
 
-        public ArticleRequest(Long articleID,String title, String content,String hashtag, Set<Hashtag.HashtagDto> hashtags) {
-            if(hashtag!=null) {
-                if (hashtag.contains("#")) {
-                    String newHashtag = hashtag.replaceAll(" ", "");
-                    StringTokenizer st = new StringTokenizer(newHashtag, "#");
-                    while (st.hasMoreTokens()) {
-                        hashtags.add(Hashtag.HashtagDto.of(st.nextToken()));
-                    }
-                }
-            }
-            this.articleId = articleID;
-            this.title = title;
-            this.content = content;
-            this.hashtags = hashtags;
-        }
 
         public ArticleRequest(String title, String content,String hashtag) {
-            Set<Hashtag.HashtagDto> hashtags = new HashSet<>();
-            if(hashtag!=null) {
-                if (hashtag.contains("#")) {
-                    String newHashtag = hashtag.replaceAll(" ", "");
-                    StringTokenizer st = new StringTokenizer(newHashtag, "#");
-                    while (st.hasMoreTokens()) {
-                        hashtags.add(Hashtag.HashtagDto.of(st.nextToken()));
-                    }
-                }
-            }
             this.articleId = null;
             this.title = title;
             this.content = content;
-            this.hashtags = hashtags;
+            this.hashtag = hashtag;
         }
 
 
@@ -153,7 +125,8 @@ public class Article extends AuditingFields{
             return ArticleDto.of(
                     userAccountDto,
                     title,
-                    content
+                    content,
+                    hashtag
             );
         }
     }
@@ -212,15 +185,16 @@ public class Article extends AuditingFields{
             String modifiedBy,
             String deleted,
             Integer viewCount,
-            Integer likeCount
+            Integer likeCount,
+            String hashtag
 
     ) {
 
-        public static ArticleDto of(UserAccount.UserAccountDto userAccountDto, String title, String content) {
-            return new ArticleDto(null, userAccountDto, title, content,  null, null,null, null,null,null,null);
+        public static ArticleDto of(UserAccount.UserAccountDto userAccountDto, String title, String content, String hashtag) {
+            return new ArticleDto(null, userAccountDto, title, content,null, null,null, null,null,null,null,hashtag);
         }
-        public static ArticleDto of(Long id, UserAccount.UserAccountDto userAccountDto, String title, String content, LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy, String deleted, Integer viewCount, Integer likeCount) {
-            return new ArticleDto(id, userAccountDto, title, content,  createdAt, createdBy, modifiedAt, modifiedBy,deleted, viewCount, likeCount);
+        public static ArticleDto of(Long id, UserAccount.UserAccountDto userAccountDto, String title,String content ,LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy, String deleted, Integer viewCount, Integer likeCount, String hashtag) {
+            return new ArticleDto(id, userAccountDto, title, content , createdAt, createdBy, modifiedAt, modifiedBy,deleted, viewCount, likeCount,hashtag);
         }
 
         public static ArticleDto from(Article entity) {

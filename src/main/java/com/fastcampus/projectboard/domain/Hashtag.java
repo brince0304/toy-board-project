@@ -71,6 +71,20 @@ public class Hashtag{
             );
         }
 
+        public static List<HashtagDto> from(String hashtag){
+            List<Hashtag.HashtagDto> hashtagDtos =new ArrayList<>();
+            if(hashtag!=null) {
+                if (hashtag.contains("#")) {
+                    String newHashtag = hashtag.replaceAll(" ", "");
+                    StringTokenizer st = new StringTokenizer(newHashtag, "#");
+                    while (st.hasMoreTokens()) {
+                        hashtagDtos.add(Hashtag.HashtagDto.of(st.nextToken()));
+                    }
+                }
+            }
+            return hashtagDtos;
+        }
+
 
         public Hashtag toEntity() {
             return Hashtag.of(
