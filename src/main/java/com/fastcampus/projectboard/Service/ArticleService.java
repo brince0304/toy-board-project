@@ -16,7 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -112,22 +114,22 @@ public class ArticleService {
 
 
 
-    public Article.ArticleDto saveArticle(Article.ArticleDto dto, Set<Hashtag.HashtagDto> hashtagDto) {
+    public Article.ArticleDto saveArticle(Article.ArticleDto dto, List<Hashtag.HashtagDto> hashtagDtos) {
         Article article =articleRepository.save(dto.toEntity());
-        for (Hashtag.HashtagDto hashtag : hashtagDto) {
+        for (Hashtag.HashtagDto hashtag : hashtagDtos) {
                 Hashtag hashtag1= hashtagRepository.findByHashtag(hashtag.hashtag()).orElseGet(()-> hashtagRepository.save(hashtag.toEntity()));
                 articlehashtagrepository.save(ArticleHashtag.of(article,hashtag1));
         }
         return Article.ArticleDto.from(article);
     }
-        public void updateArticle (Long articleId, Article.ArticleRequest dto){
+        public void updateArticle (Long articleId, Article.ArticleRequest dto, List<Hashtag.HashtagDto> hashtagDtos){
             Article article = articleRepository.findById(articleId)
                     .orElseThrow(() -> new EntityNotFoundException("게시글이 없습니다 - articleId: " + articleId));
             articlehashtagrepository.findByArticleId(articleId).forEach(articleHashtag -> {
                 articleHashtag.setArticle(null);
                 articleHashtag.setHashtag(null);
             });
-            for( Hashtag.HashtagDto hashtag: dto.getHashtags()){
+            for( Hashtag.HashtagDto hashtag: hashtagDtos){
                 Hashtag hashtag1 = hashtagRepository.findByHashtag(hashtag.hashtag()).orElseGet(()-> hashtagRepository.save(hashtag.toEntity()));
                 articlehashtagrepository.save(ArticleHashtag.of(article,hashtag1));
             }

@@ -21,6 +21,11 @@ public class FileService {
         log.info("getFile() fileId: {}", fileId);
         return fileRepository.findById(fileId).map(SaveFile.FileDto::from).orElseThrow(()-> new EntityNotFoundException("파일이 없습니다 - fileId: " + fileId));
     }
+
+    public SaveFile.FileDto getFileByFileName(String fileName) {
+        log.info("getFile() fileId: {}", fileName);
+        return fileRepository.findByFileName(fileName).toDto();
+    }
     public void deleteFile(Long fileId) {
         log.info("deleteFile() fileId: {}", fileId);
         fileRepository.deleteById(fileId);

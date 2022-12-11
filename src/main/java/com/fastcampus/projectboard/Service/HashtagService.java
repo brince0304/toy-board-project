@@ -22,5 +22,28 @@ public class HashtagService {
 
     private final HashtagRepository hashtagRepository;
 
+    public void saveHashtags(Set<Hashtag.HashtagDto> hashtags) {
+        hashtags.stream()
+                .map(Hashtag.HashtagDto::hashtag)
+                .map(Hashtag::of)
+                .forEach(t -> {
+                    if (hashtagRepository.findByHashtag(t.getHashtag()).isEmpty()) {
+                        hashtagRepository.save(t);
+                    }
+                });
+    }
+    @Transactional(readOnly = true)
+    public Hashtag.HashtagDto getHashtag(String hashtag) {
+        return Hashtag.HashtagDto.from(hashtagRepository.findByHashtag(hashtag).orElseThrow());
+    }
 
+    public void saveHashtag(Hashtag hashtag) {
+        hashtagRepository.save(hashtag);
+    }
+
+    @Transactional(readOnly = true)
+    public Set<Article.ArticleDto> getArticlesByHashtag(String hashtag) {
+        return hashtagRepository.findByHashtag(hashtag).get().getArticles().stream().map(t-> Article.ArticleDto.from(t.getArticle())
+        ).collect(Collectors.toSet());
+    }
 }

@@ -333,19 +333,6 @@ function logout(){
 }
 
 
-const editor = new toastui.Editor({
-    el: document.querySelector('#editor'),
-    initialEditType: 'markdown',
-    previewStyle: 'vertical',
-    height: '500px',
-    initialValue: '내용을 입력해주세요',
-    events: {
-        change: function () {
-            console.log(editor.getMarkdown());
-        }
-    }
-});
-
 
 
 
