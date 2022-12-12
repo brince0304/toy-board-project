@@ -1,5 +1,6 @@
 package com.fastcampus.projectboard.Controller;
 
+import com.fastcampus.projectboard.Messages.ErrorMessages;
 import com.fastcampus.projectboard.Service.*;
 import com.fastcampus.projectboard.Util.ControllerUtil;
 import com.fastcampus.projectboard.domain.*;
@@ -21,6 +22,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.*;
@@ -33,7 +35,7 @@ public class ArticleController {
 
     private final ArticleService articleService;
 
-    private final FileService fileService;
+    private final SaveFileService saveFileService;
 
 
     @GetMapping
@@ -56,7 +58,7 @@ public class ArticleController {
         map.addAttribute("article", articleResponse);
         map.addAttribute("articleComments", articleResponse.articleCommentsResponse());
         map.addAttribute("dto", articleCommentRequest);}
-        catch (Exception e){
+        catch (EntityNotFoundException e){
             return "redirect:/articles";
         }
 
@@ -65,8 +67,14 @@ public class ArticleController {
     @ResponseBody
     @PostMapping("/{articleId}")
     public ResponseEntity<String> updateLikeCount(@PathVariable String articleId, HttpServletRequest req) {
-        Integer count = articleService.updateLikeCount(req.getRemoteAddr(), Long.parseLong(articleId));
-        return new ResponseEntity<>(String.valueOf(count), HttpStatus.OK);
+        try {
+            Integer count = articleService.updateLikeCount(req.getRemoteAddr(), Long.parseLong(articleId));
+            return new ResponseEntity<>(String.valueOf(count), HttpStatus.OK);
+
+        }
+        catch (EntityNotFoundException e){
+            return new ResponseEntity<>(ErrorMessages.ENTITY_NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
     }
 
 
@@ -77,28 +85,24 @@ public class ArticleController {
         return "articles/tag/result";
     }
 
-    @PreAuthorize("isAuthenticated()")
     @GetMapping("/post")
     public String getPostPage(Model model, Article.ArticleRequest articleRequest, @AuthenticationPrincipal UserAccount.BoardPrincipal principal) {
-        if (principal == null) {
-            return "redirect:/login";
-        }
         model.addAttribute("dto", articleRequest);
-        return "articles/post/article_form";
+        return principal !=null ? "articles/post/article_form" : "redirect:/login";
     }
     @ResponseBody
     @PostMapping
     public ResponseEntity<String> saveArticle(@RequestBody @Valid Article.ArticleRequest dto, BindingResult bindingResult,
                                               @AuthenticationPrincipal UserAccount.BoardPrincipal boardPrincipal) {
         if (bindingResult.hasErrors()) {
-            return new ResponseEntity<>("내용을 확인해주세요.", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ErrorMessages.ENTITY_NOT_VALID, HttpStatus.BAD_REQUEST);
         }
         if (boardPrincipal == null) {
-            return new ResponseEntity<>("로그인이 필요합니다.", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ErrorMessages.ACCESS_TOKEN_NOT_FOUND, HttpStatus.BAD_REQUEST);
         }
-        Set<SaveFile.FileDto> fileDtos = fileService.getFileDtosFromRequestsFileIds(dto);
-        fileService.deleteUnuploadedFilesFromArticleContent(dto.getContent(), dto.getFileIds());
-        return new ResponseEntity<>(articleService.saveArticle(dto.toDto(boardPrincipal.toDto()), Hashtag.HashtagDto.from(dto.getHashtag()),fileDtos).id().toString(), HttpStatus.OK);
+        Set<SaveFile.SaveFileDto> saveFileDtos = saveFileService.getFileDtosFromRequestsFileIds(dto);
+        saveFileService.deleteUnuploadedFilesFromArticleContent(dto.getContent(), dto.getFileIds());
+        return new ResponseEntity<>(articleService.saveArticle(dto.toDto(boardPrincipal.toDto()), Hashtag.HashtagDto.from(dto.getHashtag()), saveFileDtos).id().toString(), HttpStatus.OK);
     }
 
 
@@ -109,55 +113,68 @@ public class ArticleController {
     public String updateArticle(@PathVariable Long articleId, ModelMap map,
                                 Article.ArticleRequest dto,
                                 @AuthenticationPrincipal UserAccount.BoardPrincipal boardPrincipal) {
-        Article.ArticleWithCommentDto articleDto = articleService.getArticle(articleId);
-        dto.setContent(articleDto.getContent());
-        dto.setTitle(articleDto.getTitle());
-        if (!articleDto.getUserAccountDto().userId().equals(boardPrincipal.username())) {
-            return "redirect:/articles";
-        } else {
-            dto.setHashtag(ControllerUtil.hashtagsToString(articleDto.getHashtags()));
-            CopyDown converter = new CopyDown();
-            dto.setContent(converter.convert(dto.getContent()));
-            map.addAttribute("dto", dto);
+        try {
+            Article.ArticleWithCommentDto articleDto = articleService.getArticle(articleId);
+            dto.setContent(articleDto.getContent());
+            dto.setTitle(articleDto.getTitle());
+            if (!articleDto.getUserAccountDto().userId().equals(boardPrincipal.username())) {
+                return "redirect:/articles";
+            } else {
+                dto.setHashtag(ControllerUtil.hashtagsToString(articleDto.getHashtags()));
+                CopyDown converter = new CopyDown();
+                dto.setContent(converter.convert(dto.getContent()));
+                map.addAttribute("dto", dto);
+            }
+            map.addAttribute("articleId", articleId);
+            return "articles/put/article_form";
         }
-        map.addAttribute("articleId", articleId);
-        return "articles/put/article_form";
+        catch (EntityNotFoundException e){
+            return "redirect:/articles";
+        }
     }
 
     @ResponseBody
     @PutMapping
-    public ResponseEntity<Object> updateArticle(
+    public ResponseEntity<?> updateArticle(
             @RequestBody @Valid Article.ArticleRequest articleRequest,
             BindingResult bindingResult,
             @AuthenticationPrincipal UserAccount.BoardPrincipal boardPrincipal) {
-        if (boardPrincipal == null) {
-            return new ResponseEntity<>("로그인이 필요합니다.", HttpStatus.BAD_REQUEST);
+        try {
+            if (bindingResult.hasErrors()) {
+                return new ResponseEntity<>(ControllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
+            }
+            if (!Objects.equals(articleService.getWriterFromArticle(articleRequest.getArticleId()), boardPrincipal.username())) {
+                return new ResponseEntity<>(ErrorMessages.ACCOUNT_NOT_MATCH, HttpStatus.BAD_REQUEST);
+            }
+            saveFileService.deleteSaveFilesFromDeletedSavedFileIds(articleService.getDeletedSaveFileIdFromArticleContent(articleRequest.getArticleId(), articleRequest.getContent()));
+            Set<SaveFile.SaveFileDto> saveFileDtos = saveFileService.getFileDtosFromRequestsFileIds(articleRequest);
+            saveFileService.deleteUnuploadedFilesFromArticleContent(articleRequest.getContent(), Objects.requireNonNull(articleRequest.getFileIds()));
+            articleService.updateArticle(articleRequest.getArticleId(), articleRequest, Hashtag.HashtagDto.from(articleRequest.getHashtag()), saveFileDtos);
+            return new ResponseEntity<>("articleUpdating Success", HttpStatus.OK);
         }
-        if (bindingResult.hasErrors()) {
-            return new ResponseEntity<>(ControllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
+        catch (EntityNotFoundException e){
+            return new ResponseEntity<>(ErrorMessages.ENTITY_NOT_FOUND, HttpStatus.NOT_FOUND);
         }
-        fileService.deleteSaveFilesFromDeletedSavedFileIds(articleService.getDeletedSaveFileIdFromArticleContent(articleRequest.getArticleId(),articleRequest.getContent()));
-        Set<SaveFile.FileDto> fileDtos = fileService.getFileDtosFromRequestsFileIds(articleRequest);
-        fileService.deleteUnuploadedFilesFromArticleContent(articleRequest.getContent(), Objects.requireNonNull(articleRequest.getFileIds()));
-        articleService.updateArticle(articleRequest.getArticleId(),articleRequest ,Hashtag.HashtagDto.from(articleRequest.getHashtag()),fileDtos);
-        return new ResponseEntity<>("articleUpdating Success", HttpStatus.OK);
     }
 
     @ResponseBody
-    @PreAuthorize("isAuthenticated()")
     @DeleteMapping
-    public ResponseEntity<String> deleteArticleByArticleId(@RequestBody Map<String,String> articleId, @AuthenticationPrincipal UserAccount.BoardPrincipal boardPrincipal) {
-        Long aId = Long.parseLong(articleId.get("articleId"));
-        if (articleService.getArticle(aId).getUserAccountDto().userId().equals(boardPrincipal.getUsername())) {
-            articleService.deleteArticleByArticleId(aId);
-            fileService.deleteSaveFilesFromArticleId(aId);
-        } else if (boardPrincipal.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
-            articleService.deleteArticleByAdmin(aId);
-            fileService.deleteSaveFilesFromArticleId(aId);
-        } else {
-            return new ResponseEntity<>("게시글 삭제에 실패하였습니다.", HttpStatus.BAD_REQUEST);
+    public ResponseEntity<?> deleteArticleByArticleId(@RequestBody Map<String,String> articleId, @AuthenticationPrincipal UserAccount.BoardPrincipal boardPrincipal) {
+        try {
+            Long aId = Long.parseLong(articleId.get("articleId"));
+            if (articleService.getWriterFromArticle(aId).equals(boardPrincipal.getUsername())) {
+                articleService.deleteArticleByArticleId(aId);
+            } else if (boardPrincipal.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
+                articleService.deleteArticleByAdmin(aId);
+            } else {
+                return new ResponseEntity<>(ErrorMessages.ACCOUNT_NOT_MATCH, HttpStatus.BAD_REQUEST);
+            }
+            saveFileService.deleteSaveFilesFromArticleId(aId);
+            return new ResponseEntity<>("articleDeleting Success", HttpStatus.OK);
         }
-        return new ResponseEntity<>("articleDeleting Success", HttpStatus.OK);
+        catch (EntityNotFoundException e){
+            return new ResponseEntity<>(ErrorMessages.ENTITY_NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
     }
 
 
