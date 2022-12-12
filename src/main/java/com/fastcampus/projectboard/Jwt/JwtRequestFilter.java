@@ -1,5 +1,6 @@
 package com.fastcampus.projectboard.Jwt;
 
+import com.fastcampus.projectboard.Messages.ErrorMessages;
 import com.fastcampus.projectboard.Service.UserSecurityService;
 import com.fastcampus.projectboard.Util.CookieUtil;
 import com.fastcampus.projectboard.Util.RedisUtil;
@@ -57,10 +58,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 jwt = jwtToken.getValue();
                 username = tokenProvider.getUsername(jwt);
             } else {
-                logger.warn("Cannot find access token");
+                logger.warn(ErrorMessages.ACCESS_TOKEN_NOT_FOUND);
             }
             if (username != null) {
-                System.out.println("userDetails : " + username);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 if (tokenProvider.validateToken(jwt)) {
                     logger.info("validateToken : " + jwt);
@@ -73,13 +73,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             }
         } catch (ExpiredJwtException e) {
             String refreshToken = CookieUtil.getCookie(httpServletRequest, TokenProvider.REFRESH_TOKEN_NAME).getValue();
-            System.out.println("refreshToken : " + refreshToken);
             if (refreshToken != null) {
                 refreshJwt = refreshToken;
             } else {
-                logger.warn("Cannot find refresh token");
+                logger.warn(ErrorMessages.REFRESH_TOKEN_NOT_FOUND);
             }
         } catch (Exception e) {
+
         }
         try {
             if (refreshJwt != null) {
@@ -93,12 +93,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     httpServletResponse.addCookie(newAccessToken);
                 }
             } else {
-                logger.warn("Cannot find refresh token");
+                logger.warn(ErrorMessages.REFRESH_TOKEN_NOT_FOUND);
             }
         } catch (ExpiredJwtException e) {
-
+        logger.warn(ErrorMessages.REFRESH_TOKEN_NOT_FOUND);
         }
-
         filterChain.doFilter(httpServletRequest, httpServletResponse);
     }
 }
