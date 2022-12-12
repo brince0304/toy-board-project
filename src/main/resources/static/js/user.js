@@ -36,7 +36,7 @@ $("#userId").blur(function(){
         $("#idDoubleChk").val("false");
     }else{
         $.ajax({
-            url : '/user/idCheck?userId='+userId,
+            url : '/accounts/idCheck?userId='+userId,
             type : 'post',
             cache : false,
             success : function() {
@@ -82,7 +82,7 @@ $("#nickname").blur(function(){
         $("#nicknameDoubleChk").val("false");
     }else{
         $.ajax({
-            url : '/user/nicknameCheck?nickname='+nickname,
+            url : '/accounts/nicknameCheck?nickname='+nickname,
             type : 'post',
             cache : false,
             success : function() {
@@ -107,7 +107,7 @@ $("#email").blur(function(){
         $("#emailDoubleChk").val("false");
     }else{
         $.ajax({
-            url : '/user/emailCheck?email='+email,
+            url : '/accounts/emailCheck?email='+email,
             type : 'post',
             cache : false,
             success : function() {

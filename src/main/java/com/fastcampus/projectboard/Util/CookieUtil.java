@@ -21,7 +21,7 @@ public class CookieUtil {
     }
     public static Cookie getCookie(HttpServletRequest req, String cookieName){
         final Cookie[] cookies = req.getCookies();
-        if(cookies==null) return null;
+        if(cookies==null) return createCookie(cookieName,"");
         for(Cookie cookie : cookies){
             if(cookie.getName().equals(cookieName))
                 return cookie;
