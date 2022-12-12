@@ -51,20 +51,9 @@ public class RedisUtil {
         return clientAddress + "like + " + articleId;
     }
 
-
-
     public String getData(String key){
         ValueOperations<String,String> valueOperations = stringRedisTemplate.opsForValue();
         return valueOperations.get(key);
-    }
-
-    public void setData(String key, String value){
-        ValueOperations<String,String> valueOperations = stringRedisTemplate.opsForValue();
-        valueOperations.set(key,value);
-    }
-
-    public String getDataByValue(String value){
-        return Objects.requireNonNull(stringRedisTemplate.keys(value)).stream().findFirst().orElse(null);
     }
 
     public void setDataExpire(String key,String value,long duration){
@@ -82,14 +71,6 @@ public class RedisUtil {
 
     public void setBlackList(String key, Object o, Long second) {
           stringRedisTemplate.opsForValue().set(REDIS_KEY_PREFIX + key, o.toString(), Duration.ofMillis(second));
-    }
-
-    public Object getBlackList(String key) {
-        return stringRedisTemplate.opsForValue().get(REDIS_KEY_PREFIX + key);
-    }
-
-    public boolean deleteBlackList(String key) {
-        return Boolean.TRUE.equals(stringRedisTemplate.delete(REDIS_KEY_PREFIX + key));
     }
 
     public boolean hasKeyBlackList(String key) {
