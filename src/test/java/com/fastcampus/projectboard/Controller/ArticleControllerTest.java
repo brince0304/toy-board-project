@@ -2,10 +2,7 @@ package com.fastcampus.projectboard.Controller;
 
 
 import com.fastcampus.projectboard.Service.ArticleService;
-import com.fastcampus.projectboard.Service.HashtagService;
 import com.fastcampus.projectboard.Service.UserService;
-import com.fastcampus.projectboard.Util.CookieUtil;
-import com.fastcampus.projectboard.Util.TokenProvider;
 import com.fastcampus.projectboard.config.SecurityConfig;
 import com.fastcampus.projectboard.domain.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,13 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 
-import javax.servlet.http.Cookie;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import static com.fastcampus.projectboard.Util.FileUtil.uploadPath;
 import static org.mockito.ArgumentMatchers.any;
@@ -50,8 +41,7 @@ class ArticleControllerTest {
     @MockBean
     private final ArticleService articleService;
 
-    @MockBean
-    private final HashtagService hashtagService;
+
 
     @MockBean
     private final UserService userService;
@@ -59,11 +49,9 @@ class ArticleControllerTest {
     ArticleControllerTest(
             @Autowired MockMvc mvc,
             @Autowired ArticleService articleService,
-            @Autowired HashtagService hashtagService,
             @Autowired UserService userService) {
         this.mvc = mvc;
         this.articleService = articleService;
-        this.hashtagService = hashtagService;
         this.userService = userService;
     }
 
@@ -86,7 +74,7 @@ class ArticleControllerTest {
                 of(article,signupDto.toEntity(),"haha");
 
         userService.saveUserAccountWithoutProfile(signupDto);
-        articleService.saveArticle(Article.ArticleDto.from(article),null);
+        articleService.saveArticle(Article.ArticleDto.from(article),null,null);
     }
 
     @DisplayName("[view][GET] 게시글 페이지 ")
@@ -233,7 +221,7 @@ class ArticleControllerTest {
                 .build();
     }
 
-    private SaveFile.FileDto createFileDto() {
+    private SaveFile.SaveFileDto createFileDto() {
         return SaveFile.builder()
                 .fileName("default.jpg")
                 .filePath(uploadPath+"/default.jpg")

@@ -2,7 +2,6 @@ package com.fastcampus.projectboard.Controller;
 
 
 import com.fastcampus.projectboard.Annotation.WithPrincipal;
-import com.fastcampus.projectboard.Annotation.WithUserSecurityContextFactory;
 import com.fastcampus.projectboard.Service.UserService;
 import com.fastcampus.projectboard.Util.CookieUtil;
 import com.fastcampus.projectboard.Util.TokenProvider;
@@ -11,15 +10,10 @@ import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.ArticleComment;
 import com.fastcampus.projectboard.domain.SaveFile;
 import com.fastcampus.projectboard.domain.UserAccount;
-import com.fastcampus.projectboard.repository.SaveFileRepository;
-import com.fastcampus.projectboard.repository.UserAccountRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,11 +21,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.test.context.support.TestExecutionEvent;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 
 import javax.servlet.http.Cookie;
@@ -40,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.fastcampus.projectboard.Util.FileUtil.uploadPath;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -49,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @SpringBootTest
 @Import(SecurityConfig.class)
-public class AuthControllerTest {
+public class UserControllerTest {
     private final ObjectMapper mapper;
 
     private final MockMvc mvc;
@@ -63,7 +51,7 @@ public class AuthControllerTest {
 
 
 
-    public AuthControllerTest(@Autowired ObjectMapper mapper, @Autowired MockMvc mvc, @Autowired UserService userService,@Autowired TokenProvider tokenProvider) {
+    public UserControllerTest(@Autowired ObjectMapper mapper, @Autowired MockMvc mvc, @Autowired UserService userService, @Autowired TokenProvider tokenProvider) {
         this.mapper = mapper;
         this.mvc = mvc;
         this.userService = userService;
@@ -198,7 +186,7 @@ public class AuthControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN));
     }
 
-    private SaveFile.FileDto createFileDto() {
+    private SaveFile.SaveFileDto createFileDto() {
         return SaveFile.builder()
                 .fileName("default.jpg")
                 .filePath(uploadPath+"/default.jpg")

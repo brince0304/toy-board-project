@@ -16,9 +16,7 @@ import org.springframework.data.domain.Pageable;
 
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.BDDAssertions.catchThrowable;
@@ -109,11 +107,11 @@ class ArticleServiceTest {
         // Given
         Article article = createArticle();
         Hashtag hashtag= createHashtag();
-        Set<Hashtag.HashtagDto> dtos= new HashSet<>();
+        List<Hashtag.HashtagDto> dtos= new ArrayList<>();
         dtos.add(Hashtag.HashtagDto.from(hashtag));
 
         // When
-        sut.saveArticle(Article.ArticleDto.from(article),dtos);
+        sut.saveArticle(Article.ArticleDto.from(article),dtos,null);
         // Then
         then(articleRepository).should().save(any(Article.class));
     }
@@ -147,10 +145,9 @@ class ArticleServiceTest {
     void givenNonexistentArticleInfo_whenUpdatingArticle_thenLogsWarningAndDoesNothing() {
         // Given
         Article.ArticleDto dto = createArticleDto("새 타이틀", "새 내용", "#springboot");
-        given(articleRepository.getReferenceById(dto.id())).willThrow(EntityNotFoundException.class);
+        given(articleRepository.getReferenceById(1L)).willThrow(EntityNotFoundException.class);
 
         // When
-
         // Then
         then(articleRepository).should().getReferenceById(dto.id());
     }
@@ -194,18 +191,11 @@ class ArticleServiceTest {
 
     private Article.ArticleDto createArticleDto(String title, String content, String hashtag) {
 
-        return Article.ArticleDto.of(1L,
-                createUserAccountDto(),
-                title,
-                content,
-                LocalDateTime.now(),
-                "Uno",
-                LocalDateTime.now(),
-                "Uno",
-                "N",
-                0,
-                0
-                );
+        return Article.ArticleDto.builder()
+                .title(title)
+                .content(content)
+                .hashtag(hashtag)
+                .build();
     }
 
     private UserAccount.UserAccountDto createUserAccountDto() {

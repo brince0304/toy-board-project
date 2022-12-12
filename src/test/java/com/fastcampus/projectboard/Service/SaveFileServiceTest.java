@@ -14,7 +14,7 @@ import static org.mockito.BDDMockito.*;
 @ExtendWith(MockitoExtension.class)
 class SaveFileServiceTest {
     @InjectMocks
-    private FileService sut;
+    private SaveFileService sut;
 
 
     @Mock
