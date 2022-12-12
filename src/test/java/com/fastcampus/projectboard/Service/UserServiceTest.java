@@ -143,18 +143,13 @@ public class UserServiceTest {
     }
 
     private Article.ArticleDto createArticleDto(String title, String content, String hashtag) {
-        return Article.ArticleDto.of(1L,
-                createUserAccountDto(),
-                title,
-                content,
-                LocalDateTime.now(),
-                "Uno",
-                LocalDateTime.now(),
-                "Uno",
-                "N",
-                0,
-                0
-        );
+        return Article.ArticleDto.builder()
+                .id(1L)
+                .title(title)
+                .content(content)
+                .hashtag(hashtag)
+                .userAccountDto(createUserAccountDto())
+                .build();
     }
 
     private UserAccount.UserAccountDto createUserAccountDto() {

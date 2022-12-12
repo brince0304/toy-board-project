@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
-import java.io.File;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -43,7 +42,6 @@ public class ArticleService {
         if (searchKeyword == null || searchKeyword.isBlank()) {
             return articleRepository.findAll(pageable).map(Article.ArticleDto::from);
         }
-
         return switch (searchType) {
             case TITLE -> articleRepository.findByTitleContaining(searchKeyword, pageable).map(Article.ArticleDto::from);
             case CONTENT -> articleRepository.findByContentContaining(searchKeyword, pageable).map(Article.ArticleDto::from);
@@ -52,6 +50,10 @@ public class ArticleService {
             case HASHTAG -> null;
         };
     }
+    @Transactional(readOnly = true)
+    public String getWriterFromArticle(Long articleId){
+        return articleRepository.getReferenceById(articleId).getUserAccount().getUserId();
+    }
 
     @Transactional(readOnly = true)
     public Set<Article.ArticleDto> getArticlesByHashtag(String hashtag) {
@@ -59,7 +61,7 @@ public class ArticleService {
                 hashtagRepository.findByHashtag(hashtag).get().getArticles().stream()
                         .map(ArticleHashtag::getArticle)
                         .map(Article.ArticleDto::from)
-                        .collect(Collectors.toSet()) : null;
+                        .collect(Collectors.toSet()) : new HashSet<>();
     }
     public void saveHashtags(Set<Hashtag.HashtagDto> hashtags) {
         hashtags.stream()
@@ -71,24 +73,22 @@ public class ArticleService {
                     }
                 });
     }
+
     @Transactional(readOnly = true)
     public Hashtag.HashtagDto getHashtag(String hashtag) {
         return Hashtag.HashtagDto.from(hashtagRepository.findByHashtag(hashtag).orElseThrow(()-> new EntityNotFoundException("해시태그가 없습니다 - hashtag: " + hashtag)));
     }
 
 
-
-
-
     @Transactional(readOnly = true)
     public Article.ArticleWithCommentDto getArticle(Long articleId) {
-        Set<Hashtag.HashtagDto> hashtags =  new HashSet<>();
-        articlehashtagrepository.findByArticleId(articleId).forEach(articleHashtag -> {
-            hashtags.add(Hashtag.HashtagDto.from(articleHashtag.getHashtag()));
-        });
+        Set<Hashtag.HashtagDto> hashtags = articlehashtagrepository.findByArticleId(articleId).stream()
+                .map(ArticleHashtag::getHashtag)
+                .map(Hashtag.HashtagDto::from)
+                .collect(Collectors.toSet());
         Article.ArticleWithCommentDto article =articleRepository.findById(articleId)
                 .map(Article.ArticleWithCommentDto::from)
-                .orElseThrow(() -> new EntityNotFoundException("게시글이 없습니다 - articleId: " + articleId));
+                .orElseThrow(EntityNotFoundException::new);
         article.setHashtags(hashtags);
         return article;
     }
@@ -103,7 +103,6 @@ public class ArticleService {
 
     public Integer updateLikeCount(String clientIp, Long articleId) {
         Article article = articleRepository.findById(articleId).orElseThrow(EntityNotFoundException::new);
-
         if(redisUtil.isFirstIpRequest2(clientIp, articleId)) {
             redisUtil.writeClientRequest2(clientIp, articleId);
             article.setLikeCount(article.getLikeCount() + 1);
@@ -112,46 +111,39 @@ public class ArticleService {
         return article.getLikeCount();
     }
 
-    public Set<SaveFile.FileDto> getSaveFilesFromArticle(Long articleId) {
+    public Set<SaveFile.SaveFileDto> getSaveFilesFromArticle(Long articleId) {
         return articleSaveFileRepository.getSaveFileByArticleId(articleId).stream()
                 .map(ArticleSaveFile::getSaveFile)
-                .map(SaveFile.FileDto::from)
+                .map(SaveFile.SaveFileDto::from)
                 .collect(Collectors.toSet());
     }
 
 
     public Set<Long> getDeletedSaveFileIdFromArticleContent(Long articleId,String content){
-        Set<Long> deletedFileIds = new HashSet<>();
-        Set<SaveFile.FileDto> saveFiles = getSaveFilesFromArticle(articleId);
-        for(SaveFile.FileDto saveFile : saveFiles){
-            if(!content.contains(saveFile.fileName())){
-                deletedFileIds.add(saveFile.id());
-            }
-        }
-        return deletedFileIds;
+        Set<SaveFile.SaveFileDto>  saveFileDtos = getSaveFilesFromArticle(articleId);
+        return saveFileDtos.stream()
+                .filter(saveFileDto -> !content.contains(saveFileDto.fileName()))
+                .map(SaveFile.SaveFileDto::id)
+                .collect(Collectors.toSet());
     }
 
 
-
-
-
-
-
-    public Article.ArticleDto saveArticle(Article.ArticleDto dto, List<Hashtag.HashtagDto> hashtagDtos, Set<SaveFile.FileDto> fileDtos) {
+    public Article.ArticleDto saveArticle(Article.ArticleDto dto, List<Hashtag.HashtagDto> hashtagDtos, Set<SaveFile.SaveFileDto> saveFileDtos) {
         Article article =articleRepository.save(dto.toEntity());
         for (Hashtag.HashtagDto hashtag : hashtagDtos) {
                 Hashtag hashtag1= hashtagRepository.findByHashtag(hashtag.hashtag()).orElseGet(()-> hashtagRepository.save(hashtag.toEntity()));
                 articlehashtagrepository.save(ArticleHashtag.of(article,hashtag1));
         }
-        for (SaveFile.FileDto fileDto : fileDtos) {
-            if(dto.content().contains(fileDto.fileName())){
-                articleSaveFileRepository.save(ArticleSaveFile.of(article,fileDto.toEntity()));
+        for (SaveFile.SaveFileDto saveFileDto : saveFileDtos) {
+            if(dto.content().contains(saveFileDto.fileName())){
+                articleSaveFileRepository.save(ArticleSaveFile.of(article, saveFileDto.toEntity()));
             }
-
         }
         return Article.ArticleDto.from(article);
     }
-        public void updateArticle (Long articleId, Article.ArticleRequest dto, List<Hashtag.HashtagDto> hashtagDtos, Set<SaveFile.FileDto> saveFileDtos){
+
+
+        public void updateArticle (Long articleId, Article.ArticleRequest dto, List<Hashtag.HashtagDto> hashtagDtos, Set<SaveFile.SaveFileDto> saveFileDtos){
             Article article = articleRepository.findById(articleId)
                     .orElseThrow(() -> new EntityNotFoundException("게시글이 없습니다 - articleId: " + articleId));
             articlehashtagrepository.findByArticleId(articleId).forEach(articleHashtag -> {
@@ -162,7 +154,7 @@ public class ArticleService {
                 Hashtag hashtag1 = hashtagRepository.findByHashtag(hashtag.hashtag()).orElseGet(()-> hashtagRepository.save(hashtag.toEntity()));
                 articlehashtagrepository.save(ArticleHashtag.of(article,hashtag1));
             }
-            for (SaveFile.FileDto saveFileDto : saveFileDtos) {
+            for (SaveFile.SaveFileDto saveFileDto : saveFileDtos) {
                 if(dto.getContent().contains(saveFileDto.fileName())){
                     articleSaveFileRepository.save(ArticleSaveFile.of(article,saveFileDto.toEntity()));
                 }

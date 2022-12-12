@@ -1,12 +1,14 @@
 package com.fastcampus.projectboard.Controller;
 
-import com.fastcampus.projectboard.Service.FileService;
+import com.fastcampus.projectboard.Messages.ErrorMessages;
+import com.fastcampus.projectboard.Service.SaveFileService;
 import com.fastcampus.projectboard.Service.UserService;
 import com.fastcampus.projectboard.Util.*;
 import com.fastcampus.projectboard.domain.SaveFile;
 import com.fastcampus.projectboard.domain.UserAccount;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,16 +35,12 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping
+@Slf4j
 public class UserController {
     private final UserService userService;
     private final TokenProvider tokenProvider;
     private final RedisUtil redisUtil;
-
-    private final FileService fileService;
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
-
-    @Value("${com.example.upload.path.profileImg}") // application.properties의 변수
-    private String uploadPath;
+    private final SaveFileService saveFileService;
 
     @GetMapping("/signup")
     public ModelAndView signup(UserAccount.SignupDto userCreateForm) {
@@ -52,45 +51,63 @@ public class UserController {
     }
 
     @GetMapping("/accounts")
-    public ModelAndView myPage(@AuthenticationPrincipal UserAccount.BoardPrincipal principal,ModelMap map) {
-        UserAccount.UserAccountDto accountDto =  userService.getUserAccount(principal.username());
-        ModelAndView mav = new ModelAndView();
-        mav.setViewName("user/my_page");
-        mav.addObject("accountDto", accountDto);
-        return mav;
+    public ModelAndView myPage(@AuthenticationPrincipal UserAccount.BoardPrincipal principal) {
+        try {
+            UserAccount.UserAccountDto accountDto = userService.getUserAccount(principal.username());
+            ModelAndView mav = new ModelAndView();
+            mav.setViewName("user/my_page");
+            mav.addObject("accountDto", accountDto);
+            return mav;
+        }
+        catch (Exception e){
+            ModelAndView mav = new ModelAndView();
+            mav.setViewName("redirect:/");
+            return mav;
+        }
     }
     @GetMapping("/accounts/{username}")
     public ResponseEntity<?> getProfileImg (@PathVariable String username) throws IOException {
-        File profileImg = FileUtil.getFileFromFileDomain(userService.getUserAccount(username).profileImg());
-        byte[] imageByteArray = IOUtils.toByteArray(new FileInputStream(profileImg));
-        return new ResponseEntity<>(imageByteArray, HttpStatus.OK);
+        try {
+            File profileImg = FileUtil.getFileFromSaveFile(userService.getUserAccount(username).profileImg());
+            byte[] imageByteArray = IOUtils.toByteArray(new FileInputStream(profileImg));
+            return new ResponseEntity<>(imageByteArray, HttpStatus.OK);
+        }
+        catch (EntityNotFoundException e){
+            return new ResponseEntity<>(ErrorMessages.ENTITY_NOT_FOUND,HttpStatus.NOT_FOUND);
+        }
     }
 
     @GetMapping("/accounts/articles")
     public ResponseEntity<?> getMyArticles(@AuthenticationPrincipal UserAccount.BoardPrincipal principal) {
-        return new ResponseEntity<>(userService.getMyArticles(principal.username()), HttpStatus.OK);
+        try {
+            return new ResponseEntity<>(userService.getMyArticles(principal.username()), HttpStatus.OK);
+        }
+        catch (Exception e){
+            return new ResponseEntity<>(ErrorMessages.ENTITY_NOT_FOUND,HttpStatus.NOT_FOUND);
+        }
     }
 
     @PutMapping("/accounts")
     public ResponseEntity<?> updateMyAccount(@AuthenticationPrincipal UserAccount.BoardPrincipal principal
             ,@Valid @RequestBody UserAccount.UserAccountUpdateRequestDto dto, BindingResult bindingResult) {
-        if(dto.password1()!=null &&!dto.password1().equals(dto.password2())){
-            bindingResult.addError(new FieldError("dto","password2","비밀번호가 일치하지 않습니다."));
-            return new ResponseEntity<>(ControllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
+        try {
+            if (dto.password1() != null && !dto.password1().equals(dto.password2())) {
+                bindingResult.addError(new FieldError("dto", "password2", "비밀번호가 일치하지 않습니다."));
+                return new ResponseEntity<>(ControllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
+            } else if (principal == null) {
+                return new ResponseEntity<>(ErrorMessages.NOT_ACCEPTABLE, HttpStatus.UNAUTHORIZED);
+            } else if (bindingResult.hasErrors()) {
+                return new ResponseEntity<>(ControllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
+            }
+            userService.updateUserAccount(principal.username(), dto);
+            return new ResponseEntity<>("수정되었습니다.", HttpStatus.OK);
         }
-        else if(principal==null){
-            return new ResponseEntity<>("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
+        catch (Exception e){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        else if(bindingResult.hasErrors()){
-            return new ResponseEntity<>(ControllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
-        }
-        userService.updateUserAccount(principal.username(),dto);
-        return new ResponseEntity<>("수정되었습니다.", HttpStatus.OK);
     }
 
-
-
-    @PostMapping("/user/idCheck")
+    @PostMapping("/accounts/idCheck")
     public ResponseEntity<String> isUserExists(@RequestParam("userId") String userId) {
         if (userService.isUserExists(userId)) {
             return new ResponseEntity<>("true", HttpStatus.OK);
@@ -98,7 +115,7 @@ public class UserController {
             return new ResponseEntity<>("false",HttpStatus.BAD_REQUEST);
         }
     }
-    @PostMapping("/user/emailCheck")
+    @PostMapping("/accounts/emailCheck")
     public ResponseEntity<String> isEmailExists(@RequestParam("email") String email) {
         if (userService.isExistEmail(email)) {
             return new ResponseEntity<>("true", HttpStatus.OK);
@@ -107,7 +124,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/user/nicknameCheck")
+    @PostMapping("/accounts/nicknameCheck")
     public ResponseEntity<String> isNicknameExists(@RequestParam("nickname") String nickname) {
         if (userService.isExistNickname(nickname)) {
             return new ResponseEntity<>("true", HttpStatus.OK);
@@ -118,32 +135,36 @@ public class UserController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestPart("signupDto") @Valid UserAccount.SignupDto signupDto, BindingResult bindingResult
-    ,@RequestPart(value = "imgFile",required = false) MultipartFile imgFile) throws IOException {
-        if (bindingResult.hasErrors()) {
-            return new ResponseEntity<>(ControllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
+    ,@RequestPart(value = "imgFile",required = false) MultipartFile imgFile) {
+        try {
+            if (bindingResult.hasErrors()) {
+                return new ResponseEntity<>(ControllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
+            } else if (!signupDto.getPassword1().equals(signupDto.getPassword2())) {
+                bindingResult.addError(new FieldError("userCreateForm", "password2", "비밀번호가 일치하지 않습니다."));
+                return new ResponseEntity<>(ControllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
+            }
+            if (imgFile == null) {
+                userService.saveUserAccountWithoutProfile(signupDto);
+            } else {
+                userService.saveUserAccount(signupDto, saveFileService.saveFile(FileUtil.getFileDtoFromMultiPartFile(imgFile, signupDto.getUserId())));
+            }
         }
-        else if(!signupDto.getPassword1().equals(signupDto.getPassword2())){
-            bindingResult.addError(new FieldError("userCreateForm","password2","비밀번호가 일치하지 않습니다."));
-            return new ResponseEntity<>(ControllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
-        }
-        if(imgFile==null){
-            userService.saveUserAccountWithoutProfile(signupDto);
-        }
-        else {
-            userService.saveUserAccount(signupDto, fileService.saveFile(FileUtil.getFileDtoFromMultiPartFile(imgFile,signupDto.getUserId())));
+        catch (IOException e){
+            return new ResponseEntity<>(ErrorMessages.ENTITY_NOT_VALID, HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>("success", HttpStatus.OK);
     }
     @PutMapping("/accounts/{id}")
     public ResponseEntity<?> changeProfileImg(@PathVariable String id, @RequestPart(value="imgFile",required = true)  MultipartFile imgFile) {
         if (imgFile == null) {
-            return new ResponseEntity<>("파일이 없습니다.", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ErrorMessages.NOT_FOUND, HttpStatus.BAD_REQUEST);
         }
         try {
-            SaveFile.FileDto fileDto = fileService.saveFile(FileUtil.getFileDtoFromMultiPartFile(imgFile,id));
-            fileService.deleteFile(userService.changeAccountProfileImg(id,fileDto).id());
+            SaveFile.SaveFileDto saveFileDto = saveFileService.saveFile(FileUtil.getFileDtoFromMultiPartFile(imgFile,id));
+            saveFileService.deleteFile(userService.changeAccountProfileImg(id, saveFileDto).id());
         } catch (IOException e) {
             e.printStackTrace();
+            return new ResponseEntity<>(ErrorMessages.ENTITY_NOT_VALID, HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>("success", HttpStatus.OK);
     }
@@ -160,18 +181,11 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@ModelAttribute("dto") @RequestBody @Valid UserAccount.LoginDto user, BindingResult bindingResult,
-                                HttpServletResponse res, HttpServletRequest req, ModelMap map) throws IOException {
+                                HttpServletResponse res, ModelMap map)  {
 
         try {
             if (!bindingResult.hasErrors()) {
-                final UserAccount.BoardPrincipal principal = userService.loginByUserNameAndPassword(user.getUsername(), user.getPassword());
-                Cookie accessToken = CookieUtil.createCookie(TokenProvider.ACCESS_TOKEN_NAME, tokenProvider.generateToken(principal));
-                accessToken.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds(TokenProvider.REFRESH_TOKEN_VALIDATION_SECOND));
-                Cookie refreshToken = CookieUtil.createCookie(TokenProvider.REFRESH_TOKEN_NAME, tokenProvider.generateRefreshToken(principal));
-                refreshToken.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds(TokenProvider.REFRESH_TOKEN_VALIDATION_SECOND));
-                redisUtil.setDataExpire(refreshToken.getValue(), principal.getUsername(), TokenProvider.REFRESH_TOKEN_VALIDATION_SECOND);
-                res.addCookie(accessToken);
-                res.addCookie(refreshToken);
+                createTokenCookies(userService.loginByUserNameAndPassword(user.getUsername(), user.getPassword()), res);
                 return new ResponseEntity<>(map.getAttribute("prevPage"), HttpStatus.OK);
             }
             else{
@@ -180,7 +194,6 @@ public class UserController {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             bindingResult.addError(new FieldError("dto", "username", "아이디 또는 비밀번호가 일치하지 않습니다."));
-
             return new ResponseEntity<>(ControllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
         }
     }
@@ -189,6 +202,25 @@ public class UserController {
     public ResponseEntity<String> logout(
              HttpServletRequest req,
             HttpServletResponse res) {
+        try {
+            deleteTokenCookies(res, req);
+        }
+        catch (RuntimeException e){
+            return new ResponseEntity<>(ErrorMessages.BAD_REQUEST, HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>("로그아웃 되었습니다.", HttpStatus.OK);
+    }
+
+    public void createTokenCookies(UserAccount.BoardPrincipal principal, HttpServletResponse res) {
+        Cookie accessToken = CookieUtil.createCookie(TokenProvider.ACCESS_TOKEN_NAME, tokenProvider.generateToken(principal));
+        accessToken.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds(TokenProvider.REFRESH_TOKEN_VALIDATION_SECOND));
+        Cookie refreshToken = CookieUtil.createCookie(TokenProvider.REFRESH_TOKEN_NAME, tokenProvider.generateRefreshToken(principal));
+        refreshToken.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds(TokenProvider.REFRESH_TOKEN_VALIDATION_SECOND));
+        redisUtil.setDataExpire(refreshToken.getValue(), principal.getUsername(), TokenProvider.REFRESH_TOKEN_VALIDATION_SECOND);
+        res.addCookie(accessToken);
+        res.addCookie(refreshToken);
+    }
+    public void deleteTokenCookies(HttpServletResponse res, HttpServletRequest req) {
         SecurityContextHolder.clearContext();
         Cookie accessToken = CookieUtil.getCookie(req, TokenProvider.ACCESS_TOKEN_NAME);
         Cookie refreshToken = CookieUtil.getCookie(req, TokenProvider.REFRESH_TOKEN_NAME);
@@ -198,14 +230,13 @@ public class UserController {
             accessToken.setMaxAge(0);
             res.addCookie(accessToken);
         }
-        else{
-            return new ResponseEntity<>("로그아웃에 실패했습니다.", HttpStatus.BAD_REQUEST);
-        }
         if (refreshToken != null) {
             refreshToken.setMaxAge(0);
             res.addCookie(refreshToken);
             redisUtil.deleteData(refreshToken.getValue());
         }
-        return new ResponseEntity<>("로그아웃 되었습니다.", HttpStatus.OK);
+        else{
+            throw new RuntimeException();
+        }
     }
 }
