@@ -1,16 +1,11 @@
 package com.fastcampus.projectboard.domain;
 
 import lombok.*;
-import org.apache.commons.io.FileUtils;
-import org.springframework.beans.factory.annotation.Value;
 
 import javax.persistence.*;
-import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.UUID;
 
 @Entity
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -38,8 +33,8 @@ public class SaveFile extends AuditingFields{
     @Column(nullable = false)
     private String uploadUser;
 
-    public FileDto toDto() {
-        return FileDto.builder()
+    public SaveFileDto toDto() {
+        return SaveFileDto.builder()
                 .id(id)
                 .fileName(fileName)
                 .filePath(filePath)
@@ -63,14 +58,14 @@ public class SaveFile extends AuditingFields{
     }
 
     @Builder
-    public  record FileDto (
+    public  record SaveFileDto(
             Long id,
             String fileName,
             String filePath,
             String fileType,
             Long fileSize,
             String uploadUser,
-LocalDateTime createdAt,
+            LocalDateTime createdAt,
             String createdBy,
             LocalDateTime modifiedAt,
             String modifiedBy
@@ -81,8 +76,8 @@ LocalDateTime createdAt,
 
 
 
-        public static FileDto from(SaveFile saveFile) {
-            return new FileDto(
+        public static SaveFileDto from(SaveFile saveFile) {
+            return new SaveFileDto(
                     saveFile.getId(),
                     saveFile.getFileName(),
                     saveFile.getFilePath(),
@@ -112,7 +107,7 @@ LocalDateTime createdAt,
 
     }
 
-    public static class FileRequestDto implements Serializable{
+    public static class SaveFileRequestDto implements Serializable{
         @Setter
         private String fileName;
         private final String filePath;
@@ -120,11 +115,8 @@ LocalDateTime createdAt,
         private final Long fileSize;
         private final String uploadUser;
 
-        UUID uuid = UUID.randomUUID();
-        String uuidString = uuid.toString();
-
         @Builder
-        public FileRequestDto(String fileName, String filePath, String fileType, Long fileSize, String uploadUser) {
+        public SaveFileRequestDto(String fileName, String filePath, String fileType, Long fileSize, String uploadUser) {
             this.fileName = fileName;
             this.filePath = filePath;
             this.fileType = fileType;
@@ -142,8 +134,8 @@ LocalDateTime createdAt,
                     .build();
         }
     }
-    public record FileResponseDto(
-            Long id,
+    public record SaveFileResponseDto(
+
             String fileName,
             String filePath,
             String fileType,
@@ -154,9 +146,8 @@ LocalDateTime createdAt,
             LocalDateTime modifiedAt,
             String modifiedBy
     ) {
-        public static FileResponseDto from(SaveFile saveFile) {
-            return new FileResponseDto(
-                    saveFile.getId(),
+        public static SaveFileResponseDto from(SaveFile saveFile) {
+            return new SaveFileResponseDto(
                     saveFile.getFileName(),
                     saveFile.getFilePath(),
                     saveFile.getFileType(),

@@ -55,12 +55,6 @@ public class UserAccount extends AuditingFields {
     private SaveFile profileImg;
 
 
-
-
-
-
-
-
     public UserAccount() {}
     @Builder
     private UserAccount(String userId, String userPassword, String email, String nickname, String memo,Set<UserAccountRole> roles, SaveFile profileImg) {
@@ -149,7 +143,7 @@ public class UserAccount extends AuditingFields {
             String email,
             String nickname,
             String memo,
-            SaveFile.FileDto profileImg
+            SaveFile.SaveFileDto profileImg
     )  implements UserDetails {
 
         public static BoardPrincipal from(UserAccountDto dto) {
@@ -222,7 +216,7 @@ public class UserAccount extends AuditingFields {
             LocalDateTime modifiedAt,
             String modifiedBy,
             Set<UserAccountRole> roles,
-            SaveFile.FileDto profileImg
+            SaveFile.SaveFileDto profileImg
 
     ) {
 
@@ -239,7 +233,7 @@ public class UserAccount extends AuditingFields {
                     .modifiedAt(entity.getModifiedAt())
                     .modifiedBy(entity.getModifiedBy())
                     .roles(entity.getRoles())
-                    .profileImg(entity.getProfileImg() == null ? null : SaveFile.FileDto.from(entity.getProfileImg()))
+                    .profileImg(entity.getProfileImg() == null ? null : SaveFile.SaveFileDto.from(entity.getProfileImg()))
                     .build();
         }
 
