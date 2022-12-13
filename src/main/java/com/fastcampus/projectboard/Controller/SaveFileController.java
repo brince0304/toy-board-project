@@ -23,13 +23,15 @@ import java.io.*;
 public class SaveFileController {
     private final SaveFileService saveFileService;
 
-    @PostMapping("/files/upload")
+    @PostMapping("/files")
     public ResponseEntity<?> uploadFile(@RequestPart("file")MultipartFile file, @AuthenticationPrincipal UserAccount.BoardPrincipal principal) throws IOException {
-        if(file.isEmpty()){
-            return new ResponseEntity<>(ErrorMessages.NOT_FOUND, HttpStatus.BAD_REQUEST);
-        }
+        try{
         SaveFile.SaveFileDto fileDto = saveFileService.saveFile(FileUtil.getFileDtoFromMultiPartFile(file,principal!=null ? principal.getUsername() : "anonymous"));
         return new ResponseEntity<>(fileDto, HttpStatus.OK);
+        }catch (Exception e){
+            log.error("uploadFile() error: {}", e.getMessage());
+            return new ResponseEntity<>(ErrorMessages.FILE_UPLOAD_FAIL, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/files/{fileName}")

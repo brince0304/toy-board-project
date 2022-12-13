@@ -120,6 +120,7 @@ public class ArticleController {
             if (!articleDto.getUserAccountDto().userId().equals(boardPrincipal.username())) {
                 return "redirect:/articles";
             } else {
+                dto.setFileIds(ControllerUtil.fileIdsToString(articleDto.getSaveFiles()));
                 dto.setHashtag(ControllerUtil.hashtagsToString(articleDto.getHashtags()));
                 CopyDown converter = new CopyDown();
                 dto.setContent(converter.convert(dto.getContent()));
@@ -146,7 +147,6 @@ public class ArticleController {
             if (!Objects.equals(articleService.getWriterFromArticle(articleRequest.getArticleId()), boardPrincipal.username())) {
                 return new ResponseEntity<>(ErrorMessages.ACCOUNT_NOT_MATCH, HttpStatus.BAD_REQUEST);
             }
-            saveFileService.deleteSaveFilesFromDeletedSavedFileIds(articleService.getDeletedSaveFileIdFromArticleContent(articleRequest.getArticleId(), articleRequest.getContent()));
             Set<SaveFile.SaveFileDto> saveFileDtos = saveFileService.getFileDtosFromRequestsFileIds(articleRequest);
             saveFileService.deleteUnuploadedFilesFromArticleContent(articleRequest.getContent(), Objects.requireNonNull(articleRequest.getFileIds()));
             articleService.updateArticle(articleRequest.getArticleId(), articleRequest, Hashtag.HashtagDto.from(articleRequest.getHashtag()), saveFileDtos);
