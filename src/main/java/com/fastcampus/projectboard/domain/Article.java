@@ -245,10 +245,12 @@ public class Article extends AuditingFields{
         Integer viewCount ;
 
         Integer likeCount ;
+
+        Set<SaveFile.SaveFileDto> saveFiles;
         public ArticleWithCommentDto(Long id,
                                      UserAccount.UserAccountDto userAccountDto,
                                      Set<ArticleComment.ArticleCommentDto> articleCommentDtos,
-                                     String title, String content, LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy, Set<Hashtag.HashtagDto> hashtags, String deleted, Integer viewCount, Integer likeCount) {
+                                     String title, String content, LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy, Set<Hashtag.HashtagDto> hashtags, String deleted, Integer viewCount, Integer likeCount, Set<SaveFile.SaveFileDto> saveFiles) {
             this.id = id;
             this.userAccountDto = userAccountDto;
             this.articleCommentDtos = articleCommentDtos;
@@ -262,13 +264,14 @@ public class Article extends AuditingFields{
             this.deleted = deleted;
             this.viewCount = viewCount;
             this.likeCount = likeCount;
+            this.saveFiles = saveFiles;
         }
 
-        public static ArticleWithCommentDto of(Long id, UserAccount.UserAccountDto userAccountDto, Set<ArticleComment.ArticleCommentDto> articleCommentDtos, String title, String content, LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy, Set<Hashtag.HashtagDto> hashtags, String deleted, Integer viewCount, Integer likeCount) {
-            return new ArticleWithCommentDto(id, userAccountDto, articleCommentDtos, title, content, createdAt, createdBy, modifiedAt, modifiedBy, hashtags, deleted, viewCount, likeCount);
+        public static ArticleWithCommentDto of(Long id, UserAccount.UserAccountDto userAccountDto, Set<ArticleComment.ArticleCommentDto> articleCommentDtos, String title, String content, LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy, Set<Hashtag.HashtagDto> hashtags, String deleted, Integer viewCount, Integer likeCount, Set<SaveFile.SaveFileDto> saveFiles) {
+            return new ArticleWithCommentDto(id, userAccountDto, articleCommentDtos, title, content, createdAt, createdBy, modifiedAt, modifiedBy, hashtags, deleted, viewCount, likeCount, saveFiles);
         }
-        public static ArticleWithCommentDto of(Long id, UserAccount.UserAccountDto userAccountDto, Set<ArticleComment.ArticleCommentDto> articleCommentDtos, String title, String content, LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy, String deleted, Integer viewCount, Integer likeCount) {
-            return new ArticleWithCommentDto(id, userAccountDto, articleCommentDtos, title, content, createdAt, createdBy, modifiedAt, modifiedBy, null, deleted, viewCount, likeCount);
+        public static ArticleWithCommentDto of(Long id, UserAccount.UserAccountDto userAccountDto, Set<ArticleComment.ArticleCommentDto> articleCommentDtos, String title, String content, LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy, String deleted, Integer viewCount, Integer likeCount, Set<SaveFile.SaveFileDto> saveFiles) {
+            return new ArticleWithCommentDto(id, userAccountDto, articleCommentDtos, title, content, createdAt, createdBy, modifiedAt, modifiedBy, null, deleted, viewCount, likeCount, saveFiles);
         }
 
         public static ArticleWithCommentDto from(Article entity) {
