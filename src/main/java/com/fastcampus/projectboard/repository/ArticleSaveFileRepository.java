@@ -9,5 +9,7 @@ public interface ArticleSaveFileRepository extends org.springframework.data.jpa.
 
     void deleteBySaveFileId(Long deletedFileId);
 
+    boolean existsBySaveFileIdAndArticleId(Long saveFileId, Long articleId);
+
 
 }

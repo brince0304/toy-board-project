@@ -11,5 +11,6 @@ public interface ArticleHashtagRepository extends JpaRepository<ArticleHashtag, 
 
     Set<ArticleHashtag> findByArticleId(Long articleId);
     Set<ArticleHashtag> findByHashtag(Hashtag hashtag);
+
 }
 
