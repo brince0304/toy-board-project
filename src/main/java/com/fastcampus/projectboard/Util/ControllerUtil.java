@@ -1,6 +1,7 @@
 package com.fastcampus.projectboard.Util;
 
 import com.fastcampus.projectboard.domain.Hashtag;
+import com.fastcampus.projectboard.domain.SaveFile;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.validation.FieldError;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -50,6 +52,14 @@ public class ControllerUtil {
             } else {
                 sb.append("#").append(dto.stream().toList().get(i).hashtag());
             }
+        }
+        return  sb.toString();
+    }
+
+    public static String fileIdsToString(Set<SaveFile.SaveFileDto> saveFiles){
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < saveFiles.size(); i++) {
+            sb.append(saveFiles.stream().toList().get(i).id()).append(",");
         }
         return  sb.toString();
     }
