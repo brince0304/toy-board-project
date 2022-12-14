@@ -74,11 +74,26 @@ public class ArticleService {
                 });
     }
 
-    @Transactional(readOnly = true)
-    public Hashtag.HashtagDto getHashtag(String hashtag) {
-        return Hashtag.HashtagDto.from(hashtagRepository.findByHashtag(hashtag).orElseThrow(()-> new EntityNotFoundException("해시태그가 없습니다 - hashtag: " + hashtag)));
+
+
+
+    public void deleteArticleByArticleId(long articleId) {
+        for( ArticleHashtag articleHashtag : articlehashtagrepository.findByArticleId(articleId)){
+            articleHashtag.setArticle(null);
+            articleHashtag.setHashtag(null);
+        }
+        articleRepository.findById(articleId).orElseThrow(EntityNotFoundException::new).setDeleted("Y");
     }
 
+    public void deleteArticleByAdmin(Long articleId) {
+        articleRepository.findById(articleId).ifPresent(o->{
+            o.setDeleted("Y");
+            for( ArticleHashtag articleHashtag : articlehashtagrepository.findByArticleId(articleId)){
+                articleHashtag.setArticle(null);
+                articleHashtag.setHashtag(null);
+            }
+        });
+    }
 
     @Transactional(readOnly = true)
     public Article.ArticleWithCommentDto getArticle(Long articleId) {
@@ -89,7 +104,12 @@ public class ArticleService {
         Article.ArticleWithCommentDto article =articleRepository.findById(articleId)
                 .map(Article.ArticleWithCommentDto::from)
                 .orElseThrow(EntityNotFoundException::new);
+        Set<SaveFile.SaveFileDto>  saveFiles = articleSaveFileRepository.getSaveFileByArticleId(articleId).stream()
+                        .map(ArticleSaveFile::getSaveFile)
+                                .map(SaveFile.SaveFileDto::from)
+                                .collect(Collectors.toSet());
         article.setHashtags(hashtags);
+        article.setSaveFiles(saveFiles);
         return article;
     }
 
@@ -111,76 +131,44 @@ public class ArticleService {
         return article.getLikeCount();
     }
 
-    public Set<SaveFile.SaveFileDto> getSaveFilesFromArticle(Long articleId) {
-        return articleSaveFileRepository.getSaveFileByArticleId(articleId).stream()
-                .map(ArticleSaveFile::getSaveFile)
-                .map(SaveFile.SaveFileDto::from)
-                .collect(Collectors.toSet());
-    }
 
-
-    public Set<Long> getDeletedSaveFileIdFromArticleContent(Long articleId,String content){
-        Set<SaveFile.SaveFileDto>  saveFileDtos = getSaveFilesFromArticle(articleId);
-        return saveFileDtos.stream()
-                .filter(saveFileDto -> !content.contains(saveFileDto.fileName()))
-                .map(SaveFile.SaveFileDto::id)
-                .collect(Collectors.toSet());
-    }
-
-
-    public Article.ArticleDto saveArticle(Article.ArticleDto dto, List<Hashtag.HashtagDto> hashtagDtos, Set<SaveFile.SaveFileDto> saveFileDtos) {
+    public Article.ArticleDto saveArticle(Article.ArticleDto dto, Set<SaveFile.SaveFileDto> saveFileDtos) {
         Article article =articleRepository.save(dto.toEntity());
-        for (Hashtag.HashtagDto hashtag : hashtagDtos) {
-                Hashtag hashtag1= hashtagRepository.findByHashtag(hashtag.hashtag()).orElseGet(()-> hashtagRepository.save(hashtag.toEntity()));
-                articlehashtagrepository.save(ArticleHashtag.of(article,hashtag1));
-        }
-        for (SaveFile.SaveFileDto saveFileDto : saveFileDtos) {
-            if(dto.content().contains(saveFileDto.fileName())){
-                articleSaveFileRepository.save(ArticleSaveFile.of(article, saveFileDto.toEntity()));
-            }
-        }
+        articleHashtagSavefileMapper(article,dto.hashtags(),saveFileDtos);
         return Article.ArticleDto.from(article);
     }
 
-
-        public void updateArticle (Long articleId, Article.ArticleRequest dto, List<Hashtag.HashtagDto> hashtagDtos, Set<SaveFile.SaveFileDto> saveFileDtos){
-            Article article = articleRepository.findById(articleId)
-                    .orElseThrow(() -> new EntityNotFoundException("게시글이 없습니다 - articleId: " + articleId));
-            articlehashtagrepository.findByArticleId(articleId).forEach(articleHashtag -> {
-                articleHashtag.setArticle(null);
-                articleHashtag.setHashtag(null);
-            });
-            for( Hashtag.HashtagDto hashtag: hashtagDtos){
-                Hashtag hashtag1 = hashtagRepository.findByHashtag(hashtag.hashtag()).orElseGet(()-> hashtagRepository.save(hashtag.toEntity()));
-                articlehashtagrepository.save(ArticleHashtag.of(article,hashtag1));
-            }
-            for (SaveFile.SaveFileDto saveFileDto : saveFileDtos) {
-                if(dto.getContent().contains(saveFileDto.fileName())){
-                    articleSaveFileRepository.save(ArticleSaveFile.of(article,saveFileDto.toEntity()));
-                }
-            }
-            if(dto.getTitle() != null) article.setTitle(dto.getTitle());
-            if(dto.getContent() != null) article.setContent(dto.getContent());
+        public void updateArticle (Long articleId, Article.ArticleDto dto, Set<SaveFile.SaveFileDto> saveFileDtos){
+            Article article = articleHashtagUpdateNull(articleId);
+            if(dto.title() != null) article.setTitle(dto.title());
+            if(dto.content() != null) article.setContent(dto.content());
+            articleHashtagSavefileMapper(article,dto.hashtags(),saveFileDtos);
 
         }
-
-
-
-    public void deleteArticleByArticleId(long articleId) {
-        for( ArticleHashtag articleHashtag : articlehashtagrepository.findByArticleId(articleId)){
-            articleHashtag.setArticle(null);
-            articleHashtag.setHashtag(null);
+    public void articleHashtagSavefileMapper(Article article,Set<Hashtag.HashtagDto> hashtags , Set<SaveFile.SaveFileDto> saveFiles){
+        for( Hashtag.HashtagDto hashtag: hashtags){
+            Hashtag hashtag1 = hashtagRepository.findByHashtag(hashtag.hashtag()).orElseGet(()-> hashtagRepository.save(hashtag.toEntity()));
+            articlehashtagrepository.save(ArticleHashtag.of(article,hashtag1));
         }
-        articleRepository.findById(articleId).orElseThrow(EntityNotFoundException::new).setDeleted("Y");
+        for (SaveFile.SaveFileDto saveFileDto : saveFiles) {
+            if(article.getContent().contains(saveFileDto.fileName())){
+                articleSaveFileRepository.save(ArticleSaveFile.of(article,saveFileDto.toEntity()));
+            }
+        }
     }
 
-    public void deleteArticleByAdmin(Long articleId) {
-        articleRepository.findById(articleId).ifPresent(o->{
-            o.setDeleted("Y");
-            for( ArticleHashtag articleHashtag : articlehashtagrepository.findByArticleId(articleId)){
-                articleHashtag.setArticle(null);
-                articleHashtag.setHashtag(null);
-            }
+    @Transactional(readOnly = true)
+    public Hashtag.HashtagDto getHashtag(String hashtag) {
+        return Hashtag.HashtagDto.from(hashtagRepository.findByHashtag(hashtag).orElseThrow(()-> new EntityNotFoundException("해시태그가 없습니다 - hashtag: " + hashtag)));
+    }
+
+    public Article articleHashtagUpdateNull(Long articleId){
+        Article article = articleRepository.findById(articleId)
+                .orElseThrow(() -> new EntityNotFoundException("게시글이 없습니다 - articleId: " + articleId));
+        articlehashtagrepository.findByArticleId(articleId).forEach(articleHashtag -> {
+            articleHashtag.setArticle(null);
+            articleHashtag.setHashtag(null);
         });
+        return article;
     }
 }

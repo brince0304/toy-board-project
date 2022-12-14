@@ -71,8 +71,8 @@ public class Hashtag{
             );
         }
 
-        public static List<HashtagDto> from(String hashtag){
-            List<Hashtag.HashtagDto> hashtagDtos =new ArrayList<>();
+        public static Set<HashtagDto> from(String hashtag){
+            Set<Hashtag.HashtagDto> hashtagDtos = new HashSet<>();
             if(hashtag!=null) {
                 if (hashtag.contains("#")) {
                     String newHashtag = hashtag.replaceAll(" ", "");

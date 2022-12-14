@@ -102,7 +102,7 @@ public class ArticleController {
         }
         Set<SaveFile.SaveFileDto> saveFileDtos = saveFileService.getFileDtosFromRequestsFileIds(dto);
         saveFileService.deleteUnuploadedFilesFromArticleContent(dto.getContent(), dto.getFileIds());
-        return new ResponseEntity<>(articleService.saveArticle(dto.toDto(boardPrincipal.toDto()), Hashtag.HashtagDto.from(dto.getHashtag()), saveFileDtos).id().toString(), HttpStatus.OK);
+        return new ResponseEntity<>(articleService.saveArticle(dto.toDto(boardPrincipal.toDto()), saveFileDtos).id().toString(), HttpStatus.OK);
     }
 
 
@@ -149,7 +149,7 @@ public class ArticleController {
             }
             Set<SaveFile.SaveFileDto> saveFileDtos = saveFileService.getFileDtosFromRequestsFileIds(articleRequest);
             saveFileService.deleteUnuploadedFilesFromArticleContent(articleRequest.getContent(), Objects.requireNonNull(articleRequest.getFileIds()));
-            articleService.updateArticle(articleRequest.getArticleId(), articleRequest, Hashtag.HashtagDto.from(articleRequest.getHashtag()), saveFileDtos);
+            articleService.updateArticle(articleRequest.getArticleId(), articleRequest.toDto(boardPrincipal.toDto()), saveFileDtos);
             return new ResponseEntity<>("articleUpdating Success", HttpStatus.OK);
         }
         catch (EntityNotFoundException e){
