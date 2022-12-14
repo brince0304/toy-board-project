@@ -118,22 +118,13 @@ public class Article extends AuditingFields{
             this.hashtag = hashtag;
             this.fileIds = fileIds;
         }
-
-
-        public ArticleRequest of(String title, String content, String hashtag,String fileIds) {
-            return new ArticleRequest(title, content, hashtag,fileIds);
-
-        }
-
-
-
         public ArticleDto toDto(UserAccount.UserAccountDto userAccountDto) {
-            return ArticleDto.of(
-                    userAccountDto,
-                    title,
-                    content,
-                    hashtag
-            );
+            return ArticleDto.builder()
+                    .title(title)
+                    .content(content)
+                    .userAccountDto(userAccountDto)
+                    .hashtags(Hashtag.HashtagDto.from(hashtag))
+                    .build();
         }
     }
 
@@ -152,10 +143,6 @@ public class Article extends AuditingFields{
             Integer viewCount,
             Integer likeCount
     ) implements Serializable {
-
-        public static ArticleWithCommentResponse of(Long id, String title, String content, LocalDateTime createdAt, String email, String nickname, String userId, Set<ArticleComment.ArticleCommentResponse> articleCommentResponses, Set<Hashtag.HashtagDto> hashtags, String deleted, Integer viewCount, Integer likeCount) {
-            return new ArticleWithCommentResponse(id, title, content, createdAt, email, nickname, userId,articleCommentResponses,hashtags, deleted,viewCount, likeCount);
-        }
 
         public static ArticleWithCommentResponse from(ArticleWithCommentDto dto) {
             String nickname = dto.getUserAccountDto().nickname();
@@ -192,16 +179,9 @@ public class Article extends AuditingFields{
             String deleted,
             Integer viewCount,
             Integer likeCount,
-            String hashtag
+            Set<Hashtag.HashtagDto> hashtags
 
     ) {
-
-        public static ArticleDto of(UserAccount.UserAccountDto userAccountDto, String title, String content, String hashtag) {
-            return new ArticleDto(null, userAccountDto, title, content,null, null,null, null,null,null,null,hashtag);
-        }
-        public static ArticleDto of(Long id, UserAccount.UserAccountDto userAccountDto, String title,String content ,LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy, String deleted, Integer viewCount, Integer likeCount, String hashtag) {
-            return new ArticleDto(id, userAccountDto, title, content , createdAt, createdBy, modifiedAt, modifiedBy,deleted, viewCount, likeCount,hashtag);
-        }
 
         public static ArticleDto from(Article entity) {
             return ArticleDto.builder()
@@ -267,13 +247,6 @@ public class Article extends AuditingFields{
             this.saveFiles = saveFiles;
         }
 
-        public static ArticleWithCommentDto of(Long id, UserAccount.UserAccountDto userAccountDto, Set<ArticleComment.ArticleCommentDto> articleCommentDtos, String title, String content, LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy, Set<Hashtag.HashtagDto> hashtags, String deleted, Integer viewCount, Integer likeCount, Set<SaveFile.SaveFileDto> saveFiles) {
-            return new ArticleWithCommentDto(id, userAccountDto, articleCommentDtos, title, content, createdAt, createdBy, modifiedAt, modifiedBy, hashtags, deleted, viewCount, likeCount, saveFiles);
-        }
-        public static ArticleWithCommentDto of(Long id, UserAccount.UserAccountDto userAccountDto, Set<ArticleComment.ArticleCommentDto> articleCommentDtos, String title, String content, LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy, String deleted, Integer viewCount, Integer likeCount, Set<SaveFile.SaveFileDto> saveFiles) {
-            return new ArticleWithCommentDto(id, userAccountDto, articleCommentDtos, title, content, createdAt, createdBy, modifiedAt, modifiedBy, null, deleted, viewCount, likeCount, saveFiles);
-        }
-
         public static ArticleWithCommentDto from(Article entity) {
             return ArticleWithCommentDto.builder()
                     .id(entity.getId())
@@ -305,10 +278,6 @@ public class Article extends AuditingFields{
             Integer viewCount,
             Integer likeCount
     ) implements Serializable {
-
-        public static ArticleResponse of(Long id, String title, String content,  LocalDateTime createdAt, String email, String nickname, String deleted,Integer viewCount, Integer likeCount) {
-            return new ArticleResponse(id, title, content,  createdAt, email, nickname, deleted,viewCount, likeCount);
-        }
 
         public static ArticleResponse from(Article.ArticleDto dto) {
             String nickname = dto.userAccountDto().nickname();
