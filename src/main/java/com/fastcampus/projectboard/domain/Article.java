@@ -9,7 +9,6 @@ import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Getter //setter는 따로 생성 ( 자동으로 설정되는 값이 있기 때문 )
 @ToString(callSuper = true)
@@ -137,14 +136,13 @@ public class Article extends AuditingFields{
             String email,
             String nickname,
             String userId,
-            Set<ArticleComment.ArticleCommentResponse> articleCommentsResponse,
             Set<Hashtag.HashtagDto> hashtags,
             String deleted,
             Integer viewCount,
             Integer likeCount
     ) implements Serializable {
 
-        public static ArticleWithCommentResponse from(ArticleWithCommentDto dto) {
+        public static ArticleWithCommentResponse from(ArticleDtoWithSaveFiles dto) {
             String nickname = dto.getUserAccountDto().nickname();
             if (nickname == null || nickname.isBlank()) {
                 nickname = dto.getUserAccountDto().userId();
@@ -158,7 +156,6 @@ public class Article extends AuditingFields{
                     dto.getUserAccountDto().email(),
                     nickname,
                     dto.getUserAccountDto().userId(),
-                    dto.getArticleCommentDtos().stream().map(ArticleComment.ArticleCommentResponse::from).collect(Collectors.toCollection(LinkedHashSet::new)),
                     dto.getHashtags(),
                     dto.getDeleted(),
                     dto.getViewCount(),
@@ -210,10 +207,9 @@ public class Article extends AuditingFields{
     @Builder
     @Getter
     @Setter
-    public static class ArticleWithCommentDto {
+    public static class ArticleDtoWithSaveFiles {
         Long id ;
         UserAccount.UserAccountDto userAccountDto ;
-        Set<ArticleComment.ArticleCommentDto> articleCommentDtos ;
         String title ;
         String content ;
         LocalDateTime createdAt ;
@@ -227,13 +223,11 @@ public class Article extends AuditingFields{
         Integer likeCount ;
 
         Set<SaveFile.SaveFileDto> saveFiles;
-        public ArticleWithCommentDto(Long id,
-                                     UserAccount.UserAccountDto userAccountDto,
-                                     Set<ArticleComment.ArticleCommentDto> articleCommentDtos,
-                                     String title, String content, LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy, Set<Hashtag.HashtagDto> hashtags, String deleted, Integer viewCount, Integer likeCount, Set<SaveFile.SaveFileDto> saveFiles) {
+        public ArticleDtoWithSaveFiles(Long id,
+                                       UserAccount.UserAccountDto userAccountDto,
+                                       String title, String content, LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt, String modifiedBy, Set<Hashtag.HashtagDto> hashtags, String deleted, Integer viewCount, Integer likeCount, Set<SaveFile.SaveFileDto> saveFiles) {
             this.id = id;
             this.userAccountDto = userAccountDto;
-            this.articleCommentDtos = articleCommentDtos;
             this.title = title;
             this.content = content;
             this.createdAt = createdAt;
@@ -247,11 +241,10 @@ public class Article extends AuditingFields{
             this.saveFiles = saveFiles;
         }
 
-        public static ArticleWithCommentDto from(Article entity) {
-            return ArticleWithCommentDto.builder()
+        public static ArticleDtoWithSaveFiles from(Article entity) {
+            return ArticleDtoWithSaveFiles.builder()
                     .id(entity.getId())
                     .userAccountDto(UserAccount.UserAccountDto.from(entity.getUserAccount()))
-                    .articleCommentDtos(entity.getArticleComments().stream().map(ArticleComment.ArticleCommentDto::from).collect(Collectors.toCollection(LinkedHashSet::new)))
                     .title(entity.getTitle())
                     .content(entity.getContent())
                     .createdAt(entity.getCreatedAt())
@@ -295,6 +288,43 @@ public class Article extends AuditingFields{
                     dto.deleted(),
                     dto.viewCount(),
                     dto.likeCount()
+            );
+        }
+
+    }
+
+    public record ArticleRepsonseWithSaveFile(
+            Long id,
+            String title,
+            String content,
+            LocalDateTime createdAt,
+            String email,
+            String nickname,
+            String deleted,
+            Integer viewCount,
+            Integer likeCount,
+            Set<SaveFile.SaveFileDto> saveFiles,
+            Set<Hashtag.HashtagDto> hashtags
+    ) implements Serializable {
+
+        public static ArticleRepsonseWithSaveFile from(ArticleDtoWithSaveFiles dto) {
+            String nickname = dto.getUserAccountDto().nickname();
+            if (nickname == null || nickname.isBlank()) {
+                nickname = dto.getUserAccountDto().userId();
+            }
+
+            return new ArticleRepsonseWithSaveFile(
+                    dto.getId(),
+                    dto.getTitle(),
+                    dto.getContent(),
+                    dto.getCreatedAt(),
+                    dto.getUserAccountDto().email(),
+                    nickname,
+                    dto.getDeleted(),
+                    dto.getViewCount(),
+                    dto.getLikeCount(),
+                    dto.getSaveFiles(),
+                    dto.getHashtags()
             );
         }
 

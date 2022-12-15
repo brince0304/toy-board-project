@@ -38,13 +38,13 @@
                         <input type="hidden" th:value="${article.id}" id="articleId">
                 </div>
                 <div style="display:inline" class="buttons">
-                    <a sec:authorize="isAuthenticated()" th:if="${article.userId() != null && #authentication.getName() == article.userId()}"
+                    <a sec:authorize="isAuthenticated()" th:if="${article.nickname() != null && #authentication.getName() == article.nickname()}"
                     th:href="@{|/articles/post/${articleId}|}">
                         <button type="button"  class="btn btn-light">글 수정</button>
                     </a>
                     <a href="javascript:void(0);" th:data-uri="@{/articles}"
                        sec:authorize="isAuthenticated()"
-                       th:if="${article.userId() != null && #authentication.getName() == article.userId() || #authorization.expression('hasRole(''ADMIN'')')}"
+                       th:if="${#authentication.getName() == article.nickname() || #authorization.expression('hasRole(''ADMIN'')')}"
                        class="delete">
                         <input type="text" th:value="${articleId}"  hidden style="display:none">
                         <button type="button" class="btn btn-light">글 삭제</button>

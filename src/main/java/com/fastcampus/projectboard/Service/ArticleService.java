@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,15 +37,15 @@ public class ArticleService {
 
 
     @Transactional(readOnly = true)
-    public Page<Article.ArticleDto> searchArticles(SearchType searchType, String searchKeyword, Pageable pageable) {
+    public Page<Article.ArticleResponse> searchArticles(SearchType searchType, String searchKeyword, Pageable pageable) {
         if (searchKeyword == null || searchKeyword.isBlank()) {
-            return articleRepository.findAll(pageable).map(Article.ArticleDto::from);
+            return articleRepository.findAll(pageable).map(Article.ArticleDto::from).map(Article.ArticleResponse::from);
         }
         return switch (searchType) {
-            case TITLE -> articleRepository.findByTitleContaining(searchKeyword, pageable).map(Article.ArticleDto::from);
-            case CONTENT -> articleRepository.findByContentContaining(searchKeyword, pageable).map(Article.ArticleDto::from);
-            case ID -> articleRepository.findByUserAccount_UserIdContaining(searchKeyword, pageable).map(Article.ArticleDto::from);
-            case NICKNAME -> articleRepository.findByUserAccount_NicknameContaining(searchKeyword, pageable).map(Article.ArticleDto::from);
+            case TITLE -> articleRepository.findByTitleContaining(searchKeyword, pageable).map(Article.ArticleDto::from).map(Article.ArticleResponse::from);
+            case CONTENT -> articleRepository.findByContentContaining(searchKeyword, pageable).map(Article.ArticleDto::from).map(Article.ArticleResponse::from);
+            case ID -> articleRepository.findByUserAccount_UserIdContaining(searchKeyword, pageable).map(Article.ArticleDto::from).map(Article.ArticleResponse::from);
+            case NICKNAME -> articleRepository.findByUserAccount_NicknameContaining(searchKeyword, pageable).map(Article.ArticleDto::from).map(Article.ArticleResponse::from);
             case HASHTAG -> null;
         };
     }
@@ -56,11 +55,12 @@ public class ArticleService {
     }
 
     @Transactional(readOnly = true)
-    public Set<Article.ArticleDto> getArticlesByHashtag(String hashtag) {
+    public Set<Article.ArticleResponse> getArticlesByHashtag(String hashtag) {
         return hashtagRepository.findByHashtag(hashtag).isPresent() ?
                 hashtagRepository.findByHashtag(hashtag).get().getArticles().stream()
                         .map(ArticleHashtag::getArticle)
                         .map(Article.ArticleDto::from)
+                        .map(Article.ArticleResponse::from)
                         .collect(Collectors.toSet()) : new HashSet<>();
     }
     public void saveHashtags(Set<Hashtag.HashtagDto> hashtags) {
@@ -96,13 +96,13 @@ public class ArticleService {
     }
 
     @Transactional(readOnly = true)
-    public Article.ArticleWithCommentDto getArticle(Long articleId) {
+    public Article.ArticleDtoWithSaveFiles getArticle(Long articleId) {
         Set<Hashtag.HashtagDto> hashtags = articlehashtagrepository.findByArticleId(articleId).stream()
                 .map(ArticleHashtag::getHashtag)
                 .map(Hashtag.HashtagDto::from)
                 .collect(Collectors.toSet());
-        Article.ArticleWithCommentDto article =articleRepository.findById(articleId)
-                .map(Article.ArticleWithCommentDto::from)
+        Article.ArticleDtoWithSaveFiles article =articleRepository.findById(articleId)
+                .map(Article.ArticleDtoWithSaveFiles::from)
                 .orElseThrow(EntityNotFoundException::new);
         Set<SaveFile.SaveFileDto>  saveFiles = articleSaveFileRepository.getSaveFileByArticleId(articleId).stream()
                         .map(ArticleSaveFile::getSaveFile)
@@ -143,7 +143,6 @@ public class ArticleService {
             if(dto.title() != null) article.setTitle(dto.title());
             if(dto.content() != null) article.setContent(dto.content());
             articleHashtagSavefileMapper(article,dto.hashtags(),saveFileDtos);
-
         }
     public void articleHashtagSavefileMapper(Article article,Set<Hashtag.HashtagDto> hashtags , Set<SaveFile.SaveFileDto> saveFiles){
         for( Hashtag.HashtagDto hashtag: hashtags){

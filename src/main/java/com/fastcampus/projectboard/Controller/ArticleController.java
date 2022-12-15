@@ -45,7 +45,7 @@ public class ArticleController {
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
             , ModelMap map) {
 
-        map.addAttribute("articles", articleService.searchArticles(searchType, searchValue, pageable).map(Article.ArticleResponse::from));
+        map.addAttribute("articles", articleService.searchArticles(searchType, searchValue, pageable));
         return "articles/index";
     }
 
@@ -53,10 +53,9 @@ public class ArticleController {
     public String getArticleByArticleId(@PathVariable Long articleId, ModelMap map, ArticleComment.ArticleCommentRequest articleCommentRequest,
                                         HttpServletRequest req) {
         try{
-        Article.ArticleWithCommentResponse articleResponse = Article.ArticleWithCommentResponse.from(articleService.getArticle(articleId));
+        Article.ArticleRepsonseWithSaveFile articleResponse = Article.ArticleRepsonseWithSaveFile.from(articleService.getArticle(articleId));
         articleService.updateViewCount(req.getRemoteAddr(), articleId);
         map.addAttribute("article", articleResponse);
-        map.addAttribute("articleComments", articleResponse.articleCommentsResponse());
         map.addAttribute("dto", articleCommentRequest);}
         catch (EntityNotFoundException e){
             return "redirect:/articles";
@@ -84,7 +83,6 @@ public class ArticleController {
         map.addAttribute("hashtag", articleService.getHashtag(hashtag));
         return "articles/tag/result";
     }
-
     @GetMapping("/post")
     public String getPostPage(Model model, Article.ArticleRequest articleRequest, @AuthenticationPrincipal UserAccount.BoardPrincipal principal) {
         model.addAttribute("dto", articleRequest);
@@ -92,7 +90,7 @@ public class ArticleController {
     }
     @ResponseBody
     @PostMapping
-    public ResponseEntity<String> saveArticle(@RequestBody @Valid Article.ArticleRequest dto, BindingResult bindingResult,
+    public ResponseEntity<String> saveArticle(@RequestBody @Valid Article.ArticleRequest articleRequest, BindingResult bindingResult,
                                               @AuthenticationPrincipal UserAccount.BoardPrincipal boardPrincipal) {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(ErrorMessages.ENTITY_NOT_VALID, HttpStatus.BAD_REQUEST);
@@ -100,9 +98,9 @@ public class ArticleController {
         if (boardPrincipal == null) {
             return new ResponseEntity<>(ErrorMessages.ACCESS_TOKEN_NOT_FOUND, HttpStatus.BAD_REQUEST);
         }
-        Set<SaveFile.SaveFileDto> saveFileDtos = saveFileService.getFileDtosFromRequestsFileIds(dto);
-        saveFileService.deleteUnuploadedFilesFromArticleContent(dto.getContent(), dto.getFileIds());
-        return new ResponseEntity<>(articleService.saveArticle(dto.toDto(boardPrincipal.toDto()), saveFileDtos).id().toString(), HttpStatus.OK);
+        Set<SaveFile.SaveFileDto> saveFileDtos = saveFileService.getFileDtosFromRequestsFileIds(articleRequest);
+        saveFileService.deleteUnuploadedFilesFromArticleContent(articleRequest.getContent(), articleRequest.getFileIds());
+        return new ResponseEntity<>(articleService.saveArticle(articleRequest.toDto(boardPrincipal.toDto()), saveFileDtos).id().toString(), HttpStatus.OK);
     }
 
 
@@ -111,20 +109,20 @@ public class ArticleController {
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/post/{articleId}")
     public String updateArticle(@PathVariable Long articleId, ModelMap map,
-                                Article.ArticleRequest dto,
+                                Article.ArticleRequest articleUpdateRequest,
                                 @AuthenticationPrincipal UserAccount.BoardPrincipal boardPrincipal) {
         try {
-            Article.ArticleWithCommentDto articleDto = articleService.getArticle(articleId);
-            dto.setContent(articleDto.getContent());
-            dto.setTitle(articleDto.getTitle());
+            Article.ArticleDtoWithSaveFiles articleDto = articleService.getArticle(articleId);
+            articleUpdateRequest.setContent(articleDto.getContent());
+            articleUpdateRequest.setTitle(articleDto.getTitle());
             if (!articleDto.getUserAccountDto().userId().equals(boardPrincipal.username())) {
                 return "redirect:/articles";
             } else {
-                dto.setFileIds(ControllerUtil.fileIdsToString(articleDto.getSaveFiles()));
-                dto.setHashtag(ControllerUtil.hashtagsToString(articleDto.getHashtags()));
+                articleUpdateRequest.setFileIds(ControllerUtil.fileIdsToString(articleDto.getSaveFiles()));
+                articleUpdateRequest.setHashtag(ControllerUtil.hashtagsToString(articleDto.getHashtags()));
                 CopyDown converter = new CopyDown();
-                dto.setContent(converter.convert(dto.getContent()));
-                map.addAttribute("dto", dto);
+                articleUpdateRequest.setContent(converter.convert(articleUpdateRequest.getContent()));
+                map.addAttribute("dto", articleUpdateRequest);
             }
             map.addAttribute("articleId", articleId);
             return "articles/put/article_form";
