@@ -2,6 +2,7 @@ package com.fastcampus.projectboard.Service;
 
 
 import com.fastcampus.projectboard.domain.Article;
+import com.fastcampus.projectboard.domain.Hashtag;
 import com.fastcampus.projectboard.domain.UserAccount;
 
 import com.fastcampus.projectboard.repository.ArticleRepository;
@@ -147,7 +148,7 @@ public class UserServiceTest {
                 .id(1L)
                 .title(title)
                 .content(content)
-                .hashtag(hashtag)
+                .hashtags(Hashtag.HashtagDto.from(hashtag))
                 .userAccountDto(createUserAccountDto())
                 .build();
     }

@@ -20,8 +20,6 @@ import java.util.stream.Collectors;
 })  //테이블 컬럼 인덱스 설정
  // 인덱스 이름이 없으니 키 부여
 @Entity
-@Builder
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Article extends AuditingFields{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 프라이머리 키
@@ -97,6 +95,8 @@ public class Article extends AuditingFields{
     @Getter
     @Setter
     @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class ArticleRequest implements Serializable {
         @Nullable
         private Long articleId;

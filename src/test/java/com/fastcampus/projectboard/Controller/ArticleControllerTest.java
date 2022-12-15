@@ -74,7 +74,7 @@ class ArticleControllerTest {
                 of(article,signupDto.toEntity(),"haha");
 
         userService.saveUserAccountWithoutProfile(signupDto);
-        articleService.saveArticle(Article.ArticleDto.from(article),null,null);
+        articleService.saveArticle(Article.ArticleDto.from(article),null);
     }
 
     @DisplayName("[view][GET] 게시글 페이지 ")

@@ -1,18 +1,22 @@
 package com.fastcampus.projectboard.Service;
 
-import com.fastcampus.projectboard.domain.Article;
-import com.fastcampus.projectboard.domain.Hashtag;
-import com.fastcampus.projectboard.domain.UserAccount;
+import com.fastcampus.projectboard.config.JpaConfig;
+import com.fastcampus.projectboard.domain.*;
 import com.fastcampus.projectboard.domain.type.SearchType;
-import com.fastcampus.projectboard.repository.ArticleRepository;
+import com.fastcampus.projectboard.repository.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.data.web.PageableDefault;
 
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
@@ -30,143 +34,132 @@ class ArticleServiceTest {
 
     @InjectMocks private ArticleService sut;
 
-
     @Mock private ArticleRepository articleRepository;
+    @Mock private HashtagRepository hashtagRepository;
+    @Mock private ArticleHashtagRepository articleHashtagRepository;
+    @Mock private ArticleSaveFileRepository articleSaveFileRepository;
 
-    @DisplayName("검색어 없이 게시글을 검색하면, 게시글 페이지를 반환한다.")
+    @Mock private SaveFileRepository saveFileRepository;
+
+    @DisplayName("게시글을 작성할 수 있다.")
     @Test
-    void givenNoSearchParameters_whenSearchingArticles_thenReturnsArticlePage() {
-        // Given
-        Pageable pageable = Pageable.ofSize(20);
-        given(articleRepository.findAll(pageable)).willReturn(Page.empty());
-
-        // When
-        Page<Article.ArticleDto> articles = sut.searchArticles(null, null, pageable);
-
-        // Then
-        assertThat(articles).isEmpty();
-        then(articleRepository).should().findAll(pageable);
-    }
-
-    @DisplayName("검색어와 함께 게시글을 검색하면, 게시글 페이지를 반환한다.")
-    @Test
-    void givenSearchParameters_whenSearchingArticles_thenReturnsArticlePage() {
-        // Given
-        SearchType searchType = SearchType.TITLE;
-        String searchKeyword = "title";
-        Pageable pageable = Pageable.ofSize(20);
-        given(articleRepository.findByTitleContaining(searchKeyword, pageable)).willReturn(Page.empty());
-
-        // When
-        Page<Article.ArticleDto> articles = sut.searchArticles(searchType, searchKeyword, pageable);
-
-        // Then
-        assertThat(articles).isEmpty();
-        then(articleRepository).should().findByTitleContaining(searchKeyword, pageable);
-    }
-
-    @DisplayName("게시글을 조회하면, 게시글을 반환한다.")
-    @Test
-    void givenArticleId_whenSearchingArticle_thenReturnsArticle() {
-        // Given
-        Long articleId = 1L;
+    void givenArticle_whenWritingArticle_thenWritesArticle() {
+        //given
         Article article = createArticle();
-        given(articleRepository.findById(articleId)).willReturn(Optional.of(article));
+        UserAccount userAccount = createUserAccount();
+        given(articleRepository.save(any(Article.class))).willReturn(article);
+        //when
+        sut.saveArticle(createArticleRequest().toDto(UserAccount.UserAccountDto.from(userAccount)),createSaveFiles());
 
-        // When
-        Article.ArticleWithCommentDto dto = sut.getArticle(articleId);
-
-        // Then
-        assertThat(dto)
-                .hasFieldOrPropertyWithValue("title", article.getTitle()) ;
-        then(articleRepository).should().findById(articleId);
-    }
-
-
-
-    @DisplayName("없는 게시글을 조회하면, 예외를 던진다.")
-    @Test
-    void givenNonexistentArticleId_whenSearchingArticle_thenThrowsException() {
-        // Given
-        Long articleId = 0L;
-        given(articleRepository.findById(articleId)).willReturn(Optional.empty());
-
-        // When
-        Throwable t = catchThrowable(() -> sut.getArticle(articleId));
-
-        // Then
-        assertThat(t)
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("게시글이 없습니다 - articleId: " + articleId);
-        then(articleRepository).should().findById(articleId);
-    }
-
-    @DisplayName("게시글 정보를 입력하면, 게시글을 생성한다.")
-    @Test
-    void givenArticleInfo_whenSavingArticle_thenSavesArticle() {
-        // Given
-        Article article = createArticle();
-        Hashtag hashtag= createHashtag();
-        List<Hashtag.HashtagDto> dtos= new ArrayList<>();
-        dtos.add(Hashtag.HashtagDto.from(hashtag));
-
-        // When
-        sut.saveArticle(Article.ArticleDto.from(article),dtos,null);
-        // Then
+        //then
         then(articleRepository).should().save(any(Article.class));
     }
-
-    private Hashtag createHashtag() {
-        return Hashtag.builder()
-                .id(1L)
-                .hashtag("hashtag")
-                .build();
-    }
-
-    @DisplayName("게시글의 수정 정보를 입력하면, 게시글을 수정한다.")
+    @DisplayName("게시글을 조회할 수 있다.")
     @Test
-    void givenModifiedArticleInfo_whenUpdatingArticle_thenUpdatesArticle() {
-        // Given
+    void givenArticle_whenReadingArticle_thenReadsArticle() {
+        //given
         Article article = createArticle();
-        Article.ArticleDto dto = createArticleDto("새 타이틀", "새 내용", "#springboot");
-        given(articleRepository.getReferenceById(dto.id())).willReturn(article);
+        given(articleRepository.findById(any(Long.class))).willReturn(Optional.of(article));
 
-        // When
-
-        // Then
-        assertThat(article)
-                .hasFieldOrPropertyWithValue("title", dto.title())
-                .hasFieldOrPropertyWithValue("content", dto.content());
-        then(articleRepository).should().getReferenceById(dto.id());
+        //when
+        sut.getArticle(1L);
+        //then
+        then(articleRepository).should().findById(any(Long.class));
     }
-
-    @DisplayName("없는 게시글의 수정 정보를 입력하면, 경고 로그를 찍고 아무 것도 하지 않는다.")
+    @DisplayName("게시글을 수정할 수 있다.")
     @Test
-    void givenNonexistentArticleInfo_whenUpdatingArticle_thenLogsWarningAndDoesNothing() {
-        // Given
-        Article.ArticleDto dto = createArticleDto("새 타이틀", "새 내용", "#springboot");
-        given(articleRepository.getReferenceById(1L)).willThrow(EntityNotFoundException.class);
+    void givenArticleAndUpdateDetails_whenUpdatingArticle_thenUpdatesArticle() {
+        //given
+        Article article = createArticle();
+        given(articleRepository.findById(any(Long.class))).willReturn(Optional.of(article));
 
-        // When
-        // Then
-        then(articleRepository).should().getReferenceById(dto.id());
+        //when
+        sut.updateArticle(1L,createArticleRequest().toDto(UserAccount.UserAccountDto.from(createUserAccount())),createSaveFiles());
+
+        //then
+        assertThat(article.getTitle()).isEqualTo(createArticleRequest().getTitle());
+
     }
 
-
-    @DisplayName("게시글의 ID를 입력하면, 게시글을 삭제한다")
+    @DisplayName("게시글을 삭제할 수 있다.")
     @Test
     void givenArticleId_whenDeletingArticle_thenDeletesArticle() {
-        // Given
-        Long articleId = 1L;
+        //given
         Article article = createArticle();
-        // When
+        given(articleRepository.findById(any(Long.class))).willReturn(Optional.of(article));
+
+        //when
         sut.deleteArticleByArticleId(1L);
 
-        // Then
-        then(articleRepository).should().getReferenceById(articleId);
+        //then
+        assertThat(article.getDeleted()).isEqualTo("Y");
+    }
+
+    @DisplayName("게시글을 검색할 수 있다.")
+    @Test
+    void givenSearchTypeAndKeyword_whenSearchingArticle_thenSearchesArticle() {
+        //given
+        Article article = createArticle();
+        given(articleRepository.findByTitleContaining(any(String.class),any(Pageable.class))).willReturn(Page.empty());
+
+        //when
+        sut.searchArticles(SearchType.TITLE,"test",Pageable.unpaged());
+
+        //then
+        then(articleRepository).should().findByTitleContaining(any(String.class),any(Pageable.class));
+    }
+    @DisplayName("해시태그를 등록할 수 있다.")
+    @Test
+    void givenArticleRequest_whenInsertingHashtag_thenSavesHashtagAndMapWithArticle() {
+        //given
+        Article article = createArticle();
+        Hashtag hashtag = createHashtag();
+        given(articleRepository.save(any(Article.class))).willReturn(article);
+        given(hashtagRepository.save(any(Hashtag.class))).willReturn(hashtag);
+        given(articleHashtagRepository.save(any(ArticleHashtag.class))).willReturn(ArticleHashtag.of(article,hashtag));
+
+        //when
+        sut.saveArticle(createArticleRequest().toDto(UserAccount.UserAccountDto.from(createUserAccount())),createSaveFiles());
+
+        //then
+        then(articleHashtagRepository).should().save(any(ArticleHashtag.class));
+    }
+
+
+    @DisplayName("해시태그 연결 관계를 끊을 수 있다.")
+    @Test
+    void givenArticleId_whenDeletingHashtag_thenDeletesHashtagAndMapWithArticle() {
+        //given
+        Article article = createArticle();
+        Long countHashtags = hashtagRepository.count();
+        given(articleRepository.findById(any(Long.class))).willReturn(Optional.of(article));
+        //when
+        sut.updateArticle(any(Long.class),createArticleRequestForUpdating().toDto(UserAccount.UserAccountDto.from(createUserAccount())),createSaveFiles());
+
+        //then
+        then(articleHashtagRepository).should().findByArticleId(any(Long.class));
+        assertThat(countHashtags).isEqualTo(hashtagRepository.count());
+    }
+
+
+
+    private SaveFile createSaveFile() {
+        return SaveFile.builder()
+                .id(1L)
+                .fileName("test")
+                .filePath("test")
+                .fileSize(1L)
+                .fileType("test")
+                .build();
 
     }
 
+    private Hashtag createHashtag(){
+        return Hashtag.builder()
+                .id(1L)
+                .hashtag("test")
+                .build();
+    }
 
     private UserAccount createUserAccount() {
         return UserAccount.builder()
@@ -178,11 +171,7 @@ class ArticleServiceTest {
     }
 
     private Article createArticle() {
-        return Article.of(
-                createUserAccount(),
-                "title",
-                "content"
-        );
+        return Article.of(createUserAccount(), "제목", "내용 test", null);
     }
 
     private Article.ArticleDto createArticleDto() {
@@ -192,9 +181,26 @@ class ArticleServiceTest {
     private Article.ArticleDto createArticleDto(String title, String content, String hashtag) {
 
         return Article.ArticleDto.builder()
+                .userAccountDto(UserAccount.UserAccountDto.from(createUserAccount()))
                 .title(title)
                 .content(content)
-                .hashtag(hashtag)
+                .hashtags(Hashtag.HashtagDto.from(hashtag))
+                .build();
+    }
+
+    private Article.ArticleRequest createArticleRequest() {
+        return Article.ArticleRequest.builder()
+                .title("title")
+                .content("content")
+                .hashtag("")
+                .build();
+    }
+
+    private Article.ArticleRequest createArticleRequestForUpdating() {
+        return Article.ArticleRequest.builder()
+                .title("title")
+                .content("content")
+                .hashtag("#java")
                 .build();
     }
 
@@ -216,6 +222,18 @@ class ArticleServiceTest {
                 .likeCount(0)
                 .articleCommentDtos(null)
                 .build();
+    }
+
+    private Set<SaveFile.SaveFileDto> createSaveFiles(){
+        Set<SaveFile.SaveFileDto> saveFileDtos = new HashSet<>();
+        saveFileDtos.add(SaveFile.SaveFileDto.builder()
+                .id(1L)
+                .fileName("fileName")
+                .filePath("filePath")
+                .fileSize(100L)
+                .build());
+        return saveFileDtos;
+
     }
 
 }
