@@ -132,8 +132,8 @@ class JpaRepositoryTest {
         return UserAccount.UserAccountDto.from(createUserAccount());
     }
 
-    private Article.ArticleWithCommentDto createArticleWithCommentDto() {
-        return Article.ArticleWithCommentDto.builder()
+    private Article.ArticleDtoWithSaveFiles createArticleWithCommentDto() {
+        return Article.ArticleDtoWithSaveFiles.builder()
                 .id(1L)
                 .userAccountDto(createUserAccountDto())
                 .title("title")
@@ -144,7 +144,6 @@ class JpaRepositoryTest {
                 .modifiedBy("Uno")
                 .deleted("N")
                 .likeCount(0)
-                .articleCommentDtos(null)
                 .build();
     }
 
