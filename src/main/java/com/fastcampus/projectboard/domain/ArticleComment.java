@@ -32,9 +32,9 @@ public class ArticleComment extends AuditingFields{
     @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
     @Setter
     @JoinColumn(name = "userId")
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false,fetch = FetchType.LAZY)
     private UserAccount userAccount; // 유저 정보 (ID)
-    @Setter @ManyToOne(optional = false) private Article article;
+    @Setter @ManyToOne(optional = false,fetch = FetchType.LAZY) private Article article;
     @Setter @Column(nullable = false,length= 500) private String content;
 
     @Setter
@@ -122,12 +122,12 @@ public class ArticleComment extends AuditingFields{
             String nickname,
             String userId,
             String deleted,
-            Set<ArticleCommentDto> children,
+            Set<ArticleCommentResponse> children,
             String isParent
 
     ) {
 
-        public static ArticleCommentResponse of(Long id, String content, LocalDateTime createdAt, String email, String nickname, String userId, String deleted,Set<ArticleCommentDto> children,String isParent ) {
+        public static ArticleCommentResponse of(Long id, String content, LocalDateTime createdAt, String email, String nickname, String userId, String deleted,Set<ArticleCommentResponse> children,String isParent ) {
             return new ArticleCommentResponse(id, content, createdAt, email, nickname, userId, deleted,children,isParent);
         }
 
@@ -145,11 +145,18 @@ public class ArticleComment extends AuditingFields{
                     .nickname(nickname)
                     .userId(dto.userAccountDto().userId())
                     .deleted(dto.deleted())
-                    .children(dto.children())
+                    .children(ArticleCommentResponse.from(dto.children()))
                     .isParent(dto.isParent())
                     .build();
         }
-    }
+        public static Set<ArticleCommentResponse> from(Set<ArticleCommentDto> dtos) {
+            return dtos.stream()
+                    .map(ArticleCommentResponse::from)
+                    .collect(Collectors.toSet());
+        }
+        }
+
+
     @Builder
     public record ArticleCommentDto(
             Long id,
@@ -182,7 +189,7 @@ public class ArticleComment extends AuditingFields{
                     .modifiedAt(entity.getModifiedAt())
                     .modifiedBy(entity.getModifiedBy())
                     .deleted(entity.getDeleted())
-                    .children(entity.getChildren().stream().map(ArticleCommentDto::from).collect(Collectors.toSet()))
+                    .children(entity.getChildren() != null ? entity.getChildren().stream().map(ArticleCommentDto::from).collect(Collectors.toSet()) : new HashSet<>())
                     .isParent(entity.getParent() == null ? "Y" : "N")
                     .build();
         }

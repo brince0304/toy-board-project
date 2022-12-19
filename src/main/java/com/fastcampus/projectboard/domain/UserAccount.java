@@ -49,7 +49,7 @@ public class UserAccount extends AuditingFields {
 
     @Setter
     @ToString.Exclude
-    @ManyToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_img_id")
     @Nullable
     private SaveFile profileImg;

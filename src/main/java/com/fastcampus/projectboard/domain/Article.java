@@ -28,7 +28,7 @@ public class Article extends AuditingFields{
     // ull 이 아닌 값을 컬럼에 저장 함
     @Setter
     @JoinColumn(name = "userId")
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false,fetch = FetchType.LAZY)
     private UserAccount userAccount; // 유저 정보 (ID)
 
     @Setter @Column(nullable = false,length = 10000) private String content;

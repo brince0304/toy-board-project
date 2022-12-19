@@ -17,11 +17,11 @@ public class ArticleSaveFile {
 
 
     @Setter
-    @OneToOne
+    @OneToOne (fetch = FetchType.LAZY)
     private Article article;
 
     @Setter
-    @ManyToOne
+    @ManyToOne (fetch = FetchType.LAZY)
     private SaveFile saveFile;
 
     private ArticleSaveFile(Long id, Article article, SaveFile saveFile) {
