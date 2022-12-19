@@ -29,20 +29,19 @@ public class ArticleCommentController {
     @GetMapping("/{articleId}")
     public ResponseEntity<?> getComments(@PathVariable Long articleId) {
         try{
-        return new ResponseEntity<>(articleCommentService.searchArticleComments(articleId), HttpStatus.OK);
+        return new ResponseEntity<>(ArticleComment.ArticleCommentResponse.from(articleCommentService.searchArticleComments(articleId)), HttpStatus.OK);
     }
         catch (EntityNotFoundException e){
             ModelAndView mav = new ModelAndView("redirect:/");
             return new ResponseEntity<>(mav, HttpStatus.NOT_FOUND);
         }
-
     }
 
 
     @GetMapping("/c/{articleCommentId}")
     public ResponseEntity<?> getArticleComment(@PathVariable Long articleCommentId) {
         try {
-            return new ResponseEntity<>(articleCommentService.getArticleComment(articleCommentId), HttpStatus.OK);
+            return new ResponseEntity<>(ArticleComment.ArticleCommentResponse.from(articleCommentService.getArticleComment(articleCommentId)), HttpStatus.OK);
         }
         catch (EntityNotFoundException e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
