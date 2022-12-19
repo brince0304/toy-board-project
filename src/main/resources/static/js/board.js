@@ -137,9 +137,9 @@ function getComment(){
                     html += "<li class='list-group-item comments'>";
                     html += "<div class='comment' id='"+this.id+"comment'>";
                     html += "<a href='javascript:; class='userImg'>";
-                    html += "<img src='/accounts/"+this.userAccountDto.userId+"' width='35px' height='35px' alt='userImg' class='userImg'>";
+                    html += "<img src='/accounts/"+this.userId+"' width='35px' height='35px' alt='userImg' class='userImg'>";
                     html += "</a>";
-                    html += "<a href='javascript:;' class='writer' style='display:inline'>" + this.userAccountDto.nickname + "</a>";
+                    html += "<a href='javascript:;' class='writer' style='display:inline'>" + this.nickname + "</a>";
                     html += "<div class='comment-info'>";
                     html += "<span class='comment4 date'>" + getFormatDate(new Date(this.createdAt)) + "</span>";
                     html += "<div class='comment-text' id='"+this.id+"content'> " + this.content + "</div>";
@@ -153,7 +153,7 @@ function getComment(){
                     html += "</button>";
                     html += "</a>";
                     html += "<a href='javascript:;'>";
-                    html += "<button type='button'  onclick='commentUpdateForm("+this.id+")' th:if='${"+this.userAccountDto.userId+".equals(#authentication.getName())}' class='btn btn-outline-secondary'  id='"+this.id+"updateBtn'>수정";
+                    html += "<button type='button'  onclick='commentUpdateForm("+this.id+")' th:if='${"+this.userId+".equals(#authentication.getName())}' class='btn btn-outline-secondary'  id='"+this.id+"updateBtn'>수정";
                     html += "</button>";
                     html += "</a>";
                     html += "</div>";
@@ -255,11 +255,11 @@ function getChildrenComment(id){
                     html += "<li class='list-group-item comments'>";
                     html += "<div class='childrenComment' id='" + this.id + "comment'>";
                     html += "<a href='javascript:; class='comment-img'>";
-                    html+=  "<img src='/accounts/"+this.userAccountDto.userId+"' width='35px' height='35px' alt='userImg' class='userImg' style='display:inline'>"
+                    html+=  "<img src='/accounts/"+this.nickname+"' width='35px' height='35px' alt='userImg' class='userImg' style='display:inline'>"
                     html += "</a>";
                     html += "<div class='comment-info'>";
                     html += "<span class='comment4 date'>" + getFormatDate(new Date(this.createdAt)) + "</span>";
-                    html += "<a href='javascript:;' class='writer' style='display:inline'>" + this.userAccountDto.nickname + "</a>";
+                    html += "<a href='javascript:;' class='writer' style='display:inline'>" + this.nickname + "</a>";
                     html += "<div class='comment-text' id='" + this.id + "content'> " + this.content + "</div>";
                     html += "<div class='comment_etc'>";
                     html += "<div class='comment-info'>";
