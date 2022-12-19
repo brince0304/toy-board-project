@@ -101,9 +101,7 @@ public class ArticleService {
                 .map(ArticleHashtag::getHashtag)
                 .map(Hashtag.HashtagDto::from)
                 .collect(Collectors.toSet());
-        Article.ArticleDtoWithSaveFiles article =articleRepository.findById(articleId)
-                .map(Article.ArticleDtoWithSaveFiles::from)
-                .orElseThrow(EntityNotFoundException::new);
+        Article.ArticleDtoWithSaveFiles article = Article.ArticleDtoWithSaveFiles.from(articleRepository.findById(articleId).orElseThrow(EntityNotFoundException::new));
         Set<SaveFile.SaveFileDto>  saveFiles = articleSaveFileRepository.getSaveFileByArticleId(articleId).stream()
                         .map(ArticleSaveFile::getSaveFile)
                                 .map(SaveFile.SaveFileDto::from)
@@ -158,7 +156,7 @@ public class ArticleService {
 
     @Transactional(readOnly = true)
     public Hashtag.HashtagDto getHashtag(String hashtag) {
-        return Hashtag.HashtagDto.from(hashtagRepository.findByHashtag(hashtag).orElseThrow(()-> new EntityNotFoundException("해시태그가 없습니다 - hashtag: " + hashtag)));
+        return Hashtag.HashtagDto.from(hashtagRepository.findByHashtag(hashtag).orElseThrow(EntityNotFoundException::new));
     }
 
     public Article articleHashtagUpdateNull(Long articleId){

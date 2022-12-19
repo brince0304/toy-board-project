@@ -81,7 +81,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public UserAccount.UserAccountDto getUserAccount(String userId) {
         try {
-            UserAccount userAccount = userAccountRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
+            UserAccount userAccount = userAccountRepository.getReferenceById(userId);
             return UserAccount.UserAccountDto.from(userAccount);
         } catch (Exception e) {
             throw new IllegalArgumentException("회원정보 조회에 실패했습니다");
