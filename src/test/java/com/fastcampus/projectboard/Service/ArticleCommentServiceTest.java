@@ -38,21 +38,199 @@ class ArticleCommentServiceTest {
     @Mock private ArticleRepository articleRepository;
     @Mock private ArticleCommentRepository articleCommentRepository;
 
-    @DisplayName("존재하지 않는 게시글에 댓글을 작성하면 예외가 발생한다.")
     @Test
-    void givenArticleComment_whenWritingArticleComment_thenThrowException() {
+    @DisplayName("댓글 저장")
+    void givenArticleId_whenSavingArticleComment_thenSavesArticleComment() {
         //given
-        ArticleComment articleComment = createArticleComment();
-        given(articleRepository.findById(any(Long.class))).willReturn(Optional.empty());
+        UserAccount account = createUserAccount();
+        Article article = createArticle(account);
+        ArticleComment articleComment = createArticleComment(article, account);
+        ArticleComment.ArticleCommentDto dto = ArticleComment.ArticleCommentDto.from(articleComment);
+        given(articleRepository.findById(any())).willReturn(Optional.of(article));
+        given(articleCommentRepository.save(any())).willReturn(articleComment);
+        //when
+        sut.saveArticleComment(dto);
+
+        //then
+        then(articleCommentRepository).should().save(any(ArticleComment.class));
+    }
+
+    @Test
+    @DisplayName("댓글 수정")
+    void givenUpdatingDetailsandArticleCommentId_whenUpdatingArticleComment_thenUpdatesArticleComment() {
+        //given
+        UserAccount account = createUserAccount();
+        Article article = createArticle(account);
+        ArticleComment articleComment = createArticleComment(article, account);
+        ArticleComment.ArticleCommentDto dto = ArticleComment.ArticleCommentDto.from(articleComment);
+        given(articleCommentRepository.findById(any())).willReturn(Optional.of(articleComment));
+        String content = articleComment.getContent();
+        //when
+        sut.updateArticleComment(articleComment.getId(),"updated content");
+
+        //then
+        then(articleCommentRepository).should().findById(any());
+        assertThat(articleComment.getContent()).isNotEqualTo(content);
+    }
+
+    @Test
+    @DisplayName("댓글 삭제")
+    void givenArticleCommentId_whenDeletingArticleComment_thenDeletesArticleComment() {
+        //given
+        UserAccount account = createUserAccount();
+        Article article = createArticle(account);
+        ArticleComment articleComment = createArticleComment(article, account);
+        given(articleCommentRepository.findById(any())).willReturn(Optional.of(articleComment));
+        //when
+        sut.deleteArticleComment(articleComment.getId());
+
+        //then
+        then(articleCommentRepository).should().findById(any());
+        assertThat(articleComment.getDeleted()).isEqualTo("Y");
+    }
+
+
+    @Test
+    @DisplayName("게시글 아이디로 댓글 조회시에 댓글 셋을 반환한다.")
+    void givenArticleId_whenGettingArticleCommentByArticleId_thenGetsArticleComments() {
+        //given
+        UserAccount account = createUserAccount();
+        Article article = createArticle(account);
+        ArticleComment articleComment = createArticleComment(article, account);
+        given(articleRepository.existsById(any())).willReturn(true);
+        given(articleCommentRepository.findByArticle_Id(any())).willReturn(Set.of(articleComment));
+        //when
+        Set<ArticleComment.ArticleCommentDto> articleComments = sut.searchArticleComments(article.getId());
+
+        //then
+        then(articleCommentRepository).should().findByArticle_Id(any());
+        assertThat(articleComments.size()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("대댓글을 저장한다.")
+    void givenArticleCommentId_whenSavingChildrenComment_thenSavesChildrenComment() {
+        //given
+        UserAccount account = createUserAccount();
+        Article article = createArticle(account);
+        ArticleComment articleComment = createArticleComment(article, account);
+        ArticleComment.ArticleCommentDto dto = ArticleComment.ArticleCommentDto.from(articleComment);
+        given(articleCommentRepository.findById(any())).willReturn(Optional.of(articleComment));
+        given(articleCommentRepository.save(any())).willReturn(articleComment);
+        //when
+        sut.saveChildrenComment(articleComment.getId(), dto);
+
+        //then
+        then(articleCommentRepository).should().findById(any());
+        then(articleCommentRepository).should().save(any(ArticleComment.class));
+    }
+
+    @Test
+    @DisplayName("없는 댓글에 대댓글을 달 시에 예외를 발생시킨다.")
+    void givenNotExistArticleCommentId_whenSavingChildrenComment_thenThrowsException() {
+        //given
+        UserAccount account = createUserAccount();
+        Article article = createArticle(account);
+        ArticleComment articleComment = createArticleComment(article, account);
+        ArticleComment.ArticleCommentDto dto = ArticleComment.ArticleCommentDto.from(articleComment);
+        given(articleCommentRepository.findById(any())).willReturn(Optional.empty());
+        //when
+        Throwable throwable = catchThrowable(() -> sut.saveChildrenComment(articleComment.getId(), dto));
+
+        //then
+        then(articleCommentRepository).should().findById(any());
+        assertThat(throwable).isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("없는 게시글의 댓글을 조회 시에 예외를 발생시킨다.")
+    void givenNothing_whenSearchingArticleCommentByArticleId_thenThrowsException() {
+          //when&then
+        Throwable throwable = catchThrowable(() -> sut.searchArticleComments(null));
+        assertThat(throwable).isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("없는 댓글을 수정 시에 예외를 발생시킨다.")
+    void givenNotExistArticleCommentId_whUpdateArticleCommentId_thenThrowsException() {
+        //given
+        given(articleCommentRepository.findById(any())).willReturn(Optional.empty());
+        //when
+        Throwable throwable = catchThrowable(() -> sut.updateArticleComment(1L, "updated content"));
+
+        //then
+        then(articleCommentRepository).should().findById(any());
+        assertThat(throwable).isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("없는 댓글을 삭제 시에 예외를 발생시킨다.")
+    void givenNotExistArticleCommentId_whenDeletesArticleCommentId_thenThrowsException() {
+        //given
+        given(articleCommentRepository.findById(any())).willReturn(Optional.empty());
+        //when
+        Throwable throwable = catchThrowable(() -> sut.deleteArticleComment(1L));
+
+        //then
+        then(articleCommentRepository).should().findById(any());
+        assertThat(throwable).isInstanceOf(EntityNotFoundException.class);
+    }
+
+    private ArticleComment.ArticleCommentDto createArticleCommentDto(Article article, UserAccount userAccount) {
+        return ArticleComment.ArticleCommentDto.builder()
+                .articleId(article.getId())
+                .content("content")
+                .userAccountDto(UserAccount.UserAccountDto.from(userAccount))
+                .build();
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 게시글에 댓글을 작성할 시에 예외를 던진다.")
+    void givenNotExistArticleId_whenSavingArticleComment_thenThrowsException() {
+        //given
+        UserAccount account = createUserAccount();
+        Article article = createArticle(account);
+        ArticleComment articleComment = createArticleComment(article, account);
+        given(articleRepository.findById(articleComment.getArticle().getId())).willReturn(Optional.empty());
 
         //when
         Throwable throwable = catchThrowable(() -> sut.saveArticleComment(ArticleComment.ArticleCommentDto.from(articleComment)));
 
         //then
         assertThat(throwable).isInstanceOf(EntityNotFoundException.class);
+
     }
 
+    @Test
+    @DisplayName("댓글 단건 조회")
+    void givenArticleCommentId_whenGetAnArticleComment_thenGetsArticleComment() {
+        //given
+        UserAccount account = createUserAccount();
+        Article article = createArticle(account);
+        ArticleComment articleComment = createArticleComment(article, account);
+        given(articleCommentRepository.findById(any())).willReturn(Optional.of(articleComment));
 
+        //when
+        ArticleComment.ArticleCommentDto articleCommentDto = sut.getArticleComment(articleComment.getId());
+
+        //then
+        then(articleCommentRepository).should().findById(any());
+        assertThat(articleCommentDto).isNotNull();
+    }
+
+    @Test
+    @DisplayName("댓글 단건 조회시 없는 댓글을 조회하면 예외가 발생한다$")
+    void givenNotExistArticleCommentId_whenGetAnArticleComment_thenThrowsException() {
+        //given
+        given(articleCommentRepository.findById(any())).willReturn(Optional.empty());
+
+        //when
+        Throwable throwable = catchThrowable(() -> sut.getArticleComment(1L));
+
+        //then
+        then(articleCommentRepository).should().findById(any());
+        assertThat(throwable).isInstanceOf(EntityNotFoundException.class);
+    }
 
     private ArticleComment.ArticleCommentRequest createArticleCommentRequest() {
         return ArticleComment.ArticleCommentRequest.builder()
@@ -62,12 +240,12 @@ class ArticleCommentServiceTest {
     }
 
 
-    private ArticleComment createArticleComment() {
+    private ArticleComment createArticleComment(Article article, UserAccount userAccount) {
         return ArticleComment.builder()
-                .id(1L)
+                .article(article)
                 .content("content")
-                .userAccount(createUserAccount())
-                .article(createArticle())
+                .userAccount(userAccount)
+                .children(new HashSet<>())
                 .build();
     }
 
@@ -98,8 +276,13 @@ class ArticleCommentServiceTest {
                 .build();
     }
 
-    private Article createArticle() {
-        return Article.of(createUserAccount(), "제목", "내용 test", null);
+    private Article createArticle(UserAccount account) {
+        return Article.builder()
+                .id(1L)
+                .title("title")
+                .content("content")
+                .userAccount(account)
+                .build();
     }
 
     private Article.ArticleDto createArticleDto() {

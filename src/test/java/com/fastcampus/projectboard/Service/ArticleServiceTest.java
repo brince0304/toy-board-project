@@ -1,8 +1,10 @@
 package com.fastcampus.projectboard.Service;
 
+import com.fastcampus.projectboard.Util.RedisUtil;
 import com.fastcampus.projectboard.domain.*;
 import com.fastcampus.projectboard.domain.type.SearchType;
 import com.fastcampus.projectboard.repository.*;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,10 +13,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
+import javax.persistence.EntityNotFoundException;
+import javax.swing.text.html.parser.Entity;
+import java.io.StringReader;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.BDDAssertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,7 +40,8 @@ class ArticleServiceTest {
     @Mock private ArticleSaveFileRepository articleSaveFileRepository;
 
     @Mock private SaveFileRepository saveFileRepository;
-
+    @Mock private RedisUtil redisUtil;
+    @Mock private StringRedisTemplate stringRedisTemplate;
     @DisplayName("게시글을 작성할 수 있다.")
     @Test
     void givenArticle_whenWritingArticle_thenWritesArticle() {
@@ -58,6 +66,23 @@ class ArticleServiceTest {
         sut.getArticle(1L);
         //then
         then(articleRepository).should().findById(any(Long.class));
+    }
+
+    @DisplayName("없는 게시글을 조회하면 예외가 발생한다.")
+    @Test
+    void givenNothing_whenReadingNonExistArticle_thenThrowsException() {
+        //when
+        Throwable throwable = catchThrowable(() -> sut.getArticle(1L));
+        //then
+        assertThat(throwable).isInstanceOf(EntityNotFoundException.class);
+    }
+    @DisplayName("없는 게시글을 삭제하면 예외가 발생한다.")
+    @Test
+    void givenNothing_whenDeletingNonExistArticle_thenThrowsException() {
+        //when
+        Throwable throwable = catchThrowable(() -> sut.deleteArticleByArticleId(1L));
+        //then
+        assertThat(throwable).isInstanceOf(EntityNotFoundException.class);
     }
 
     @DisplayName("게시글을 조회할 수 있으나 게시글에는 민감한 유저 정보가 포함되어 있지 않다.")
@@ -163,7 +188,39 @@ class ArticleServiceTest {
         assertThat(countHashtags).isEqualTo(hashtagRepository.count());
     }
 
+    @Test
+    @Disabled("컨트롤러 테스트에서 작성예정")
+    void givenArticleId_whenViewingArticle_thenArticleViewCountIsUpdated() {
+        //given
+        Article article = createArticle();
+        given(articleRepository.findById(any(Long.class))).willReturn(Optional.of(article));
+        given(redisUtil.isFirstIpRequest(any(String.class),any(Long.class))).willReturn(false);
 
+        //when
+        sut.getArticle(1L);
+        sut.updateViewCount("192.168.1.0",1L);
+
+        //then
+        then(articleRepository).should().findById(any(Long.class));
+        then(redisUtil).should().isFirstIpRequest(any(String.class),any(Long.class));
+    }
+
+    @Test
+    @Disabled("컨트롤러 테스트에서 작성예정")
+    void givenArticleId_whenUpdateLikeCount_thenArticleLikeCountIsUpdated() {
+        //given
+        Article article = createArticle();
+        given(articleRepository.findById(any(Long.class))).willReturn(Optional.of(article));
+        given(redisUtil.isFirstIpRequest2(any(String.class),any(Long.class))).willReturn(false);
+
+        //when
+        sut.updateLikeCount("1",1L);
+
+        //then
+        then(articleRepository).should().findById(any(Long.class));
+        then(redisUtil).should().isFirstIpRequest2(any(String.class),any(Long.class));
+        assertThat(article.getLikeCount()).isEqualTo(1);
+    }
 
     private SaveFile createSaveFile() {
         return SaveFile.builder()
