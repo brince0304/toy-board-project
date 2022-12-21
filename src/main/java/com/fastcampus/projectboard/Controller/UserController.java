@@ -136,7 +136,7 @@ public class UserController {
                 return new ResponseEntity<>(ControllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
             }
             if (imgFile == null) {
-                userService.saveUserAccountWithoutProfile(signupDto);
+                userService.saveUserAccountWithoutProfile(signupDto,saveFileService.getFileByFileName("default.jpg"));
             } else {
                 userService.saveUserAccount(signupDto, saveFileService.saveFile(FileUtil.getFileDtoFromMultiPartFile(imgFile, signupDto.getUserId())));
             }

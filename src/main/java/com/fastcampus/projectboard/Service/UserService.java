@@ -35,7 +35,6 @@ public class UserService {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final UserAccountRepository userAccountRepository;
 
-    private final SaveFileRepository fileRepository;
 
     @Value("${com.example.upload.path.profileImg}") // application.properties의 변수
     private String uploadPath;
@@ -73,7 +72,7 @@ public class UserService {
             if (userDto.email() != null) { userAccount.setEmail(userDto.email()); }
             if (userDto.memo() != null) { userAccount.setMemo(userDto.memo()); }
         } catch (Exception e) {
-            throw new IllegalArgumentException("회원정보 수정에 실패했습니다");
+            throw new EntityNotFoundException("회원정보 수정에 실패했습니다");
         }
     }
 
@@ -83,7 +82,7 @@ public class UserService {
             UserAccount userAccount = userAccountRepository.getReferenceById(userId);
             return UserAccount.UserAccountDto.from(userAccount);
         } catch (Exception e) {
-            throw new IllegalArgumentException("회원정보 조회에 실패했습니다");
+            throw new EntityNotFoundException("회원정보 조회에 실패했습니다");
         }
     }
 
@@ -119,12 +118,11 @@ public class UserService {
 
 
 
-    public String saveUserAccountWithoutProfile(UserAccount.SignupDto user) {
-        SaveFile defaultImg = fileRepository.findByFileName("default.jpg");
+    public String saveUserAccountWithoutProfile(UserAccount.SignupDto user,SaveFile.SaveFileDto saveFileDto) throws IOException {
         UserAccount account = userAccountRepository.save(user.toEntity());
         account.setUserPassword(new BCryptPasswordEncoder().encode(user.getPassword1()));
-        if(defaultImg!=null){
-            account.setProfileImg(defaultImg);
+        if(saveFileDto!=null){
+            account.setProfileImg(saveFileDto.toEntity());
         }
         else{
             throw new EntityNotFoundException("default.jpg 파일이 존재하지 않습니다");

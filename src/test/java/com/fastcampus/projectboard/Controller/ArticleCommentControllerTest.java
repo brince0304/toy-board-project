@@ -6,6 +6,7 @@ import com.fastcampus.projectboard.Service.UserService;
 import com.fastcampus.projectboard.config.SecurityConfig;
 import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.ArticleComment;
+import com.fastcampus.projectboard.domain.SaveFile;
 import com.fastcampus.projectboard.domain.UserAccount;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -66,7 +67,7 @@ public class ArticleCommentControllerTest {
         ArticleComment articleComment = ArticleComment.
                 of(article,signupDto.toEntity(),"haha");
 
-        userService.saveUserAccountWithoutProfile(signupDto);
+        userService.saveUserAccountWithoutProfile(signupDto, SaveFile.SaveFileDto.builder().build());
     }
 
 

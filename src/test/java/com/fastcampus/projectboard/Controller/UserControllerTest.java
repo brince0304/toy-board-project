@@ -79,7 +79,7 @@ public class UserControllerTest {
 
 
 
-        userService.saveUserAccountWithoutProfile(signupDto);
+        userService.saveUserAccountWithoutProfile(signupDto, SaveFile.SaveFileDto.builder().build());
 
 
 
@@ -117,8 +117,15 @@ public class UserControllerTest {
     @WithPrincipal
     void givenNothing_whenViewingAccountDetails_thenReturnsAccountDetails() throws Exception {
         //given
+        given(userService.getUserAccount("test"))
+                .willReturn(UserAccount.UserAccountDto.builder()
+                        .userId("test")
+                        .nickname("brincebrince")
+                        .email("brince@email.com")
+                        .memo("haha")
+                        .build());
         //when & then
-        mvc.perform(get("/account"))
+        mvc.perform(get("/accounts"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML));
     }
@@ -165,7 +172,7 @@ public class UserControllerTest {
                 .email("brince@email.com")
                 .memo("안녕하세요.")
                 .build();
-        given(userService.saveUserAccountWithoutProfile(userAccountDto)).willReturn(userAccountDto.toEntity().getUserId());
+        given(userService.saveUserAccountWithoutProfile(userAccountDto, SaveFile.SaveFileDto.builder().build())).willReturn(userAccountDto.toEntity().getUserId());
         MockMultipartFile signupDto = new MockMultipartFile("signupDto", "signupDto", "application/json", mapper.writeValueAsString(userAccountDto).getBytes());
         //when & then
         mvc.perform(multipart("/signup").file(signupDto))

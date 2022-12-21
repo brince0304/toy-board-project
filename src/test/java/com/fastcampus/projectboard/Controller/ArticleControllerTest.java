@@ -73,7 +73,7 @@ class ArticleControllerTest {
         ArticleComment articleComment = ArticleComment.
                 of(article,signupDto.toEntity(),"haha");
 
-        userService.saveUserAccountWithoutProfile(signupDto);
+        userService.saveUserAccountWithoutProfile(signupDto, SaveFile.SaveFileDto.builder().build());
         articleService.saveArticle(Article.ArticleDto.from(article),null);
     }
 
