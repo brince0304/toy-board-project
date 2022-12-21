@@ -101,20 +101,6 @@ public class UserServiceTest {
         then(userAccountRepository).should().deleteById(account.getUserId());
     }
 
-    @DisplayName("계정 ID를 입력하면 해당 ID로 등록된 게시글 목록을 반환한다.")
-    @Test
-    void givenUserId_whenGettingArticlesByUserId_thenReturnsArticles() {
-        //given
-        UserAccount.UserAccountDto userAccountDto = createUserAccountDto();
-        UserAccount account = userAccountDto.toEntity();
-        Article article = createArticle();
-        //when
-        sut.getMyArticles(account.getUserId());
-
-        //then
-        then(articleRepository).should().findAllByUserAccountUserId(account.getUserId());
-    }
-
 
 
 
