@@ -40,6 +40,9 @@ public class SaveFileService {
 
 
     public void deleteFile(Long fileId) {
+        if(!saveFileRepository.existsById(fileId)){
+            throw new EntityNotFoundException("파일이 없습니다 - fileId: " + fileId);
+        }
         log.info("deleteFile() fileId: {}", fileId);
         File file = new File(saveFileRepository.getReferenceById(fileId).getFilePath());
         if (file.exists()) {
@@ -58,14 +61,6 @@ public class SaveFileService {
     }
 
 
-    public void deleteSaveFilesFromDeletedSavedFileIds(Set<Long> deletedFileIds){
-        log.info("deleteSaveFilesFromDeletedSavedFileIds() deletedFileIds: {}", deletedFileIds);
-        for (Long deletedFileId : deletedFileIds) {
-            if(saveFileRepository.existsById(deletedFileId)){
-                deleteFile(deletedFileId);
-            }
-        }
-    }
 
     public void deleteUnuploadedFilesFromArticleContent(String content,String fileIds){
         if(Objects.isNull(content) || Objects.isNull(fileIds) || fileIds.equals("")){

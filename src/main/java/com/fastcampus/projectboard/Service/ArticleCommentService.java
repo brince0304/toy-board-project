@@ -28,7 +28,12 @@ public class ArticleCommentService {
 
     @Transactional(readOnly = true)
     public Set<ArticleComment.ArticleCommentDto> searchArticleComments(Long articleId) {
-        return articleCommentRepository.findByArticle_Id(articleId).stream().map(ArticleComment.ArticleCommentDto::from).collect(Collectors.toSet());
+        if(!articleRepository.existsById(articleId)){
+            throw new EntityNotFoundException();
+        }
+        else {
+            return articleCommentRepository.findByArticle_Id(articleId).stream().map(ArticleComment.ArticleCommentDto::from).collect(Collectors.toSet());
+        }
     }
 
 

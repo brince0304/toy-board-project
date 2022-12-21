@@ -11,16 +11,13 @@ import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 import java.util.List;
+import java.util.Set;
 
 public interface ArticleCommentRepository extends
         QuerydslPredicateExecutor<ArticleComment>,
         QuerydslBinderCustomizer<QArticleComment>,
         JpaRepository<ArticleComment,Long>{
-    List<ArticleComment> findByArticle_Id(Long articleId);
-
-    ArticleComment findByIdAndDeleted(Long id, String deleted);
-
-
+    Set<ArticleComment> findByArticle_Id(Long articleId);
 
     @Override
     default void customize(QuerydslBindings bindings, QArticleComment root){

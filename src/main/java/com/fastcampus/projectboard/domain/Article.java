@@ -19,6 +19,8 @@ import java.util.*;
 })  //테이블 컬럼 인덱스 설정
  // 인덱스 이름이 없으니 키 부여
 @Entity
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Article extends AuditingFields{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 프라이머리 키
