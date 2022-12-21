@@ -56,7 +56,7 @@ public class UserController {
             UserAccount.UserAccountDto accountDto = userService.getUserAccount(principal.username());
             ModelAndView mav = new ModelAndView();
             mav.setViewName("user/my_page");
-            mav.addObject("accountDto", accountDto);
+            mav.addObject("accountDto", UserAccount.UserAccountResponse.from(accountDto));
             return mav;
         }
         catch (Exception e){
@@ -77,15 +77,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("/accounts/articles")
-    public ResponseEntity<?> getMyArticles(@AuthenticationPrincipal UserAccount.BoardPrincipal principal) {
-        try {
-            return new ResponseEntity<>(userService.getMyArticles(principal.username()), HttpStatus.OK);
-        }
-        catch (Exception e){
-            return new ResponseEntity<>(ErrorMessages.ENTITY_NOT_FOUND,HttpStatus.NOT_FOUND);
-        }
-    }
+
 
     @PutMapping("/accounts")
     public ResponseEntity<?> updateMyAccount(@AuthenticationPrincipal UserAccount.BoardPrincipal principal

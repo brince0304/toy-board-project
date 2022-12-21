@@ -283,5 +283,32 @@ public class UserAccount extends AuditingFields {
                     .build();
         }
     }
+    public record UserAccountResponse(
+            String userId,
+            String email,
+            String nickname,
+            String memo,
+            LocalDateTime createdAt,
+            String createdBy,
+            LocalDateTime modifiedAt,
+            String modifiedBy,
+            Set<UserAccountRole> roles,
+            SaveFile.SaveFileDto profileImg
+    ) {
+        public static UserAccountResponse from(UserAccountDto dto){
+            return new UserAccountResponse(
+                    dto.userId(),
+                    dto.email(),
+                    dto.nickname(),
+                    dto.memo(),
+                    dto.createdAt(),
+                    dto.createdBy(),
+                    dto.modifiedAt(),
+                    dto.modifiedBy(),
+                    dto.roles(),
+                    dto.profileImg()
+            );
+        }
+    }
 }
 

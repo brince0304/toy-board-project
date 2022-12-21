@@ -35,7 +35,6 @@ public class UserService {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final UserAccountRepository userAccountRepository;
 
-    private final ArticleRepository articleRepository;
     private final SaveFileRepository fileRepository;
 
     @Value("${com.example.upload.path.profileImg}") // application.properties의 변수
@@ -118,14 +117,7 @@ public class UserService {
         return UserAccount.BoardPrincipal.from(UserAccount.UserAccountDto.from(userAccountRepository.findById(username).orElseThrow()));
     }
 
-    public Set<Article.ArticleDto> getMyArticles(String username) {
-        Set<Article> articles = articleRepository.findAllByUserAccountUserId(username);
-        Set<Article.ArticleDto> articleDtos = new HashSet<>();
-        for (Article article : articles) {
-            articleDtos.add(Article.ArticleDto.from(article));
-        }
-        return articleDtos;
-    }
+
 
     public String saveUserAccountWithoutProfile(UserAccount.SignupDto user) {
         SaveFile defaultImg = fileRepository.findByFileName("default.jpg");
