@@ -10,5 +10,6 @@ import java.lang.annotation.RetentionPolicy;
 @WithSecurityContext(factory = WithUserSecurityContextFactory.class)
 public @interface WithPrincipal {
     String username() default "test";
+    String nickname() default "test";
     String role() default "USER";
 }

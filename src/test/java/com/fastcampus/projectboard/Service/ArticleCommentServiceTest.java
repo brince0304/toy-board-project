@@ -343,7 +343,6 @@ class ArticleCommentServiceTest {
                 .fileSize(100L)
                 .build());
         return saveFileDtos;
-
     }
 
 

@@ -61,7 +61,6 @@ class ArticleServiceTest {
         //given
         Article article = createArticle();
         given(articleRepository.findById(any(Long.class))).willReturn(Optional.of(article));
-
         //when
         sut.getArticle(1L);
         //then
