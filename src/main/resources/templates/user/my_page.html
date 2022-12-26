@@ -315,7 +315,7 @@
         formData.append("imgFile", $("#updateProfileImg")[0].files[0]);
         $.ajax({
             url: '/accounts/'+userId,
-            type: 'PUT',
+            type: 'POST',
             data: formData,
             enctype: 'multipart/form-data',
             processData: false,

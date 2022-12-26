@@ -139,6 +139,9 @@ public class ArticleController {
             BindingResult bindingResult,
             @AuthenticationPrincipal UserAccount.BoardPrincipal boardPrincipal) {
         try {
+            if(boardPrincipal == null){
+                return new ResponseEntity<>(ErrorMessages.ACCESS_TOKEN_NOT_FOUND, HttpStatus.BAD_REQUEST);
+            }
             if (bindingResult.hasErrors()) {
                 return new ResponseEntity<>(ControllerUtil.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
             }
@@ -160,6 +163,9 @@ public class ArticleController {
     public ResponseEntity<?> deleteArticleByArticleId(@RequestBody Map<String,String> articleId, @AuthenticationPrincipal UserAccount.BoardPrincipal boardPrincipal) {
         try {
             Long aId = Long.parseLong(articleId.get("articleId"));
+            if(boardPrincipal == null){
+                return new ResponseEntity<>(ErrorMessages.ACCESS_TOKEN_NOT_FOUND, HttpStatus.BAD_REQUEST);
+            }
             if (articleService.getWriterFromArticle(aId).equals(boardPrincipal.getUsername())) {
                 articleService.deleteArticleByArticleId(aId);
             } else if (boardPrincipal.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {

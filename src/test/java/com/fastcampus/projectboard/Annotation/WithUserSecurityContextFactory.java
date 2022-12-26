@@ -15,10 +15,14 @@ public class WithUserSecurityContextFactory implements WithSecurityContextFactor
     @Override
     public SecurityContext createSecurityContext(WithPrincipal annotation) {
         String username = annotation.username();
+        String nickname = annotation.nickname();
         String role = annotation.role();
 
         UserAccount.BoardPrincipal authUser = UserAccount.BoardPrincipal.builder()
                 .username(username)
+                .nickname(nickname)
+                .email(username+"@test.com")
+                .authorities(List.of(new SimpleGrantedAuthority("ROLE_"+role)))
                 .build();
         UsernamePasswordAuthenticationToken token =
                 new UsernamePasswordAuthenticationToken(authUser, "password", List.of(new SimpleGrantedAuthority(role)));

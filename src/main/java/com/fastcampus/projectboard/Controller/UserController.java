@@ -51,7 +51,7 @@ public class UserController {
     }
 
     @GetMapping("/accounts")
-    public ModelAndView myPage(@AuthenticationPrincipal UserAccount.BoardPrincipal principal) {
+    public ModelAndView getMyPage(@AuthenticationPrincipal UserAccount.BoardPrincipal principal) {
         try {
             UserAccount.UserAccountDto accountDto = userService.getUserAccount(principal.username());
             ModelAndView mav = new ModelAndView();
@@ -80,7 +80,7 @@ public class UserController {
 
 
     @PutMapping("/accounts")
-    public ResponseEntity<?> updateMyAccount(@AuthenticationPrincipal UserAccount.BoardPrincipal principal
+    public ResponseEntity<?> updateAccountDetails(@AuthenticationPrincipal UserAccount.BoardPrincipal principal
             ,@Valid @RequestBody UserAccount.UserAccountUpdateRequestDto dto, BindingResult bindingResult) {
         try {
             if (dto.password1() != null && !dto.password1().equals(dto.password2())) {
@@ -146,7 +146,7 @@ public class UserController {
         }
         return new ResponseEntity<>("success", HttpStatus.OK);
     }
-    @PutMapping("/accounts/{id}")
+    @PostMapping("/accounts/{id}")
     public ResponseEntity<?> changeProfileImg(@PathVariable String id, @RequestPart(value="imgFile",required = true)  MultipartFile imgFile) {
         if (imgFile == null) {
             return new ResponseEntity<>(ErrorMessages.NOT_FOUND, HttpStatus.BAD_REQUEST);
@@ -157,6 +157,20 @@ public class UserController {
         } catch (IOException e) {
             e.printStackTrace();
             return new ResponseEntity<>(ErrorMessages.ENTITY_NOT_VALID, HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>("success", HttpStatus.OK);
+    }
+
+    @DeleteMapping("/accounts/{id}")
+    public ResponseEntity<?> deleteAccount(@PathVariable String id, @AuthenticationPrincipal UserAccount.BoardPrincipal principal) {
+        try {
+            if(principal == null || !principal.username().equals(id)){
+                return new ResponseEntity<>(ErrorMessages.NOT_ACCEPTABLE, HttpStatus.UNAUTHORIZED);
+            }
+            userService.deleteUserAccount(id);
+        }
+        catch (Exception e){
+            return new ResponseEntity<>(ErrorMessages.ENTITY_NOT_FOUND,HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>("success", HttpStatus.OK);
     }
