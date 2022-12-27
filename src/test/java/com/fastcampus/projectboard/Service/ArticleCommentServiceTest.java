@@ -3,8 +3,6 @@ package com.fastcampus.projectboard.Service;
 import com.fastcampus.projectboard.domain.*;
 import com.fastcampus.projectboard.repository.ArticleCommentRepository;
 import com.fastcampus.projectboard.repository.ArticleRepository;
-import com.fastcampus.projectboard.repository.UserAccountRepository;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,7 +13,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -33,13 +30,11 @@ class ArticleCommentServiceTest {
 
     @InjectMocks private ArticleCommentService sut;
 
-    @Mock private UserAccountRepository userAccountRepository;
-
     @Mock private ArticleRepository articleRepository;
     @Mock private ArticleCommentRepository articleCommentRepository;
 
     @Test
-    @DisplayName("댓글 저장")
+    @DisplayName("saveArticleComment() - 댓글 저장")
     void givenArticleId_whenSavingArticleComment_thenSavesArticleComment() {
         //given
         UserAccount account = createUserAccount();
@@ -56,7 +51,7 @@ class ArticleCommentServiceTest {
     }
 
     @Test
-    @DisplayName("댓글 수정")
+    @DisplayName("updateArticleComment() - 댓글 수정")
     void givenUpdatingDetailsandArticleCommentId_whenUpdatingArticleComment_thenUpdatesArticleComment() {
         //given
         UserAccount account = createUserAccount();
@@ -74,7 +69,7 @@ class ArticleCommentServiceTest {
     }
 
     @Test
-    @DisplayName("댓글 삭제")
+    @DisplayName("deleteArticleComment() - 댓글 삭제")
     void givenArticleCommentId_whenDeletingArticleComment_thenDeletesArticleComment() {
         //given
         UserAccount account = createUserAccount();
@@ -91,7 +86,7 @@ class ArticleCommentServiceTest {
 
 
     @Test
-    @DisplayName("게시글 아이디로 댓글 조회시에 댓글 셋을 반환한다.")
+    @DisplayName("searchArticleCommentsByArticleId() - 게시글 아이디로 댓글 조회시에 댓글 셋을 반환한다.")
     void givenArticleId_whenGettingArticleCommentByArticleId_thenGetsArticleComments() {
         //given
         UserAccount account = createUserAccount();
@@ -100,7 +95,7 @@ class ArticleCommentServiceTest {
         given(articleRepository.existsById(any())).willReturn(true);
         given(articleCommentRepository.findByArticle_Id(any())).willReturn(Set.of(articleComment));
         //when
-        Set<ArticleComment.ArticleCommentDto> articleComments = sut.searchArticleComments(article.getId());
+        Set<ArticleComment.ArticleCommentDto> articleComments = sut.searchArticleCommentsByArticleId(article.getId());
 
         //then
         then(articleCommentRepository).should().findByArticle_Id(any());
@@ -108,7 +103,7 @@ class ArticleCommentServiceTest {
     }
 
     @Test
-    @DisplayName("대댓글을 저장한다.")
+    @DisplayName("saveChildrenComment() - 대댓글을 저장한다.")
     void givenArticleCommentId_whenSavingChildrenComment_thenSavesChildrenComment() {
         //given
         UserAccount account = createUserAccount();
@@ -126,7 +121,7 @@ class ArticleCommentServiceTest {
     }
 
     @Test
-    @DisplayName("없는 댓글에 대댓글을 달 시에 예외를 발생시킨다.")
+    @DisplayName("saveChildrenComment() - 없는 댓글에 대댓글을 달 시에 예외를 발생시킨다.")
     void givenNotExistArticleCommentId_whenSavingChildrenComment_thenThrowsException() {
         //given
         UserAccount account = createUserAccount();
@@ -143,15 +138,15 @@ class ArticleCommentServiceTest {
     }
 
     @Test
-    @DisplayName("없는 게시글의 댓글을 조회 시에 예외를 발생시킨다.")
+    @DisplayName("searchArticleCommentsByArticleId() - 없는 게시글의 댓글을 조회 시에 예외를 발생시킨다.")
     void givenNothing_whenSearchingArticleCommentByArticleId_thenThrowsException() {
           //when&then
-        Throwable throwable = catchThrowable(() -> sut.searchArticleComments(null));
+        Throwable throwable = catchThrowable(() -> sut.searchArticleCommentsByArticleId(null));
         assertThat(throwable).isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
-    @DisplayName("없는 댓글을 수정 시에 예외를 발생시킨다.")
+    @DisplayName("updateArticleComment() - 없는 댓글을 수정 시에 예외를 발생시킨다.")
     void givenNotExistArticleCommentId_whUpdateArticleCommentId_thenThrowsException() {
         //given
         given(articleCommentRepository.findById(any())).willReturn(Optional.empty());
@@ -164,7 +159,7 @@ class ArticleCommentServiceTest {
     }
 
     @Test
-    @DisplayName("없는 댓글을 삭제 시에 예외를 발생시킨다.")
+    @DisplayName("deleteArticleComment() - 없는 댓글을 삭제 시에 예외를 발생시킨다.")
     void givenNotExistArticleCommentId_whenDeletesArticleCommentId_thenThrowsException() {
         //given
         given(articleCommentRepository.findById(any())).willReturn(Optional.empty());
@@ -185,7 +180,7 @@ class ArticleCommentServiceTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 게시글에 댓글을 작성할 시에 예외를 던진다.")
+    @DisplayName("saveArticleComment() - 존재하지 않는 게시글에 댓글을 작성할 시에 예외를 던진다.")
     void givenNotExistArticleId_whenSavingArticleComment_thenThrowsException() {
         //given
         UserAccount account = createUserAccount();
@@ -202,12 +197,10 @@ class ArticleCommentServiceTest {
     }
 
     @Test
-    @DisplayName("댓글 단건 조회")
+    @DisplayName("getArticleComment() - 댓글 단건 조회")
     void givenArticleCommentId_whenGetAnArticleComment_thenGetsArticleComment() {
         //given
-        UserAccount account = createUserAccount();
-        Article article = createArticle(account);
-        ArticleComment articleComment = createArticleComment(article, account);
+        ArticleComment articleComment = createArticleComment(createArticle(createUserAccount()),createUserAccount());
         given(articleCommentRepository.findById(any())).willReturn(Optional.of(articleComment));
 
         //when
@@ -219,7 +212,7 @@ class ArticleCommentServiceTest {
     }
 
     @Test
-    @DisplayName("댓글 단건 조회시 없는 댓글을 조회하면 예외가 발생한다$")
+    @DisplayName("getArticleComment() - 댓글 단건 조회시 없는 댓글을 조회하면 예외가 발생한다$")
     void givenNotExistArticleCommentId_whenGetAnArticleComment_thenThrowsException() {
         //given
         given(articleCommentRepository.findById(any())).willReturn(Optional.empty());

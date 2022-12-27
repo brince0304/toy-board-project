@@ -39,9 +39,7 @@ class ArticleServiceTest {
     @Mock private ArticleHashtagRepository articleHashtagRepository;
     @Mock private ArticleSaveFileRepository articleSaveFileRepository;
 
-    @Mock private SaveFileRepository saveFileRepository;
     @Mock private RedisUtil redisUtil;
-    @Mock private StringRedisTemplate stringRedisTemplate;
     @DisplayName("게시글을 작성할 수 있다.")
     @Test
     void givenArticle_whenWritingArticle_thenWritesArticle() {

@@ -11,8 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,7 +25,7 @@ public class ArticleCommentService {
 
 
     @Transactional(readOnly = true)
-    public Set<ArticleComment.ArticleCommentDto> searchArticleComments(Long articleId) {
+    public Set<ArticleComment.ArticleCommentDto> searchArticleCommentsByArticleId(Long articleId) {
         if(!articleRepository.existsById(articleId)){
             throw new EntityNotFoundException();
         }

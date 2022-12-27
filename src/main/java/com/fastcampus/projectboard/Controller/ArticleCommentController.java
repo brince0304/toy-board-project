@@ -29,7 +29,7 @@ public class ArticleCommentController {
     @GetMapping("/{articleId}")
     public ResponseEntity<?> getComments(@PathVariable Long articleId) {
         try{
-        return new ResponseEntity<>(ArticleComment.ArticleCommentResponse.from(articleCommentService.searchArticleComments(articleId)), HttpStatus.OK);
+        return new ResponseEntity<>(ArticleComment.ArticleCommentResponse.from(articleCommentService.searchArticleCommentsByArticleId(articleId)), HttpStatus.OK);
     }
         catch (EntityNotFoundException e){
             ModelAndView mav = new ModelAndView("redirect:/");
