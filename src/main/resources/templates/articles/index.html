@@ -55,29 +55,17 @@
             <th class="like-count col-1">추천</th>
         </tr>
         </thead>
-        <tbody>
-            <tr  class="hover">
-                <td class="id">3</td>
-                <td class="title"><a>세번째글</a></td>
-                <td class="user-id">test</td>
-                <td class="created-at"><time>2022-10-06</time></td>
-                <td class="view-count" id="viewCount"></td>
-                <td class="like-count" id="likeCount"></td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td>두번째글</td>
-                <td>#spring</td>
-                <td>test</td>
-                <td>2022-10-06</td>
-            </tr>
-            <tr>
-                <td>1</td>
-                <td>첫번째</td>
-                <td>#programming</td>
-                <td>test</td>
-                <td>2022-10-06</td>
-            </tr>
+        <tbody th:each="article : ${articles}">
+        <tr>
+            <td class="id col-1" th:text="${article.id}"></td>
+            <td class="title col-5">
+                <a th:href="@{/articles/{id}(id=${article.id})}" th:text="${article.title}"></a>
+            </td>
+            <td class="user-id col-1" th:text="${article.nickname}"></td>
+            <td class="created-at col-2" th:datetime="${article.createdAt}" th:text="${#temporals.format(article.createdAt, 'yyyy-MM-dd')}"></td>
+            <td class="view-count col-1" th:text="${article.viewCount}"></td>
+            <td class="like-count col-1" th:text="${article.likeCount}"></td>
+        </tr>
         </tbody>
     </table>
     <div>
