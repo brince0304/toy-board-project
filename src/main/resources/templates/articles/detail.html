@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:sec="http://www.w3.org/1999/xhtml" xmlns:layout="http://www.w3.org/1999/xhtml">
+<html lang="ko" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
     <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
     <meta charset="UTF-8">
@@ -76,6 +76,7 @@
                     <label class="form-label mt-4" hidden>댓글 작성</label>
                     <input type="text"  class="form-control" id="commentContent" name="commentContent" placeholder="댓글을 입력해주세요">
                     <input type="text" hidden th:value="${articleId}" id="articleId">
+                    <input type="text" hidden th:value="${#authentication.getName()}" id="principal">
                     <button type="button" id="commentBtn"  onclick="commentCheck()" class="btn btn-light">작성</button>
                     <div>
                     </div>
