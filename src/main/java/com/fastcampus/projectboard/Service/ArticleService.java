@@ -7,6 +7,7 @@ import com.fastcampus.projectboard.repository.ArticleHashtagRepository;
 import com.fastcampus.projectboard.repository.ArticleRepository;
 import com.fastcampus.projectboard.repository.ArticleSaveFileRepository;
 import com.fastcampus.projectboard.repository.HashtagRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -77,22 +78,13 @@ public class ArticleService {
 
 
 
-    public void deleteArticleByArticleId(long articleId) {
+    public void deleteArticleByArticleId(long articleId) throws JsonProcessingException {
         for( ArticleHashtag articleHashtag : articlehashtagrepository.findByArticleId(articleId)){
             articleHashtag.setArticle(null);
             articleHashtag.setHashtag(null);
         }
-        articleRepository.findById(articleId).orElseThrow(EntityNotFoundException::new).setDeleted("Y");
-    }
-
-    public void deleteArticleByAdmin(Long articleId) {
-        articleRepository.findById(articleId).ifPresent(o->{
-            o.setDeleted("Y");
-            for( ArticleHashtag articleHashtag : articlehashtagrepository.findByArticleId(articleId)){
-                articleHashtag.setArticle(null);
-                articleHashtag.setHashtag(null);
-            }
-        });
+        Article article = articleRepository.findById(articleId).orElseThrow(EntityNotFoundException::new);
+        article.setDeleted("Y");
     }
 
     @Transactional(readOnly = true)
@@ -112,8 +104,8 @@ public class ArticleService {
     }
 
     public void updateViewCount(String clientIp, Long articleId) {
-        if(redisUtil.isFirstIpRequest(clientIp,articleId)){
-            redisUtil.writeClientRequest(clientIp,articleId);
+        if(redisUtil.isFirstIpRequestForView(clientIp,articleId)){
+            redisUtil.writeClientRequestForView(clientIp,articleId);
             Article article = articleRepository.findById(articleId).orElseThrow(EntityNotFoundException::new);
             article.setViewCount(article.getViewCount()+1);
         }
@@ -121,8 +113,8 @@ public class ArticleService {
 
     public Integer updateLikeCount(String clientIp, Long articleId) {
         Article article = articleRepository.findById(articleId).orElseThrow(EntityNotFoundException::new);
-        if(redisUtil.isFirstIpRequest2(clientIp, articleId)) {
-            redisUtil.writeClientRequest2(clientIp, articleId);
+        if(redisUtil.isFirstIpRequestForLike(clientIp, articleId)) {
+            redisUtil.writeClientRequestForLike(clientIp, articleId);
             article.setLikeCount(article.getLikeCount() + 1);
             return article.getLikeCount();
         }

@@ -1,10 +1,12 @@
 package com.fastcampus.projectboard.Service;
 
+import com.fastcampus.projectboard.Util.RedisUtil;
 import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.ArticleComment;
 import com.fastcampus.projectboard.repository.ArticleCommentRepository;
 import com.fastcampus.projectboard.repository.ArticleRepository;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ public class ArticleCommentService {
 
     private final ArticleRepository articleRepository;
     private final ArticleCommentRepository articleCommentRepository;
+    private final RedisUtil redisUtil;
 
 
     @Transactional(readOnly = true)
@@ -30,7 +33,7 @@ public class ArticleCommentService {
             throw new EntityNotFoundException();
         }
         else {
-            return articleCommentRepository.findByArticle_Id(articleId).stream().map(ArticleComment.ArticleCommentDto::from).collect(Collectors.toSet());
+            return articleCommentRepository.findByArticle_Id(articleId).stream().filter(o->o.getDeleted().equals("N")).map(ArticleComment.ArticleCommentDto::from).collect(Collectors.toSet());
         }
     }
 
@@ -47,8 +50,10 @@ public class ArticleCommentService {
         if (content != null) { articleComment.setContent(content);}
     }
 
-    public void deleteArticleComment(Long Id) {
-        articleCommentRepository.findById(Id).orElseThrow(EntityNotFoundException::new).setDeleted("Y");
+    public void deleteArticleComment(Long Id) throws JsonProcessingException {
+        ArticleComment articleComment = articleCommentRepository.findById(Id).orElseThrow(EntityNotFoundException::new);
+        articleComment.setDeleted("Y");
+        articleComment.setParent(null);
     }
 
 
