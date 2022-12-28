@@ -13,15 +13,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.core.StringRedisTemplate;
 
 import javax.persistence.EntityNotFoundException;
-import javax.swing.text.html.parser.Entity;
-import java.io.StringReader;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.BDDAssertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
@@ -191,7 +187,7 @@ class ArticleServiceTest {
         //given
         Article article = createArticle();
         given(articleRepository.findById(any(Long.class))).willReturn(Optional.of(article));
-        given(redisUtil.isFirstIpRequest(any(String.class),any(Long.class))).willReturn(false);
+        given(redisUtil.isFirstIpRequestForView(any(String.class),any(Long.class))).willReturn(false);
 
         //when
         sut.getArticle(1L);
@@ -199,7 +195,7 @@ class ArticleServiceTest {
 
         //then
         then(articleRepository).should().findById(any(Long.class));
-        then(redisUtil).should().isFirstIpRequest(any(String.class),any(Long.class));
+        then(redisUtil).should().isFirstIpRequestForView(any(String.class),any(Long.class));
     }
 
     @Test
@@ -208,14 +204,14 @@ class ArticleServiceTest {
         //given
         Article article = createArticle();
         given(articleRepository.findById(any(Long.class))).willReturn(Optional.of(article));
-        given(redisUtil.isFirstIpRequest2(any(String.class),any(Long.class))).willReturn(false);
+        given(redisUtil.isFirstIpRequestForLike(any(String.class),any(Long.class))).willReturn(false);
 
         //when
         sut.updateLikeCount("1",1L);
 
         //then
         then(articleRepository).should().findById(any(Long.class));
-        then(redisUtil).should().isFirstIpRequest2(any(String.class),any(Long.class));
+        then(redisUtil).should().isFirstIpRequestForLike(any(String.class),any(Long.class));
         assertThat(article.getLikeCount()).isEqualTo(1);
     }
 

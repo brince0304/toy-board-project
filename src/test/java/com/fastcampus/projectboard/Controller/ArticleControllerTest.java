@@ -203,7 +203,7 @@ class ArticleControllerTest {
         //given
         Long articleId = 1L;
         given(articleService.getArticle(any())).willReturn(Article.ArticleDtoWithSaveFiles.from(createArticle(createUserAccount())));
-        given(redisUtil.isFirstIpRequest(any(), any())).willReturn(true);
+        given(redisUtil.isFirstIpRequestForView(any(), any())).willReturn(true);
 
         //when & then
         mvc.perform(get("/articles/" + articleId)).andExpect(status().isOk())
@@ -221,7 +221,7 @@ class ArticleControllerTest {
         //given
         long articleId = 1L;
         given(articleService.updateLikeCount(any(), any())).willReturn(1);
-        given(redisUtil.isFirstIpRequest2(any(), any())).willReturn(true);
+        given(redisUtil.isFirstIpRequestForLike(any(), any())).willReturn(true);
 
         //when & then
         mvc.perform(post("/articles/" + articleId)).andExpect(status().isOk())
