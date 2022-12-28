@@ -180,8 +180,6 @@ public class ArticleController {
         }
         catch (EntityNotFoundException e){
             return new ResponseEntity<>(ErrorMessages.ENTITY_NOT_FOUND, HttpStatus.NOT_FOUND);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
         }
     }
 

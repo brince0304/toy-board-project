@@ -239,6 +239,7 @@ class ArticleCommentServiceTest {
                 .content("content")
                 .userAccount(userAccount)
                 .children(new HashSet<>())
+                .deleted("N")
                 .build();
     }
 

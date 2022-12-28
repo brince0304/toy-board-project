@@ -78,7 +78,7 @@ public class ArticleService {
 
 
 
-    public void deleteArticleByArticleId(long articleId) throws JsonProcessingException {
+    public void deleteArticleByArticleId(long articleId) {
         for( ArticleHashtag articleHashtag : articlehashtagrepository.findByArticleId(articleId)){
             articleHashtag.setArticle(null);
             articleHashtag.setHashtag(null);

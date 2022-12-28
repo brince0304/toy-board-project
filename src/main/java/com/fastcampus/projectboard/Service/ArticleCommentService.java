@@ -50,7 +50,7 @@ public class ArticleCommentService {
         if (content != null) { articleComment.setContent(content);}
     }
 
-    public void deleteArticleComment(Long Id) throws JsonProcessingException {
+    public void deleteArticleComment(Long Id) {
         ArticleComment articleComment = articleCommentRepository.findById(Id).orElseThrow(EntityNotFoundException::new);
         articleComment.setDeleted("Y");
         articleComment.setParent(null);
