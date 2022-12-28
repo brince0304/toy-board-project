@@ -21,7 +21,7 @@ Array.from(delete_elements).forEach(function (element) {
                 }
 },
                 error: function (request, status, error) {
-                    alert(request.responseText);
+                    alert('권한이 없습니다.');
                 }
             });
         }
@@ -123,6 +123,7 @@ $("#ucommentContent").blur(function(){
     }
 });
 function getComment(){
+    const principal = $("#principal").val();
     $("#commentList").empty();
     const articleId = document.getElementById("articleId").value;
     $.ajax({
@@ -148,14 +149,17 @@ function getComment(){
                     html += "<a href='javascript:;' class='btn btn-secondary btn-icon-split comment_delete' id='"+this.id+"getChildrenBtn' >";
                     html += "<button id='"+this.id+"getChildrenBtn' onclick='getChildrenComment("+this.id+")' class='btn btn'>답글("+this.children.length+")</button>";
                     html += "</a>";
-                    html += "<a href='javascript:;'>";
-                    html += "<button type='button' onclick='commentDelete("+this.id+")' class='delete btn btn-outline-danger'  id='"+this.id+"deleteBtn'>삭제";
-                    html += "</button>";
-                    html += "</a>";
-                    html += "<a href='javascript:;'>";
-                    html += "<button type='button'  onclick='commentUpdateForm("+this.id+")' th:if='${"+this.userId+".equals(#authentication.getName())}' class='btn btn-outline-secondary'  id='"+this.id+"updateBtn'>수정";
-                    html += "</button>";
-                    html += "</a>";
+                    if(principal === this.userId) {
+                        html += "<a href='javascript:;'>";
+                        html += "<button type='button' onclick='commentDelete(" + this.id + ")' class='delete btn btn-outline-danger'  id='" + this.id + "deleteBtn'>삭제";
+                        html += "</button>";
+                        html += "</a>";
+                    }if(principal === this.userId) {
+                        html += "<a href='javascript:;'>";
+                        html += "<button type='button'  onclick='commentUpdateForm(" + this.id + ")' class='btn btn-outline-secondary'  id='" + this.id + "updateBtn'>수정";
+                        html += "</button>";
+                        html += "</a>";
+                    }
                     html += "</div>";
                     html += "</div>";
                     html += "</div>";
@@ -234,13 +238,14 @@ function commentUpdateCancel(id){
 function getChildrenComment(id){
     $("#"+id+"children").empty();
     $("#"+id+"children").show();
-
+    const principal = $("#principal").val();
     $.ajax({
         type: "GET",
         url: "/articles/comments/c/"+id,
         dataType: "json",
         success: function (data) {
             let html = "<ul class='list-group'>";
+            if(principal!=null){
             html +="<form >";
             html += "<input type='text' class='form-control' id='"+data.id+"replyContent' placeholder='답글을 입력하세요.'>";
             html += "<div class='field-error rcommentContentCheck'>";
@@ -249,7 +254,7 @@ function getChildrenComment(id){
             html += "<button type='button' class='btn btn-primary' onclick='replyCheck("+data.id+")'>답글등록</button>";
             html += "<div class='field-error "+id+"replyContentCheck'>";
             html += "</div>";
-            html += "</form>";
+            html += "</form>";}
             $(data.children).each(function () {
                 if(this.deleted==='N') {
                     html += "<li class='list-group-item comments'>";
@@ -263,13 +268,17 @@ function getChildrenComment(id){
                     html += "<div class='comment-text' id='" + this.id + "content'> " + this.content + "</div>";
                     html += "<div class='comment_etc'>";
                     html += "<div class='comment-info'>";
-                    html += "<a href='javascript:;'>";
-                    html += "<button type='button' onclick='replyDelete(" + this.id + ")' class='delete btn btn-outline-danger'  id='" + this.id + "deleteBtn'>삭제";
-                    html += "</button>";
-                    html += "</a>";
-                    html += "<a href='javascript:;'>";
-                    html += "<button type='button'  onclick='commentUpdateForm(" + this.id + ")' class='btn btn-outline-secondary'  id='" + this.id + "updateBtn'>수정";
-                    html += "</button>";
+                    if(principal === this.userId) {
+                        html += "<a href='javascript:;'>";
+                        html += "<button type='button' onclick='replyDelete(" + this.id + ")' class='delete btn btn-outline-danger'  id='" + this.id + "deleteBtn'>삭제";
+                        html += "</button>";
+                        html += "</a>";
+                    }
+                    if(principal === this.userId) {
+                        html += "<a href='javascript:;'>";
+                        html += "<button type='button'  onclick='commentUpdateForm(" + this.id + ")' class='btn btn-outline-secondary'  id='" + this.id + "updateBtn'>수정";
+                        html += "</button>";
+                    }
                     html += "</div>";
                     html += "</div>";
                     html += "</div>";
