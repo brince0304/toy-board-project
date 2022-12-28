@@ -5,9 +5,12 @@ import com.fastcampus.projectboard.Service.*;
 import com.fastcampus.projectboard.Util.ControllerUtil;
 import com.fastcampus.projectboard.domain.*;
 import com.fastcampus.projectboard.domain.type.SearchType;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.github.furstenheim.CopyDown;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -44,8 +47,8 @@ public class ArticleController {
             @RequestParam(required = false) String searchValue,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
             , ModelMap map) {
-
-        map.addAttribute("articles", articleService.searchArticles(searchType, searchValue, pageable));
+           Page<Article.ArticleResponse> articles = articleService.searchArticles(searchType, searchValue, pageable);
+        map.addAttribute("articles", articles);
         return "articles/index";
     }
 
@@ -166,11 +169,10 @@ public class ArticleController {
             if(boardPrincipal == null){
                 return new ResponseEntity<>(ErrorMessages.ACCESS_TOKEN_NOT_FOUND, HttpStatus.BAD_REQUEST);
             }
-            if (articleService.getWriterFromArticle(aId).equals(boardPrincipal.getUsername())) {
+            if (articleService.getWriterFromArticle(aId).equals(boardPrincipal.getUsername()) ||
+                    boardPrincipal.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
                 articleService.deleteArticleByArticleId(aId);
-            } else if (boardPrincipal.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
-                articleService.deleteArticleByAdmin(aId);
-            } else {
+            }else {
                 return new ResponseEntity<>(ErrorMessages.ACCOUNT_NOT_MATCH, HttpStatus.BAD_REQUEST);
             }
             saveFileService.deleteSaveFilesFromArticleId(aId);
@@ -178,6 +180,8 @@ public class ArticleController {
         }
         catch (EntityNotFoundException e){
             return new ResponseEntity<>(ErrorMessages.ENTITY_NOT_FOUND, HttpStatus.NOT_FOUND);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 

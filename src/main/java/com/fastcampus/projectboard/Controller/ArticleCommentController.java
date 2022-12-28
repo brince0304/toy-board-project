@@ -5,6 +5,7 @@ import com.fastcampus.projectboard.Service.ArticleCommentService;
 import com.fastcampus.projectboard.Util.ControllerUtil;
 import com.fastcampus.projectboard.domain.ArticleComment;
 import com.fastcampus.projectboard.domain.UserAccount;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -92,18 +93,19 @@ public class ArticleCommentController {
             if (principal == null) {
                 return new ResponseEntity<>(ErrorMessages.ACCESS_TOKEN_NOT_FOUND, HttpStatus.BAD_REQUEST);
             }
-            if (articleCommentService.getArticleComment(id).userAccountDto().userId().equals(principal.getUsername())) {
+            if (articleCommentService.getArticleComment(id).userAccountDto().userId().equals(principal.getUsername())||
+                    principal.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
                 articleCommentService.deleteArticleComment(id);
                 return new ResponseEntity<>("articleCommentDeleting Success", HttpStatus.OK);
-            } else if (principal.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-                articleCommentService.deleteArticleComment(id);
-                return new ResponseEntity<>("articleCommentDeleting Success", HttpStatus.OK);
-            } else {
+            }
+            else {
                 return new ResponseEntity<>(ErrorMessages.NOT_ACCEPTABLE, HttpStatus.BAD_REQUEST);
             }
         }
         catch (EntityNotFoundException e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 
